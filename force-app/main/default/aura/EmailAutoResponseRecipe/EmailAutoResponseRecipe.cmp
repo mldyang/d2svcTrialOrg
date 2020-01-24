@@ -533,7 +533,8 @@
                         
                         <!-- COMPLETE SECTION -->
                         <aura:if isTrue="{!v.sectionDisplay.complete}">
-                            <h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak">Congratulations you have setup auto-response for your email channel!</h1>
+                            <h1 class="slds-text-heading_large slds-m-bottom_medium slds-text-color_weak">Congratulations you have setup auto-response for your email channel!</h1>
+                            <div class="slds-text-heading_small slds-text-color_weak slds-m-bottom_large" style="font-family:SalesforceSans-Light">A demo on how to test auto-response is shown at the end of the Virtual Consultant video.</div>
                         </aura:if>
                         <!-- END OF COMPLETE SECTION -->
                           

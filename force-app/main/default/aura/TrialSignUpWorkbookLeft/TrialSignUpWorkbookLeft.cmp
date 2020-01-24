@@ -5,7 +5,7 @@
         <!-- WELCOME TEXT AND IMAGE -->
         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-1 slds-large-size_1-of-1 slds-m-top_xx-large slds-p-right_xx-large slds-p-left_xx-large">
             <h1 class="slds-text-heading_large slds-text-align_center slds-text-color_inverse slds-p-top_xx-large larger">
-               Your guide to setting up Service Cloud<br/><a href="http://sforce.co/2p8WLZy" target="_blank">Download</a> your workbook<br/><br/>
+               Your guide to setting up Service Cloud<br/><a href="https://desktoservice--dev.cs21.my.salesforce.com/sfc/p/q0000000CVjK/a/q00000004K5p/IfoRkfZrK28incN.yS0Uc86TL41P9UklSHPlrGz6bKc" target="_blank">Download</a> your workbook<br/><br/>
                 <!-- IMAC DISPLAY IMAGE -->
                 <div class="slds-p-right_xx-large slds-p-left_xx-large"> 
                     <img class="slds-text-align_center slds-show_medium" src="{!$Resource.TrialSignup +'/workbook-index.png'}" alt="Service Cloud" />
@@ -20,7 +20,7 @@
         <div class="slds-text-heading_small slds-text-align_center slds-p-bottom_medium slds-p-right_xx-large slds-p-left_xx-large slds-m-top_x-large slds-text-color_inverse">
             <ul>
                 <li class="slds-p-bottom_x-small">
-                    A <strong>Quick Start guide</strong> to setting up your trial, starting with Email Setup
+                    A <strong>Quick start guide</strong> to setting up your trial, starting with Email Setup
                 </li>
                 <li class="slds-p-bottom_x-small">
                     Learn about all of the <strong>pre-built customizations</strong> in this trial

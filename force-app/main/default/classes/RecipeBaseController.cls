@@ -21,11 +21,15 @@ public class RecipeBaseController {
     @auraenabled
     public static List<String> getUrlSessionInfoMethod(String recordIdentifier){
         RestClient rc = RestClient.getInstance(recordIdentifier);
+        DeskClient dc = DeskClient.getInstance(recordIdentifier);
         List<String> ret = new List<String>();
         try{
             ret.add(rc.getSalesforceEndpoint());
             ret.add(rc.getAccessToken());
             ret.add(rc.getOrgId());
+            ret.add(dc.getToken());
+            ret.add(dc.getTokenSecret());
+            ret.add(dc.getDeskSiteUrl());
         }catch(FailedException e){
             throw new AuraHandledException('Failed');
         }catch(Exception e){

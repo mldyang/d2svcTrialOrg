@@ -21,23 +21,23 @@ public class DeskOauth {
     System.debug('Pos A.0');  
     //userConfigSettings = getUserConfigSettings(endpoint);
     System.debug('Pos A.1');
-    consumerKey = Label.Recipe_Desk_ConsumerKey; //Label.Desk_ConsumerKey;
-    consumerSecret = Label.Recipe_Desk_ConsumerSecret; //Label.Desk_ConsumerSecret;
+    consumerKey = Label.Recipe_Desk_ConsumerKey;
+    consumerSecret = Label.Recipe_Desk_ConsumerSecret;
         
-		String nonce = string.valueof(dateTime.now().getTime()/1000);
+	String nonce = string.valueof(dateTime.now().getTime()/1000);
     String timestamp = string.valueof(dateTime.now().getTime()/1000);
 
  		
     Map<String,String> parameters = new Map<String,String>();
     //parameters.put('oauth_callback', EncodingUtil.urlEncode(URL.getSalesforceBaseUrl().toExternalForm() + '/apex/CompleteAuth?endPoint='+endPoint, 'UTF-8'));
-    parameters.put('oauth_callback', EncodingUtil.urlEncode('https://desktosvc.secure.force.com/trial/CompleteAuth?trialSignUpId='+trialSignUpId, 'UTF-8'));
+    parameters.put('oauth_callback', EncodingUtil.urlEncode('https://dev3-desktosvc.cs26.force.com/trial/CompleteAuth?trialSignUpId='+trialSignUpId, 'UTF-8'));
     parameters.put('oauth_consumer_key', consumerKey);
     parameters.put('oauth_nonce', nonce);
     parameters.put('oauth_signature_method', 'HMAC-SHA1');
     parameters.put('oauth_timestamp', timestamp);
     parameters.put('oauth_version', '1.0');
       
-      System.debug('URL: '+EncodingUtil.urlEncode('https://desktosvc.secure.force.com/trial/CompleteAuth?trialSignUpId='+trialSignUpId, 'UTF-8'));
+      System.debug('URL: '+EncodingUtil.urlEncode('https://dev3-desktosvc.cs26.force.com/trial/CompleteAuth?trialSignUpId='+trialSignUpId, 'UTF-8'));
 
     //callbackUrl = EncodingUtil.urlEncode('https://'+ApexPages.currentPage().getHeaders().get('Host')+ Page.CompleteAuth.getUrl(),'UTF-8');
 	System.debug('Pos A.3');
@@ -51,7 +51,7 @@ public class DeskOauth {
         		 
     String signature = generateSignature(req, consumerSecret, '', parameters);
 		//String body = 'oauth_callback=' + URL.getSalesforceBaseUrl().toExternalForm() + '/apex/CompleteAuth?endPoint='+endPoint + '&';
-		String body = 'oauth_callback=' + 'https://desktosvc.secure.force.com/trial/CompleteAuth?trialSignUpId='+trialSignUpId + '&';
+		String body = 'oauth_callback=' + 'https://dev3-desktosvc.cs26.force.com/trial/CompleteAuth?trialSignUpId='+trialSignUpId + '&';
 		body += 'oauth_consumer_key=' + consumerKey + '&';
 		body += 'oauth_nonce=' + nonce + '&';
 		body += 'oauth_signature_method=HMAC-SHA1&';
@@ -66,11 +66,11 @@ public class DeskOauth {
       System.debug('before call');
       Map<String,String> responseItems = getResponseNVP( req );
       authToken = responseItems.get('oauth_token');
-      updateToken(trialSignUpId, responseItems);
+      updateToken(trialSignUpId,responseItems);
       System.debug('authToken: '+authToken);
 
     } catch(Exception e) {
-      System.debug(e.getMessage());  
+      System.debug('Exception temp token: ' + e.getMessage());  
       return null;  
     }
 
@@ -86,11 +86,11 @@ public class DeskOauth {
   public boolean completeAuthorization(String token, String verifier, String trialSignUpId) {
     System.debug('record identifier: '+trialSignUpId);
     endpoint = getEndPoint(trialSignUpId);
-      System.debug('endpoint: '+endpoint);
-    consumerKey = Label.Recipe_Desk_ConsumerKey; //Label.Desk_ConsumerKey;
-    consumerSecret = Label.Recipe_Desk_ConsumerSecret; //Label.Desk_ConsumerSecret;
+    System.debug('endpoint: '+endpoint);
+    consumerKey = Label.Recipe_Desk_ConsumerKey;
+    consumerSecret = Label.Recipe_Desk_ConsumerSecret;
         
-		String nonce = string.valueof(dateTime.now().getTime()/1000);
+	String nonce = string.valueof(dateTime.now().getTime()/1000);
     String timestamp = string.valueof(dateTime.now().getTime()/1000);
    
     Map<String,String> parameters = new Map<String,String>();
@@ -112,7 +112,7 @@ public class DeskOauth {
     req.setMethod('POST');   
         		 
     String signature = generateSignature(req, consumerSecret, getTemporaryTokenSecret(trialSignUpId), parameters);
-		
+		System.debug('in generate Signature');
 		String body = 'oauth_consumer_key=' + consumerKey + '&';
 		body += 'oauth_nonce=' + nonce + '&';
 		body += 'oauth_signature_method=HMAC-SHA1&';
@@ -126,8 +126,8 @@ public class DeskOauth {
     try {
 			Map<String,String> responseItems = getResponseNVP( req );
         
+        	 //deleteRemoteSiteSetting(trialSignUpId);
      		 updateFinalToken(trialSignUpId, responseItems);
-        	 
 	    
 	    } catch(Exception e) {
     		System.debug(e.getMessage());        
@@ -138,8 +138,8 @@ public class DeskOauth {
   public static HttpRequest signRequest(HttpRequest req, String trialSignUpId) {
     //endpoint = getEndPoint(trialSignUpId);
     //userConfigSettings = getUserConfigSettings(endpoint);
-    consumerKey = Label.Recipe_Desk_ConsumerKey; //Label.Desk_ConsumerKey;
-    consumerSecret = Label.Recipe_Desk_ConsumerSecret; //Label.Desk_ConsumerSecret;
+    consumerKey = Label.Recipe_Desk_ConsumerKey;
+    consumerSecret = Label.Recipe_Desk_ConsumerSecret;
 
     String nonce     = string.valueof(dateTime.now().getTime()/1000);
     String timestamp = string.valueof(dateTime.now().getTime()/1000);
@@ -254,19 +254,19 @@ public class DeskOauth {
 
   private static String getTemporaryTokenSecret(String trialSignUpId) {
 
-  	String temporaryTokenSecret;
+    String temporaryTokenSecret;
     List<Trial_SignUp__c> ts = [SELECT Id, Temporary_Token_Secret__c FROM Trial_SignUp__c WHERE record_identifier_token__c =: trialSignUpId];
     if (ts != null && ts.size() > 0 )
-    	temporaryTokenSecret = ts[0].Temporary_Token_Secret__c;
-	System.debug('query done: ');
+        temporaryTokenSecret = ts[0].Temporary_Token_Secret__c;
+    System.debug('query done: ');
     return temporaryTokenSecret;
   }
     
     private static void deleteRemoteSiteSetting(String trialSignUpId){
       List<Trial_SignUp__c> tsList = [SELECT Id, desk_endpoint__c FROM Trial_SignUp__c WHERE record_identifier_token__c =: trialSignUpId];
       String deskEndPoint;
- 	  if (tsList != null && tsList.size() > 0 ){            
-			deskEndPoint = tsList[0].desk_endpoint__c;
+      if (tsList != null && tsList.size() > 0 ){            
+            deskEndPoint = tsList[0].desk_endpoint__c;
       }
       ToolingClient.deleteRemoteSiteSetting(Helper.parseEndPoint(deskEndPoint),null,null);
     }
@@ -274,34 +274,21 @@ public class DeskOauth {
   public static void updateToken(String trialSignUpId, Map<String, String> credsMap) {
     String tempToken = credsMap.get('oauth_token_secret');
     List<Trial_SignUp__c> ts = [SELECT Id, Temporary_Token_Secret__c FROM Trial_SignUp__c WHERE record_identifier_token__c =: trialSignUpId];
-	if (ts != null && ts.size() > 0 )
-    	ts[0].Temporary_Token_Secret__c = tempToken;
+    if (ts != null && ts.size() > 0 )
+        ts[0].Temporary_Token_Secret__c = tempToken;
     else
         ts[0] = new Trial_SignUp__c(
-        		record_identifier_token__c = tempToken	
-        		);
+                record_identifier_token__c = tempToken  
+                );
     upsert ts;
  
   }
 
-  /*public static void updateFinalToken(String trialSignUpId, Map<String, String> credsMap) {
-    String token = credsMap.get('oauth_token');
-    String secret = credsMap.get('oauth_token_secret');
-    
-
-   	Trial_SignUp__c ts = [SELECT Id, Temporary_Token_Secret__c, token__c, token_secret__c FROM Trial_SignUp__c WHERE record_identifier_token__c =: trialSignUpId];
-    ts.token__c = token;
-    ts.token_secret__c = secret;  
-
-    update ts;
-  }*/
-    
   public static void updateFinalToken(String trialSignUpId, Map<String, String> credsMap) {
     String token = credsMap.get('oauth_token');
     String secret = credsMap.get('oauth_token_secret');
     
     String deskSiteId = getDeskSiteId(trialSignupId,token,secret);  
-	deleteRemoteSiteSetting(trialSignUpId);
 
     Trial_SignUp__c ts = [SELECT Id,Desk_Site_Id__c, Temporary_Token_Secret__c, token__c, token_secret__c FROM Trial_SignUp__c WHERE record_identifier_token__c =: trialSignUpId];
     ts.token__c = token;
@@ -315,11 +302,11 @@ public class DeskOauth {
      Trial_SignUp__c ts = [SELECT Id, desk_endpoint__c FROM Trial_SignUp__c WHERE record_identifier_token__c =: trialSignUpId];
      DeskClient dc = DeskClient.getInstance(ts.Desk_Endpoint__c, token, secret);
      Map<String, Object> deskDataMap = dc.getDeskSiteInfo();
-     System.debug('deskDataMap: '+deskDataMap);
+        
      if(deskDataMap != null && deskDataMap.get('id') != null){
         deskSiteId = String.valueOf((Long)deskDataMap.get('id'));
      }
      return deskSiteId;
-  } 
+  }
     
 }

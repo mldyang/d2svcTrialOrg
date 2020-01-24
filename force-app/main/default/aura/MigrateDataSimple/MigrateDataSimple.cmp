@@ -2,10 +2,6 @@
     <aura:attribute name="oauthRecordIdentifier" type="String" access="public" default="bw8u3Xm81547509012512"/>
     <aura:attribute name="sfUrl" type="String" access="public"/>
     <aura:attribute name="sfSessionId" type="String" access="public"/>
-    <aura:attribute name="deskToken" type="String" access="public"/>
-    <aura:attribute name="deskTokenSecret" type="String" access="public"/>
-    <aura:attribute name="deskMigrationId" type="String" access="public"/>
-    <aura:attribute name="deskEndPoint" type="String" access="public"/>
     <aura:attribute name="isProcessing" type="Boolean" default="false"/>
 	<aura:attribute name="processingMessage" type="String" default="" />
     <aura:handler name="init" action="{!c.init}" value="{!this}" />
@@ -64,7 +60,7 @@
                                 <input type="hidden" name="sid"
                                        value="{!v.sfSessionId}" />
                                 <input type="hidden" name="retURL" 
-                                       value="{!'lightning/o/Case'}" /> 
+                                       value="{!'https://apr15-vctest-1--deskscmt.visualforce.com/apex/DeskAuth?core.apexpages.request.devconsole=1'}" /> 
                             </form>
                             <h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak">Watch the three steps to migrate your data using the migration tool: Authenticate, Map, Migrate.</h1>
                              <ul class="slds-list--dotted slds-text-color_weak slds-m-left_medium slds-m-bottom_xx-large">

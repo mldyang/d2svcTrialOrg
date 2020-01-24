@@ -219,7 +219,7 @@ public class RecipeAuthenticationController {
         if(recordIdentifier == null) recordIdentifier = 'abc';
 		String consumerKey = Label.Recipe_Salesforce_Consumer_Key;
         //Boolean remoteSiteResult = ToolingClient.createRemoteSiteSetting(Helper.parseEndPoint(deskSiteName), deskSiteName , 'Created for Trial Sign Up'); 
-        String retUrl = EncodingUtil.urlEncode('https://desktosvc.secure.force.com/trial/RecipeCompleteSFAuth','UTF-8');
+        String retUrl = EncodingUtil.urlEncode('https://dev3-desktosvc.cs26.force.com/trial/RecipeCompleteSFAuth','UTF-8');
         System.debug('URL: '+ 'https://login.salesforce.com/services/oauth2/authorize?response_type=code&client_id='+ consumerKey +
                                  '&redirect_uri=' + retUrl +
                                  '&state='+recordIdentifier);
@@ -231,7 +231,7 @@ public class RecipeAuthenticationController {
                                           '&redirect_uri=' + retUrl +
                                           '&state='+recordIdentifier);
              } else {
-                 return new PageReference('https://desktosvc.secure.force.com/trial/RecipesError');
+                 return new PageReference('https://dev3-desktosvc.cs26.force.com/trial/RecipesError');
              }
          }else{
              return new PageReference('https://login.salesforce.com/services/oauth2/authorize?response_type=code&client_id='+ consumerKey +
@@ -252,7 +252,7 @@ public class RecipeAuthenticationController {
         
         String consumerKey = Label.Recipe_Salesforce_Consumer_Key;
         String url = 'https://login.salesforce.com/services/oauth2/token';
-        String retUrl = EncodingUtil.urlEncode('https://desktosvc.secure.force.com/trial/RecipeCompleteSFAuth','UTF-8');
+        String retUrl = EncodingUtil.urlEncode('https://dev3-desktosvc.cs26.force.com/trial/RecipeCompleteSFAuth','UTF-8');
         String body = 'grant_type=authorization_code&' +
             		'client_id=' + 	consumerKey + '&' +
             		'redirect_uri=' + retUrl + '&' +
@@ -302,7 +302,6 @@ public class RecipeAuthenticationController {
                 String username = (String)userInfoMap.get('preferred_username');
                 String userEmail = (String)userInfoMap.get('email');
                 String name = (String)userInfoMap.get('name');
-                System.debug('URLs' + userInfoMap.get('urls'));
                 String orgId = ((String)((Map<String,Object>)userInfoMap.get('urls')).get('enterprise')).substringAfterLast('/');
                 String signUpUsername;
                 String signupEmail;
@@ -336,7 +335,7 @@ public class RecipeAuthenticationController {
                 
                 //connect to TMO org to get the desk site and signed up user email
                 if(rs.token__c == null || rs.token_secret__c == null){
-                    List<Object> signUpList = TMORestClient.queryRecords('select Username, Desk_Site_Id__c, SignupEmail from SignupRequest where CreatedOrgId = \'' + orgId + '\'');            
+                    List<Object> signUpList = TMORestClient.queryRecords('select Username, Desk_Site_Id__c, Signupemail from SignupRequest where CreatedOrgId = \'' + orgId + '\'');            
                     for(Object signUpRecord:signUpList){
                          Map<String,Object> signUpInfo = (Map<String,Object>)signUpRecord;
                          signUpUsername = (String)signUpInfo.get('Username');
@@ -350,13 +349,13 @@ public class RecipeAuthenticationController {
                             rs.token__c = tsList[0].Token__c;
                             rs.Desk_Endpoint__c = tsList[0].Desk_Endpoint__c;
                             rs.Token_Secret__c = tsList[0].token_secret__c;
-                            rs.desk_site_id__c = tsList[0].desk_site_id__c;
+                            rs.Desk_Site_Id__c = tsList[0].desk_site_id__c;
                         }
                     }
                 }
                 
                 if(!ToolingClient.createRemoteSiteSetting(Helper.parseEndPoint(instance_url), instance_url, instance_url)){
-                    return new PageReference('https://desktosvc.secure.force.com/trial/RecipesError');
+                    return new PageReference('https://dev3-desktosvc.cs26.force.com/trial/RecipesError');
                 }
                 upsert rs;
                 
@@ -368,8 +367,8 @@ public class RecipeAuthenticationController {
                 
             }
           }catch(Exception e){
-              return new PageReference('https://desktosvc.secure.force.com/trial/RecipesError?message='+e.getMessage());
+              return new PageReference('https://dev3-desktosvc.cs26.force.com/trial/RecipesError?message='+e.getMessage());
           }
-        return new PageReference('https://desktosvc.secure.force.com/trial/setuprecipes?recordIdentifier='+recordIdentifier);
+        return new PageReference('https://dev3-desktosvc.cs26.force.com/trial/setuprecipes?recordIdentifier='+recordIdentifier);
       }
 }

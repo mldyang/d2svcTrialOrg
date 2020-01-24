@@ -1,0 +1,131 @@
+<aura:component >
+    <aura:registerEvent name="recipeComponentChange" type="c:RecipeComponentChangeEvent"/>  
+    <aura:attribute name="oauthRecordIdentifier" type="String" access="public"/>
+    <!-- TEST CONTENT HOLDER -->
+	  <div style="margin: auto; width: 600px; height: auto; overflow: hidden;">
+		  
+		  	<!-- RECIPE HOLDER -->
+		  	<div class="slds-grid slds-theme_default slds-m-bottom_small" style="margin-top:3.5em">
+			 
+		  		<!-- GRID START -->
+			    <div class="slds-col slds-size_1-of-1 slds-p-around_medium">
+				    
+				    <div class="slds-grid">
+					    
+					    <div class="slds-col slds-size_12-of-12 slds-show_small">
+						    
+						    <!-- BREADCRUMBS -->
+						    <div class="slds-m-bottom_small">
+							  <nav role="navigation" aria-label="Breadcrumbs">
+							    <ol class="slds-breadcrumb slds-list_horizontal slds-wrap">
+							      <li class="slds-breadcrumb__item slds-text-title_caps"><a href="javascript:void(0);">Setup Recipes</a></li>
+							      <li class="slds-breadcrumb__item slds-text-title_caps" style="padding-left:8px">Email</li>
+							    </ol>
+							  </nav>
+							</div>
+							<!-- END BREADCRUMBS -->
+						    
+						    <!-- HEADLINE TEXT -->
+						    <h1 class="slds-text-heading_large slds-m-bottom_large">Configure your Email Add Ons</h1>
+							<!-- HEADLINE TEXT END -->
+							
+							<!-- ACTION BUTTONS -->
+							<div class="slds-m-bottom_xx-large" style="margin-bottom: 3.5em">
+								 <lightning:button aura:id="backButton" variant="neutral" label="BACK" name="EmailRecipe" onclick="{!c.loadComponent}" disabled="false" class="wide-button"/>
+                            	<lightning:button aura:id="nextButton" variant="brand" label="START" name="EmailAutoResponseRecipe" onclick="{!c.loadComponent}" disabled="false" class="wide-button"/>
+		      				</div>
+		      				<!-- ACTION BUTTONS END -->
+							
+							<!-- FORM STARTS -->
+							
+							<!-- LEFT LIST ITEM START -->
+							<div class="slds-col slds-size_1-of-1 slds-p-top_medium slds-p-bottom_medium slds-p-left_xx-small slds-p-right_xx-small slds-border_bottom">
+							    
+							    <div class="slds-grid">
+								    
+								    
+									
+								    <div class="slds-col slds-size_8-of-12 slds-small-size_8-of-12 slds-medium-size_8-of-12 slds-large-size_8-of-12">
+									    <!-- LIST LINK -->
+									    <h2 class="slds-p-top_xx-small">
+										    Setup Auto-Response
+									    </h2>
+									    <!-- LIST LINK END -->
+								    </div>
+								    <div class="slds-col slds-size_4-of-12 slds-small-size_4-of-12 slds-medium-size_4-of-12 slds-large-size_4-of-12">   
+									    <!-- CTA BUTTON -->
+									    <lightning:button name="EmailAutoResponseRecipe" variant="neutral" label="Setup" onclick="{!c.loadComponent}" disabled="false" class="wide-button-right"/>
+									    <!-- CTA BUTTON END -->
+							    	</div>
+								</div>
+							
+							</div>
+							<!-- LEFT LIST ITEM END -->
+							
+							<!-- LEFT LIST ITEM START -->
+							<div class="slds-col slds-size_1-of-1 slds-p-top_medium slds-p-bottom_medium slds-p-left_xx-small slds-p-right_xx-small slds-border_bottom">
+							    
+							    <div class="slds-grid">
+								    
+								    
+									
+								    <div class="slds-col slds-size_8-of-12 slds-small-size_8-of-12 slds-medium-size_8-of-12 slds-large-size_8-of-12">
+									    <!-- LIST LINK -->
+									    <h2 class="slds-p-top_xx-small">
+										    Setup Auto Create Contact
+									    </h2>
+									    <!-- LIST LINK END -->
+								    </div>
+								    <div class="slds-col slds-size_4-of-12 slds-small-size_4-of-12 slds-medium-size_4-of-12 slds-large-size_4-of-12">   
+									    <!-- CTA BUTTON -->
+									    <lightning:button aura:id="addEmail" name="" variant="neutral" label="Setup" onclick="" disabled="true" class="wide-button-right"/>
+									    <!-- CTA BUTTON END -->
+							    	</div>
+								</div>
+							
+							</div>
+							<!-- LEFT LIST ITEM END -->
+							
+							<!-- LEFT LIST ITEM START -->
+							<div class="slds-col slds-size_1-of-1 slds-p-top_medium slds-p-bottom_medium slds-p-left_xx-small slds-p-right_xx-small slds-border_bottom">
+							    
+							    <div class="slds-grid">
+									
+								    <div class="slds-col slds-size_8-of-12 slds-small-size_8-of-12 slds-medium-size_8-of-12 slds-large-size_8-of-12">
+									    <!-- LIST LINK -->
+									    <h2 class="slds-p-top_xx-small">
+										    Enable Forward Processing
+									    </h2>
+									    <!-- LIST LINK END -->
+								    </div>
+								    <div class="slds-col slds-size_4-of-12 slds-small-size_4-of-12 slds-medium-size_4-of-12 slds-large-size_4-of-12">   
+									    <!-- CTA BUTTON -->
+									    <lightning:button name="" variant="neutral" label="Enable" onclick="" disabled="true" class="wide-button-right"/>
+									    <!-- CTA BUTTON END -->
+							    	</div>
+								</div>
+							
+							</div>
+							<!-- LEFT LIST ITEM END -->
+							
+							
+							
+							<!-- FORM ENDS -->
+							
+						
+						
+					    </div>
+											    
+			    	</div>
+	
+			    </div>
+			    <!-- GRID START END -->
+		  		
+			</div>
+			<!-- END RECIPE HOLDER -->
+
+			
+	  </div>
+	  <!-- END CONTENT TEST HOLDER -->
+	
+</aura:component>

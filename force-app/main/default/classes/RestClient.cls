@@ -176,20 +176,6 @@ public class RestClient {
            
     }
     
-    public List<Object> queryRecords(String query){
-        HttpResponse res = SimpleHttpClient.get(this.API_URL +'/query/?q=' + EncodingUtil.urlencode(query,'UTF-8'))
-                                            .header('Content-Type','application/json')
-                                            .auth('Bearer '+this.access_token)
-                                            .compressed(false)
-                                            .send();
-         if(res.getStatusCode() == 200){
-           Map<String,Object> response = (Map<String,Object>)JSON.deserializeUntyped(res.getBody());
-           return (List<Object>)response.get('records');
-        }else{
-           throw new FailedException();
-        }
-    }
-    
     public String createDeskMigration(String jsonString){
         HttpResponse res = SimpleHttpClient.post(this.API_URL +'/sobjects/DESKSCMT__Desk_Migration__c')
                                             .header('Content-Type','application/json')
@@ -205,6 +191,20 @@ public class RestClient {
             throw new FailedException();
         }
            
+    }
+    
+    public List<Object> queryRecords(String query){
+        HttpResponse res = SimpleHttpClient.get(this.API_URL +'/query/?q=' + EncodingUtil.urlencode(query,'UTF-8'))
+                                            .header('Content-Type','application/json')
+                                            .auth('Bearer '+this.access_token)
+                                            .compressed(false)
+                                            .send();
+         if(res.getStatusCode() == 200){
+           Map<String,Object> response = (Map<String,Object>)JSON.deserializeUntyped(res.getBody());
+           return (List<Object>)response.get('records');
+        }else{
+           throw new FailedException();
+        }
     }
     
      public List<Object> getUsers(){

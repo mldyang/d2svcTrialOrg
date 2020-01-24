@@ -1,0 +1,226 @@
+<aura:component controller="LabelsRecipeController">
+    <aura:attribute name="oauthRecordIdentifier" type="String" access="public" default="bw8u3Xm81547509012512"/>
+    <aura:attribute name="sfUrl" type="String" access="public"/>
+    <aura:attribute name="sfSessionId" type="String" access="public"/>
+    <aura:attribute name="sectionDisplay" type="Map" default="{ intro: true, casetype: false, existing: false, newFieldType: false, newField: false, complete: false}" />
+    <aura:attribute name="deskLabels" type="List" default="[]"/>
+    <aura:attribute name="labelsCaseType" type="List" default="[]"/>
+    <aura:attribute name="labelsPicklistExisting" type="List" default="[]"/>
+    <aura:attribute name="labelsCheckboxExisting" type="List" default="[]"/>
+    <aura:attribute name="labelsMultiPicklistExisting" type="List" default="[]"/>
+    <aura:attribute name="labelsPicklistNew" type="List" default="[]"/>
+    <aura:attribute name="labelsCheckboxNew" type="List" default="[]"/>
+    <aura:attribute name="labelsMultiPicklistNew" type="List" default="[]"/>
+    <aura:attribute name="isProcessing" type="Boolean" default="false"/>
+    <aura:attribute name="processingMessage" type="String" default="Checking for existing Assignment Rules" />
+    <aura:attribute name="showError" type="Boolean" default="false" />
+    <aura:attribute name="errorMessage" type="String" />
+    <aura:attribute name="unknownError" type="Boolean" default="false" />
+    <aura:attribute name="labelString" type="String" />
+    
+    <aura:handler name="init" action="{!c.init}" value="{!this}" /> 
+    <aura:registerEvent name="recipeComponentChange" type="c:RecipeComponentChangeEvent"/>
+
+	<body class="desk" style="background:white;">
+	  <!-- TEST CONTENT HOLDER -->
+	  <div style="margin: auto; width: 100%; height: 100vh;">
+          
+          <!-- RECIPE HOLDER -->
+          <div style="margin: 3em 3em 0 3em;">
+              
+              <!-- ERRORS SECTION -->
+
+                    <div style="{! if(v.showError,'display:block','display:none')}">
+                         <c:Toast aura:id="toast" isActive="{!v.showError}" message="{!v.errorMessage}" type="warning">
+                            {!v.errorMessage}
+                        </c:Toast> 
+                    </div>
+                    
+
+              <!-- END OF ERRORS SECTION-->
+              
+              <!-- BLOCKING ERROR -->    
+              <aura:if isTrue="{!v.unknownError}">
+                  <div aura:id="unknownErrorMessage" id="unknonw" class="middle" >
+                      <lightning:icon iconName="utility:error" variant="error" size="large"/>
+                      <div class="slds-text-heading_small slds-m-top_x-small">There seems to be an issue with creating your trial org. Please contact <a href = "mailto: support@desk.com">support@desk.com</a></div>
+                  </div>
+              </aura:if>
+              <!-- BLOCKING ERROR END -->
+              
+              <!-- GRID START -->
+              <div class="slds-col slds-size_1-of-1 slds-p-around_medium" style="max-width:800px">
+                  <div class="slds-grid">
+                      <div class="slds-col slds-size_12-of-12 slds-show_small">
+                          <!-- BREADCRUMBS -->
+                          <div class="slds-m-bottom_large">
+                              <nav role="navigation" aria-label="Breadcrumbs">
+                                  <ol class="slds-breadcrumb slds-list_horizontal slds-wrap">
+                                      <li class="slds-breadcrumb__item slds-text-title_caps"><a href="javascript:void(0);">Setup Recipes</a></li>
+                                      <li class="slds-breadcrumb__item slds-text-title_caps"><a href="javascript:void(0);">Labels</a></li>
+                                      <!-- <li class="slds-breadcrumb__item slds-text-title_caps" style="padding-left:8px;padding-right:8px;">Step 1 of 3</li> -->
+                                  </ol>
+                              </nav>
+                          </div>
+                          <!-- END BREADCRUMBS -->
+        
+                        <!-- INTRO -->
+                        <aura:if isTrue="{! and(v.sectionDisplay.intro)}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_medium slds-text-color_weak">Labels translate to Custom Fields in Salesforce. Here is an overview of the mapping process.</h1>
+                                <div class="slds-text-heading_small slds-text-color_weak slds-m-bottom_large" style="font-family:SalesforceSans-Light">To start mapping your labels to custom fields click next.</div>
+                                
+                                <!-- video to be added -->
+                                   
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF INTRO -->   
+                          
+                        <!-- CASE TYPE -->
+                        <aura:if isTrue="{! and(v.sectionDisplay.casetype)}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_medium slds-text-color_weak">Case Type is a standard picklist field in Salesforce. Are there any labels that can be mapped to Case Type picklist values?</h1>
+                                <ul class="slds-list--dotted slds-text-color_weak slds-m-left_medium slds-m-bottom_xx-large">
+                                   	<li class=" slds-text-heading_small slds-text-color_weak">Existing Case Type picklist values that match with labels in Desk are auto-mapped.</li>
+                                    <li class=" slds-text-heading_small slds-text-color_weak">Once you map a label, a new picklist value is created in Salesforce.</li>
+                                    <li class="slds-text-heading_small slds-text-color_weak">As you type, we will search from your labels in Desk. </li>
+                                </ul>
+                                
+                                <fieldset class="slds-form-element slds-m-bottom_xx-large">
+	                                 <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white;row-height:3rem;width:500px;">
+                                   <thead>
+                                      <tr class="slds-text-title_caps" >
+
+                                         <th scope="col" class="slds-cell-wrap" style="">
+                                            <div  title="Name" class="slds-m-right_xx-large">
+                                               Mapped Label
+                                            </div>
+                                         </th>
+                                          
+                                         <th scope="col" class="slds-cell-wrap" style="width:8rem;">
+                                            <div class="slds-truncate" title="Criteria" >
+                                                Existing/New
+                                            </div>
+                                         </th>
+                                         <th scope="col" class="slds-cell-wrap" style="width:6rem;">
+                                            <div class="slds-truncate" title="Email">
+                                               
+                                            </div>
+                                         </th>
+                                        
+                                      </tr>
+                                   </thead>
+                                   <tbody>
+                                     <aura:iteration items="{!v.labelsCaseType}" var="label" indexVar="count"> 
+                                      	<tr class="slds-hint-parent">
+                                          <td class="slds-cell-shrink" data-label="Select Row" style="">
+                                              <aura:if isTrue="{!label.newToSalesforce == true}">
+                                                <!--  
+                                              	<lightning:input label="" name="" value="{!label}" onchange="" disabled="true" class="profile"/>
+												-->
+                                                <div onclick="{!c.hideButtons}" onfocusout="{!c.showButtons}">
+                                                	<c:lookup openOnFocus="true" value="{!label.label}" oldValue="" name="1" placeholder="Select a Label" options="{!v.deskLabels}" iconName="" idVar="label" labelVar="label" iconVar="icon"/> 
+                                                </div>      
+                                              <aura:set attribute="else">    
+                                              	{!label.label}
+                                              </aura:set>    
+                                              </aura:if>    
+                                          </td>
+                                         <td scope="row" data-label="Name" class="slds-cell-wrap" >
+											   <aura:if isTrue="{! label.newToSalesforce == true}">
+                                              	New
+                                              <aura:set attribute="else">    
+                                              	Existing
+                                              </aura:set>    
+                                              </aura:if>  	
+                                         </td>
+                                         <td data-label="Email" class="slds-cell-wrap">
+											<div>
+                                                <lightning:icon name="{! concat('row',count)}" onclick="{! c.delRow }" iconName="utility:delete" variant="success" size="xx-small"/> 
+                                                 <button name="{! concat('row',count)}" onclick="{! c.delRow }" class="slds-button"  style="padding-top: 2px; margin: 2px 0px 0 2px;">
+                                                     Remove
+                                                 </button>
+                                            </div>
+                                         </td>
+                                      </tr>
+                                       </aura:iteration>	
+                                   </tbody>
+                            	</table>
+                                <div aura:id="addRow" class="slds-grid slds-m-top_medium"> 
+                                    <div class="slds-col slds-size_3-of-12">
+                                        <lightning:icon iconName="utility:add" variant="success" size="xx-small"/> 
+                                        <button class="slds-button" onclick="{! c.addRow }" style="padding-top: 2px; margin: 2px 0px 0 2px;">
+                                            Add Another
+                                        </button>
+                                    </div>
+                                 </div>    
+                            	</fieldset>
+                                   
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF CASE TYPE -->     
+                          
+                        <!-- COMPLETE SECTION -->
+                        <aura:if isTrue="{!v.sectionDisplay.complete}">
+                            <aura:if isTrue="{!v.model.advanced == false}">
+                            	<h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak">Congratulations you have completed assignment rules setup! </h1>
+                             <aura:set attribute="else">
+                                <form aura:id="frontdoor-form" target="_blank" method="POST" action="{! v.sfUrl + '/secur/frontdoor.jsp'}">
+                                    <input type="hidden" name="sid"
+                                          value="{!v.sfSessionId}" />
+                                    <input type="hidden" name="retURL" 
+                                          value="{!'lightning/setup/CaseRules/home'}" /> 
+                                </form> 
+                                <aura:if isTrue="{!v.newAssignmentRule.ruleEntryList.length > 0}">
+                                	<h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak">Assignment rules based on the models selected have been created successfully. </h1> 
+                                    <ul class="slds-list--dotted slds-text-color_weak slds-m-left_medium slds-m-bottom_xx-large">
+                                   <li class=" slds-text-heading_small slds-text-color_weak">Use Salesforce's native setup interface to further customize and create advanced rules. Click <ui:outputURL value="#" click="{!c.customizeLink}" label="here"/></li>
+                                </ul>
+                                <aura:set attribute="else">
+                                	<h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak">Use Salesforce's native setup interface to further customize and create advanced rules. Click <ui:outputURL value="#" click="{!c.customizeLink}" label="here"/> </h1> 
+                                </aura:set>    
+                                </aura:if>    
+                                
+                                
+                                </aura:set>
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF COMPLETE SECTION -->  
+                       
+                        <!-- COMMON BUTTONS -->
+                        <!-- <aura:if isTrue="{! and(v.isInitialising == false, v.unknownError == false)}"></aura:if> -->
+                        <footer aura:id="footer" class="slds-m-top_x-large" style="{! and(v.isProcessing == false, v.unknownError == false) ? 'display:block' : 'display:none' }">
+                         	
+                            <lightning:button aura:id="backButton" variant="neutral" label="Back" onclick="{!c.back}" disabled="false" class="wide-button"/>
+                            <lightning:button aura:id="nextButton" variant="neutral" label="Next >" onclick="{!c.next}" disabled="false" class="wide-button"/>
+                        </footer> 
+                        
+                        <!-- END OF COMMON BUTTONS -->
+                          
+                        </div>
+											    
+			    	</div>
+	
+			    </div>
+			    <!-- GRID START END -->
+		  		
+			</div>
+			<!-- END RECIPE HOLDER -->
+
+			
+	  </div>
+	  <!-- END CONTENT TEST HOLDER -->
+    
+    </body>  
+	
+</aura:component>

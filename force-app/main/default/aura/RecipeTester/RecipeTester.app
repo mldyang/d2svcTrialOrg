@@ -1,10 +1,11 @@
 <aura:application access="Global" extends="force:slds">
     <!-- <c:AddEmailChannel /> -->
      <!--<c:Toast message="hello world" isActive="true" type="warning" link="Continue without verification" linkMessage="bypassVerification"/> -->
-    <!-- <c:RecipeList/> -->
+     <!-- <c:RecipeList/> -->
     <!-- <aura:dependency resource="c:RecipeList"/> -->
     <!-- <c:EmailRecipe /> -->
-    <!--  <c:EmailAutoResponseRecipe /> -->
+    <!-- <c:EmailAutoResponseRecipe /> -->
+    <!-- <c:SocialRecipe/> -->
     <!-- <c:RecipeAuthentication />--> 
     <!-- <c:UserRecipe /> -->
     <!-- <c:RecipeWrapper /> -->
@@ -12,14 +13,20 @@
     <!-- <c:CaseAssignmentByRuleV2 /> -->
     <!-- <c:LabelsRecipe/> -->
     <!-- <c:RecipeAuthentication/> -->
-    <c:AddEmailChannel/>
+    <!--  <c:AddEmailChannel/> -->
     <!-- <c:TestComponent/> --> 
     <!-- <c:MacrosRecipe/> -->
+    <!-- <c:Popover/> -->
+    <!-- <c:SupportProcessSimple/> -->
+    <!-- <c:Breadcrumb/> -->
+    
+    <c:MigrateArticlesSimple />
     <!--
     <aura:attribute name="label" type="String" access="public" description="Label for the field." />
     <aura:attribute name="oldValue" type="String" access="public" description="Label for the field." />
-    <c:lookup openOnFocus="true" value="{!v.label}" oldValue="" name="a" placeholder="Select a Value" options="[{label:'a'},{label:'b'}]" iconName="" idVar="name" labelVar="label" iconVar="icon" /> 
-    -->
+    <c:lookup openOnFocus="true" value="{!v.label}" oldValue="" name="a" placeholder="Select a Value" options="[{label:'a',name:'a'},{label:'b',name:'b'}]" iconName="" idVar="label" labelVar="label" iconVar="icon" /> 
+	-->
+    
    
     <!-- <c:TestComponent/> -->
    

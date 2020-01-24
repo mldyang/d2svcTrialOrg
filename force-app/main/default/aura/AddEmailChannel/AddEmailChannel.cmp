@@ -245,7 +245,7 @@
                         <aura:if isTrue="{!v.sectionDisplay.verify}">
                             <aura:if isTrue="{!v.isVerifying == false}">
                                 <h1 class="slds-text-heading_large slds-m-bottom_medium slds-text-color_weak">Verification emails have been sent. Check the emails added and verify by clicking on the link in the emails </h1>
-                                <div class="slds-text-heading_small slds-text-color_weak slds-m-bottom_xx-large" style="font-family:SalesforceSans-Light">Please check the box after you verify the email(s). Adding &amp; verifying your email channel will not affect your existing Desk functioning.</div>
+                                <div class="slds-text-heading_small slds-text-color_weak slds-m-bottom_xx-large" style="font-family:SalesforceSans-Light">Please check the box after you verify the email(s). Verifying your emails will not affect your existing Desk functioning.</div>
                                 <div aura:id="emails-to-verify">
                                     <fieldset class="slds-form-element slds-m-left_small slds-m-bottom_xx-large">
                                     <aura:iteration items="{!v.emailsToVerify}" var="emailData">
@@ -269,7 +269,7 @@
                             <aura:if isTrue="{!v.isProcessing == false}">
                             <h1 class="slds-text-heading_large slds-m-bottom_medium slds-text-color_weak">Congratulations you have added your Email Addresses!</h1>
                             <div class="slds-text-heading_small slds-text-color_weak slds-m-bottom_large" style="font-family:SalesforceSans-Light">Watch the Virtual Consultant video to learn what the long email services address is. A video demo on how to test the email channel is shown at the end.</div>
-                                <fieldset class="slds-form-element slds-m-bottom_xx-large">
+                            <fieldset class="slds-form-element slds-m-bottom_xx-large">
 	                                 <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white;width:900px">
                                    <thead>
                                       <tr class="slds-text-title_caps" >

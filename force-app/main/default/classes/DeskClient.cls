@@ -59,14 +59,6 @@ public class DeskClient {
 
         return instance;
     }
-
-    public static DeskClient getInstance(String recordIdentifier){
-        if(instance == null || !instance.compareConfigId(recordIdentifier)) {
-            instance = new DeskClient(recordIdentifier);
-        }
-
-        return instance;
-    }
     
     public String getToken(){
         return token;
@@ -75,6 +67,16 @@ public class DeskClient {
     public String getTokenSecret(){
         return tokenSecret;
 	}
+    
+   
+
+    public static DeskClient getInstance(String recordIdentifier){
+        if(instance == null || !instance.compareConfigId(recordIdentifier)) {
+            instance = new DeskClient(recordIdentifier);
+        }
+
+        return instance;
+    }
     
     public Map<String, Object> getDeskSiteInfo() {
       String endpoint = deskSiteUrl + '/api/v2/site';

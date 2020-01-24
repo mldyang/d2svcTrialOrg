@@ -1,0 +1,152 @@
+<aura:component controller="MacrosRecipeController">
+    
+    <aura:attribute name="oauthRecordIdentifier" type="String" access="public" default="TBupF9Se1536768630712"/>
+
+	<!-- Existing Email-to-case in Salesforce -->
+    <aura:attribute type="String" name="sfSystemUserEmail" access="public" />
+    
+    <!-- This map determines which steps are to be shown -->
+    <aura:attribute name="sectionDisplay" type="Map" default="{ macrosList: true, labelMapping: false}" />
+    <aura:attribute name="deskMacrosList" type="List"/>
+    <aura:attribute name="pageNo" type="Integer" default="1"/>
+    <aura:attribute name="totalDeskMacros" type="Integer" default="10"/>
+    <aura:attribute name="startPosition" type="Integer" default="1"/>
+    <aura:attribute name="endPosition" type="Integer" default="10"/>
+       
+    <aura:attribute type="Boolean" name="isProcessing" default="false" />
+    <aura:attribute type="String" name="processingMessage"  />
+    
+    <aura:attribute name="showError" type="Boolean" default="false" />
+    <aura:attribute name="errorMessage" type="String" />
+    <aura:attribute name="unknownError" type="Boolean" default="false" />
+    
+    <aura:handler name="init" action="{!c.init}" value="{!this}" />
+    <aura:handler name="toastClickEvent" event="c:ToastClick" action="{!c.handleToastClick}"/>
+    <aura:registerEvent name="recipeComponentChange" type="c:RecipeComponentChangeEvent"/>
+    
+      <body class="desk" style="background:white;">
+	  <!-- TEST CONTENT HOLDER -->
+	  <div style="margin: auto; width: 100%; height: 100vh;">
+          
+          <!-- RECIPE HOLDER -->
+          <div style="margin: 3em 3em 0 3em;">
+              
+              <!-- ERRORS SECTION -->
+
+                    <div style="{! if(v.showError,'display:block','display:none')}">
+                         <c:Toast aura:id="toast" isActive="{!v.showError}" message="{!v.errorMessage}" type="warning">
+                            {!v.errorMessage}
+                        </c:Toast> 
+                    </div>
+                    
+
+              <!-- END OF ERRORS SECTION-->
+              
+              <!-- BLOCKING ERROR -->    
+              <aura:if isTrue="{!v.unknownError}">
+                  
+                  <div aura:id="unknownErrorMessage" id="unknonw" class="middle" >
+                      
+                      <lightning:icon iconName="utility:error" variant="error" size="large"/>
+                       
+                      
+                      <div class="slds-text-heading_small slds-m-top_x-small">There seems to be an issue with creating your trial org. Please contact <a href = "mailto: support@desk.com">support@desk.com</a></div>
+                  </div>
+                  
+              </aura:if>
+              <!-- BLOCKING ERROR END -->
+              
+              <!-- GRID START -->
+              <div class="slds-col slds-size_1-of-1 slds-p-around_medium" style="max-width:800px">
+                  
+                  <div class="slds-grid">
+                      
+                      <div class="slds-col slds-size_12-of-12 slds-show_small">
+                          
+                          <!-- BREADCRUMBS -->
+                          <c:Breadcrumb recipe="Macros"/>
+                          <!-- END BREADCRUMBS -->
+                          
+                        <!-- MACROS LIST -->
+                        <aura:if isTrue="{!v.sectionDisplay.macrosList}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                            <h1 class="slds-text-heading_large slds-m-bottom_medium slds-text-color_weak" style="width:900px">Select the Macros that you would like to migrate</h1>
+                            <div class="slds-text-heading_small slds-text-color_weak slds-m-bottom_xx-large" style="font-family:SalesforceSans-Light">{! 'Showing ' + v.startPosition + '-' + v.endPosition +' of ' + v.totalDeskMacros + ' Macros. Macros existing in service cloud are shown with their checkbox disabled'}</div>
+                            <fieldset class="slds-form-element slds-m-bottom_xx-large">
+	                                 <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white;">
+                                   <thead>
+                                      <tr class="slds-text-title_caps" >
+                                         <th scope="col" class="slds-cell-wrap" style="width: 3rem;">
+                                            <div  title="Select">
+                                               
+                                            </div>
+                                         </th>
+                                         <th scope="col" class="slds-cell-wrap" style="width: 12.5rem;">
+                                            <div class="slds-truncate" title="Name">
+                                               Name
+                                            </div>
+                                         </th>  
+                                          <th scope="col" class="slds-cell-wrap" style="">
+                                            <div class="slds-truncate" title="Description">
+                                               Description
+                                            </div>
+                                         </th>
+                                      </tr>
+                                   </thead>
+                                   <tbody>
+                                     <aura:iteration items="{!v.deskMacrosList}" var="macro" indexVar="count"> 
+                                      		<tr class="slds-hint-parent">
+                                          <td class="slds-cell-wrap" data-label="Select Row" style="" >
+                                              <lightning:input type="checkbox" disabled="{! macro.sfMacroId}" checked="{! macro.selected}" style="padding-left: 0.75rem;" />
+                                          </td>
+                                         <td scope="row" data-label="Name" class="slds-cell-wrap" style="">
+                                            {!macro.name}
+                                         </td>
+                                         <td data-label="Developer Name" class="slds-cell-wrap" style="">
+                                             {!macro.description}
+                                         </td> 
+                                      </tr>
+                                       </aura:iteration>	
+                                   </tbody>
+                            	</table>
+                            	</fieldset>
+                                <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                	<lightning:spinner variant="brand" size="small" /><br/><br/><br/>{!v.processingMessage}
+                                </div>
+                            </aura:set>
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF MACROS LIST SECTION -->  
+        
+                        
+                          
+              
+    
+                        <!-- COMMON BUTTONS -->
+                        <!-- <aura:if isTrue="{! and(v.isInitialising == false, v.unknownError == false)}"></aura:if> -->
+                        <footer class="slds-m-top_x-large" style="{! or( v.unknownError == true, v.isProcessing == true) ? 'display:none' : 'display:block' }">
+                         	
+                            <lightning:button aura:id="backButton" variant="neutral" label="Back" onclick="{!c.back}" disabled="false" class="wide-button"/>
+                            <lightning:button aura:id="nextButton" variant="neutral" label="Next >" onclick="{!c.next}" disabled="false" class="wide-button"/>
+                        </footer> 
+                        
+                        <!-- END OF COMMON BUTTONS -->
+                          
+                        </div>
+											    
+			    	</div>
+	
+			    </div>
+			    <!-- GRID START END -->
+		  		
+			</div>
+			<!-- END RECIPE HOLDER -->
+
+			
+	  </div>
+	  <!-- END CONTENT TEST HOLDER -->
+    
+    </body>
+	
+</aura:component>

@@ -1,2 +1,4 @@
-<apex:page controller="RecipeAuthenticationController" action="{!completeAuthorization}" sidebar="false" showHeader="false">  
+<apex:page controller="RecipeAuthenticationController" action="{!completeAuthorization}" sidebar="false" showHeader="false">
+
+  
 </apex:page>

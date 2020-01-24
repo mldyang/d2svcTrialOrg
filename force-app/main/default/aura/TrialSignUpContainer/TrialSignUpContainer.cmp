@@ -13,7 +13,7 @@
 	  
 	  <!-- LEFT HAND SIDE CONTENT 50% -->
 	  <div aura:id="leftContainer" class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12" style="min-height: 100vh;">
-
+		
           <aura:if isTrue="{!v.showSpinner}">
               <div class="slds-align_absolute-center slds-is-relative" style="height: 100%;">
                   <lightning:spinner aura:id="spinner" variant="brand"  size="medium" class="nobg"/>

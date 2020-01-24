@@ -1,15 +1,13 @@
 ({
 	init : function(cmp, event, helper) {
-        helper.getUrlSessionInfo(cmp,event,helper);
-        //CHANGE TO THE METHOD BELOW WHEN THE FORM IS READY
-        //helper.getUrlSessionInfoLocal(cmp,event,helper);
+        helper.getUrlSessionInfoLocal(cmp,event,helper);
         helper.createRecipeActivity(cmp,{action: 'Load', recipe: 'Article Migration', feature:'Recipe'});
+        //helper.createDeskMigration(cmp,event,helper,'Article');
 	},
     
     customizeLink: function(cmp,event,helper){
         console.log('In Url');  
-        //CHANGE TO THE FROM URL BELOW WHEN THE FORM IS READY
-        //cmp.find('retURL').getElement().value = 'lightning/o/Case?token='+cmp.get('v.deskToken')+'&secret='+cmp.get('v.deskTokenSecret')+'&dmId='+cmp.get('v.deskMigrationId');
+        cmp.find('retURL').getElement().value = 'lightning/o/Case?token='+cmp.get('v.deskToken')+'&secret='+cmp.get('v.deskTokenSecret')+'&dmId='+cmp.get('v.deskMigrationId');
         cmp.find('frontdoor-form').getElement().submit();
     },
     

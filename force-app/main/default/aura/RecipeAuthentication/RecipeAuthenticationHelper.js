@@ -1,5 +1,6 @@
 ({
-	deskAuthenticateHelper: function(cmp, evt, helper) { 
+	deskAuthenticateHelper: function(cmp, evt, helper) {
+        helper.createRecipeActivity(cmp,{action: 'Load', recipe: null, feature:'Authentication', section: 'Desk'});  
         cmp.set('v.authInProgress',true);
         if(!helper.validateEndpoint(cmp, evt, helper)){
             cmp.find('deskEndpoint').showHelpMessageIfInvalid();
@@ -83,13 +84,14 @@
     },
     
     sfAuthenticateHelper: function(cmp, event, helper){
+        helper.createRecipeActivity(cmp,{action: 'Load', recipe: null, feature:'Authentication', section: 'Salesforce'});
         if(!cmp.get('v.oauthRecordIdentifier')){
             cmp.set('v.oauthRecordIdentifier',helper.makeid());
         }
         if(cmp.get('v.sfMyDomain')){
-        	window.location.replace('https://desktosvc.secure.force.com/trial/RecipeSalesforceAuth?recordIdentifierToken='+cmp.get('v.oauthRecordIdentifier')+'&instance='+cmp.get('v.sfMyDomain'));
+        	window.location.replace('https://dev3-desktosvc.cs26.force.com/trial/RecipeSalesforceAuth?recordIdentifierToken='+cmp.get('v.oauthRecordIdentifier')+'&instance='+cmp.get('v.sfMyDomain'));
         }else{
-            window.location.replace('https://desktosvc.secure.force.com/trial/RecipeSalesforceAuth?recordIdentifierToken='+cmp.get('v.oauthRecordIdentifier'));
+            window.location.replace('https://dev3-desktosvc.cs26.force.com/trial/RecipeSalesforceAuth?recordIdentifierToken='+cmp.get('v.oauthRecordIdentifier'));
         }
         /*var oauthPopup = window.open(
           'https://dev2-desktosvc.cs21.force.com/trial/RecipeSalesforceAuth?recordIdentifierToken='+cmp.get('v.oauthRecordIdentifier'),

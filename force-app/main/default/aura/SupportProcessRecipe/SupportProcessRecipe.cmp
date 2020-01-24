@@ -1,0 +1,200 @@
+<aura:component >
+  <aura:attribute name="oauthRecordIdentifier" type="String" access="public" default="gnHbM9N91545847453933" />
+  <aura:attribute name="users" type="List" access="public" />
+  <aura:attribute name="queues" type="List" access="public" />
+  <aura:attribute type="List" name="existingEmailToCase" access="public" />
+  <aura:attribute type="List" name="existingSFActiveUsers" access="public" /> />
+  <aura:attribute name="sectionDisplay" type="Map" />
+  <aura:attribute name="isProcessing" type="Boolean" default="false" />
+  <aura:attribute name="processingMessage" type="String" default="Checking for existing Assignment Rules" />
+  <aura:attribute name="showError" type="Boolean" default="false" />
+  <aura:attribute name="errorMessage" type="String" />
+  <aura:attribute name="unknownError" type="Boolean" default="false" />
+
+  <aura:handler name="init" action="{!c.init}" value="{!this}" />
+  <aura:registerEvent name="recipeComponentChange" type="c:RecipeComponentChangeEvent" />
+
+  <body class="desk" style="background:white;">
+    <!-- TEST CONTENT HOLDER -->
+    <div style="margin: auto; width: 100%; height: 100vh;">
+
+      <!-- RECIPE HOLDER -->
+      <div style="margin: 3em 3em 0 3em;">
+
+        <!-- ERRORS SECTION -->
+
+        <div style="{! if(v.showError,'display:block','display:none')}">
+          <c:Toast aura:id="toast" isActive="{!v.showError}" message="{!v.errorMessage}" type="warning">
+            {!v.errorMessage}
+          </c:Toast>
+        </div>
+
+
+        <!-- END OF ERRORS SECTION-->
+
+        <!-- BLOCKING ERROR -->
+        <aura:if isTrue="{!v.unknownError}">
+          <div aura:id="unknownErrorMessage" id="unknonw" class="middle">
+            <lightning:icon iconName="utility:error" variant="error" size="large" />
+            <div class="slds-text-heading_small slds-m-top_x-small">There seems to be an issue with creating your trial org. Please contact <a href="mailto: support@desk.com">support@desk.com</a></div>
+          </div>
+        </aura:if>
+        <!-- BLOCKING ERROR END -->
+
+        <!-- GRID START -->
+        <div class="slds-col slds-size_1-of-1 slds-p-around_medium" style="max-width:800px">
+          <div class="slds-grid">
+            <div class="slds-col slds-size_12-of-12 slds-show_small">
+              <!-- BREADCRUMBS -->
+              <div class="slds-m-bottom_large">
+                <nav role="navigation" aria-label="Breadcrumbs">
+                  <ol class="slds-breadcrumb slds-list_horizontal slds-wrap">
+                    <li class="slds-breadcrumb__item slds-text-title_caps"><a href="javascript:void(0);">Setup Recipes</a></li>
+                    <li class="slds-breadcrumb__item slds-text-title_caps"><a href="javascript:void(0);">Support Process</a></li>
+                    <!-- <li class="slds-breadcrumb__item slds-text-title_caps" style="padding-left:8px;padding-right:8px;">Step 1 of 3</li> -->
+                  </ol>
+                </nav>
+              </div>
+              <!-- END BREADCRUMBS -->
+
+              <!-- EXISTING ASSIGNMENT RULE -->
+              <aura:if isTrue="{! and(v.sectionDisplay.existing)}">
+                <aura:if isTrue="{!v.isProcessing == false}">
+                  <h1 class="slds-text-heading_large slds-m-bottom_medium slds-text-color_weak">You have an active assignment rule {!v.existingActiveAssignmentRule.fullName}</h1>
+                  <ul class="slds-list--dotted slds-text-color_weak slds-m-left_medium slds-m-bottom_xx-large">
+                    <aura:if isTrue="{! not(v.existingActiveAssignmentRule.advancedModel)}">
+                      <li class=" slds-text-heading_small slds-text-color_weak">The rule entries are listed here. To modify the rules click here</li>
+                      <aura:set attribute="else">
+                        <li class=" slds-text-heading_small slds-text-color_weak">You are using an advanced model. To view/modify the rule entries click here</li>
+                      </aura:set>
+                    </aura:if>
+                    <li class="slds-text-heading_small slds-text-color_weak">To create a new rule click next below</li>
+                  </ul>
+                  <aura:if isTrue="{! not(v.existingActiveAssignmentRule.advancedModel)}">
+                    <fieldset class="slds-form-element slds-m-bottom_xx-large">
+                      <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white;row-height:3rem">
+                        <thead>
+                          <tr class="slds-text-title_caps">
+
+                            <th scope="col" class="slds-cell-wrap" style="width: 4rem;">
+                              <div title="Name">
+                                Order
+                              </div>
+                            </th>
+                            <th scope="col" class="slds-cell-wrap">
+                              <div class="slds-truncate" title="Criteria">
+                                Criteria
+                              </div>
+                            </th>
+                            <th scope="col" class="slds-cell-wrap" style="width: 12rem;">
+                              <div class="slds-truncate" title="Email">
+                                Assign To
+                              </div>
+                            </th>
+                            <th scope="col" style="width: 5rem;">
+                              <div class="slds-truncate" title="Profile">
+                                Notify
+                              </div>
+                            </th>
+
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <aura:iteration items="{!v.existingActiveAssignmentRule.ruleEntryList}" var="ruleEntry" indexVar="count">
+                            <tr class="slds-hint-parent">
+                              <td class="slds-cell-shrink" data-label="Select Row" style="text-align:center">
+                                {!count+1}
+                              </td>
+                              <td scope="row" data-label="Name" class="slds-cell-wrap">
+                                {!ruleEntry.displayText}
+                              </td>
+                              <td data-label="Email" class="slds-cell-wrap">
+                                <div class="slds-truncate" title="">{!ruleEntry.assignedToName}</div>
+                              </td>
+                              <td data-label="Profile" style="text-align:center">
+                                <lightning:input type="checkbox" label="" name="" checked="{! not(empty(ruleEntry.emailTemplate))}" onchange="" disabled="true" />
+                              </td>
+                            </tr>
+                          </aura:iteration>
+                        </tbody>
+                      </table>
+                    </fieldset>
+                  </aura:if>
+
+                  <aura:set attribute="else">
+                    <div class="slds-align_absolute-center slds-is-relative">
+                      <lightning:spinner variant="brand" size="small" /> <br /><br /><br />{!v.processingMessage}
+                    </div>
+                  </aura:set>
+                </aura:if>
+              </aura:if>
+              <!-- END OF EXISTING ASSIGNMENT RULE -->
+
+              <!-- MODEL SECTION -->
+              <aura:if isTrue="{! and(v.sectionDisplay.model)}">
+                <aura:if isTrue="{!v.isProcessing == false}">
+                  <h1 class="slds-text-heading_large slds-m-bottom_medium slds-text-color_weak">Choose the models that you would like to use to assign cases</h1>
+                  <fieldset class="slds-form-element slds-m-bottom_xx-large">
+                    <lightning:input aura:id="model1" type="checkbox" label="Assign all new cases to a user or queue" name="" checked="{!v.model.model1}" onchange="" disabled="false" />
+                    <lightning:input aura:id="model2" type="checkbox" label="Assign all new cases to a user or queue based on channel" name="" checked="{!v.model.model2}" onchange="" disabled="false" />
+                  </fieldset>
+                  <aura:set attribute="else">
+                    <div class="slds-align_absolute-center slds-is-relative">
+                      <lightning:spinner variant="brand" size="small" /> <br /><br /><br />{!v.processingMessage}
+                    </div>
+                  </aura:set>
+                </aura:if>
+              </aura:if>
+              <!-- END OF MODEL SECTION -->
+
+              <!-- MODEL1 SECTION (Assign to all a user or queue -->
+              <aura:if isTrue="{! and(v.sectionDisplay.model1)}">
+                <aura:if isTrue="{!v.isProcessing == false}">
+                  <h1 class="slds-text-heading_large slds-m-bottom_medium slds-text-color_weak">Choose the user or queue you would like to assign all your cases to</h1>
+                  <fieldset class="slds-form-element slds-m-bottom_xx-large">
+                    <lightning:input aura:id="model1" type="checkbox" label="Assign all new cases to a user or queue" name="" checked="{!v.model.model1}" onchange="" disabled="false" />
+                    <lightning:input aura:id="model2" type="checkbox" label="Assign all new cases to a user or queue based on channel" name="" checked="{!v.model.model2}" onchange="" disabled="false" />
+                  </fieldset>
+                  <aura:set attribute="else">
+                    <div class="slds-align_absolute-center slds-is-relative">
+                      <lightning:spinner variant="brand" size="small" /> <br /><br /><br />{!v.processingMessage}
+                    </div>
+                  </aura:set>
+                </aura:if>
+              </aura:if>
+              <!-- END OF MODEL1 SECTION -->
+
+
+
+
+
+
+
+
+              <!-- COMMON BUTTONS -->
+              <!-- <aura:if isTrue="{! and(v.isInitialising == false, v.unknownError == false)}"></aura:if> -->
+              <footer class="slds-m-top_x-large" style="{! and(v.isProcessing == false, v.unknownError == false) ? 'display:block' : 'display:none' }">
+
+                <lightning:button aura:id="backButton" variant="neutral" label="Back" onclick="{!c.back}" disabled="false" class="wide-button" />
+                <lightning:button aura:id="nextButton" variant="neutral" label="Next >" onclick="{!c.next}" disabled="false" class="wide-button" />
+              </footer>
+
+              <!-- END OF COMMON BUTTONS -->
+
+            </div>
+
+          </div>
+
+        </div>
+        <!-- GRID START END -->
+
+      </div>
+      <!-- END RECIPE HOLDER -->
+
+
+    </div>
+    <!-- END CONTENT TEST HOLDER -->
+
+  </body>
+
+</aura:component>

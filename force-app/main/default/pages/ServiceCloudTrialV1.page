@@ -1,0 +1,146 @@
+<apex:page sidebar="false" showHeader="false"  >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Desk to Service Cloud</title>
+    <apex:includeLightning />
+    <apex:slds />
+    <script>
+     $Lightning.use("c:TrialSignUpApp", function() {
+         $Lightning.createComponent("c:TrialSignUp",
+            {vfHost: document.domain},
+            "signupForm",
+            function(cmp) {
+                
+            }
+         );
+     });
+      
+    var lexOrigin = "https://desktoservice--dev--c.cs21.visual.force.com";
+    window.addEventListener("message", function(event) {
+        if (event.origin !== lexOrigin) {
+            // Not the expected origin: reject message!
+            return;
+        }
+        // Handle message
+        console.log(event.data);
+    }, false);
+    </script>
+    <style>
+        .slds-form-element__label {
+                font-size: 14px !important;
+        }
+        
+        .larger {
+            font-size: 30px !important;
+            font-family: Salesforce Sans;
+            font-weight: 400 !important;
+        }
+        
+        .arrow {
+            background: #122a39;
+            width: 30px;
+            height: 30px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-left: -15px;
+            margin-top: -15px;
+            transform: rotate(45deg);
+        }
+        
+    </style>
+      
+  </head>
+  <body class="slds-scope desk" style="margin: 0; padding: 0;" height="100%">
+    
+    <!-- ARROW -->
+    <div class="arrow slds-show_medium"></div>
+    
+    <!-- OVERALL RESPONSIVE BG --> 
+    <div class="slds-grid slds-wrap" style="background: url({!URLFOR($Resource.TrialSignup, 'bg2.png')}) repeat 20px 87px; height: 100%; overflow: hidden;">
+      
+      <!-- LEFT HAND SIDE CONTENT 50% -->
+      <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12">
+
+            
+            <!-- WELCOME TEXT AND IMAGE -->
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-1 slds-large-size_1-of-1 slds-m-top_xx-large slds-p-right_xx-large slds-p-left_xx-large">
+              <h1 class="slds-text-heading_large slds-text-align_center slds-text-color_inverse slds-p-top_xx-large larger">
+                  We've created a special trial just for Desk customers migrating to Service Cloud<br/><br/>
+                  <!-- IMAC DISPLAY IMAGE -->
+                  <div class="slds-p-right_xx-large slds-p-left_xx-large"> 
+                    <img class="slds-text-align_center slds-show_medium" src="{! $Resource.TrialSignup}/macbook.png" alt="Service Cloud" />
+                  </div>
+              </h1>
+            </div>
+            
+                        
+            <!-- FEATURE LIST -->
+
+            
+            <div class="slds-text-heading_small slds-text-align_center slds-p-bottom_medium slds-p-right_xx-large slds-p-left_xx-large slds-m-top_x-large slds-text-color_inverse">
+            <ul>
+                <li class="slds-p-bottom_x-small">
+                    <strong>Sample macros</strong> to help you get started with macros quickly
+                </li>
+                <li class="slds-p-bottom_x-small">
+                    A best practice layout providing a quick <strong>360-degree view of the customer</strong>
+                </li>
+                <li class="slds-p-bottom_x-small">
+                    See who is viewing a case with a custom <strong>Case Presence</strong> component
+                </li>
+                <li class="slds-p-bottom_x-small">
+                Customized <strong>case actions</strong> for making quick updates to any case
+                </li>
+                <li class="slds-p-bottom_x-small">
+                <strong>Auto Contact (Customer)</strong> creation based on new customer email cases
+                </li>
+                <li class="slds-p-bottom_x-small">
+                Pre-built <strong>Service Dashboard and Reports</strong> for Support Managers
+                </li>
+            </ul>
+            </div>
+      </div>
+      <!-- END LEFT HAND SIDE -->
+      
+      
+      
+      
+      
+      
+      
+      
+      <!-- RIGHT HAND SIDE CONTENT 50% -->
+      
+      <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12" style="background: #F4F6F9;min-height: 100vh">
+          
+            <!-- SERVIVE CLOUD LOGO -->
+            <div class="slds-size_4-of-12 slds-medium-size_4-of-12 slds-large-size_4-of-12 slds-m-bottom_large slds-m-top_large slds-align_absolute-center" style="height: 5rem;">
+                <img class="slds-text-align_center" src="{! $Resource.TrialSignup}/Salesforce-Service-Cloud-Logo.png" alt="Service Cloud" />
+            </div>
+            
+             <!-- TRIAL INTRO TEXT 
+            <h1 class="slds-text-heading_large slds-text-align_center slds-p-bottom_x-small slds-p-top_medium slds-p-right_xx-large slds-p-left_xx-large">Start your custom Service Cloud trial</h1>
+            <p class="slds-text-heading_medium slds-text-align_center slds-text-color_weak slds-p-bottom_medium slds-p-right_x-large slds-p-left_x-large">All the Desk.com features you love, ready to use directly in Service Cloud</p>
+            -->
+             <!-- FORM BOX STARTS -->
+            <div id="signupForm" class="slds-box slds-m-around_xx-large slds-theme_default">
+                
+                
+                
+            
+            </div>
+            <!-- END FORM BOX -->
+            
+        </div>
+        <!-- END RIGHT HAND SIDE CONTENT -->
+      
+      </div>
+      <!-- END OVERALL RESPONSIVE BG -->
+    
+
+  </body>
+</apex:page>

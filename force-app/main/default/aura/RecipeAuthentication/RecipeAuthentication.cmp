@@ -55,20 +55,20 @@
                             
 							<aura:set attribute="else">
 							<!-- FORM STARTS -->
-							<div class="slds-col slds-size_1-of-1">                               
-									
-				    
-							    <div class="slds-grid slds-wrap">
-										<div class="slds-col slds-size_12-of-12">
-											<lightning:input aura:id="deskEndpoint" type="text" label="Desk.com Endpoint" name="endpoint" value="{!v.deskEndpoint}" placeholder="https://sitename.desk.com" required="true"
-                                                                   pattern="^https:\/\/[^\/]+?$"
-                                                                   messageWhenPatternMismatch="The format expected is https://sitename.desk.com"
-                                                                   />
-										</div>
-										 
-						    	</div>
-				
-						    </div>
+                                <div class="slds-col slds-size_1-of-1">                               
+                                        
+                        
+                                    <div class="slds-grid slds-wrap">
+                                            <div class="slds-col slds-size_12-of-12">
+                                                <lightning:input aura:id="deskEndpoint" type="text" label="Desk.com Endpoint" name="endpoint" value="{!v.deskEndpoint}" placeholder="https://sitename.desk.com" required="true"
+                                                                       pattern="^https:\/\/[^\/]+?$"
+                                                                       messageWhenPatternMismatch="The format expected is https://sitename.desk.com"
+                                                                       />
+                                            </div>
+                                             
+                                    </div>
+                    
+                                </div>
                             </aura:set>
                             </aura:if>
 							<!-- FORM ENDS -->

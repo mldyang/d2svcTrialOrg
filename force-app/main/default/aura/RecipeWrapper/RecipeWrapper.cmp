@@ -10,7 +10,7 @@
                    
                 </div>
                 <div class="slds-media__body" >
-                    <h1 class="slds-page-header__title slds-truncate slds-align-middle" title="Setup Recipes" >Setup Recipes</h1>
+                    <h1 id="SetupRecipesTitle" class="slds-page-header__title slds-truncate slds-align-middle" title="Setup Recipes" >Setup Recipes</h1>
                     <p class="slds-text-color_weak" style="font-family: Salesforce Sans;">Move your setup from Desk to Service Cloud </p>
                 </div>
             </div>

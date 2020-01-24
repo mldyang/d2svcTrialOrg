@@ -62,7 +62,6 @@
                             </form>
                             <h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak">Watch the video instructions to setup a community in Service Cloud.</h1>
                              <ul class="slds-list--dotted slds-text-color_weak slds-m-left_medium slds-m-bottom_xx-large">
-                                 <li class=" slds-text-heading_small slds-text-color_weak">The equivalent of Support Center in Desk is Community in Service Cloud.</li>
                                  <li class=" slds-text-heading_small slds-text-color_weak">Click <ui:outputURL value="#" click="{!c.customizeLink}" label="here"/> to go to Service Setup Home.</li>
                              </ul>
                             <iframe width="780" height="439" src="https://www.youtube.com/embed/DbrSI_I_5kw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>

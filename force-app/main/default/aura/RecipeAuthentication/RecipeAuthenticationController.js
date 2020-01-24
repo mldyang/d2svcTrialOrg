@@ -11,11 +11,11 @@
 			helper.checkIfAuthenticated(cmp,event,helper);
             history.pushState({
                 id: 'Setup Recipes Dev3'
-            }, 'Setup Recipes', 'https://desktosvc.secure.force.com/trial/setuprecipes');
+            }, 'Setup Recipes', 'https://dev3-desktosvc.cs26.force.com/trial/setuprecipes');
         }else if (helper.getGetParameter('recordIdentifier')){
             cmp.set('v.authInProgress',true);
             sessionStorage.setItem('oauthRecordIdentifier',helper.getGetParameter('recordIdentifier'));
-            window.location.replace('https://desktosvc.secure.force.com/trial/setuprecipes');
+            window.location.replace('https://dev3-desktosvc.cs26.force.com/trial/setuprecipes');
             //cmp.set('v.oauthRecordIdentifier',helper.getGetParameter('recordIdentifier'));
             //helper.checkIfAuthenticated(cmp,event,helper);
         }else if (helper.getGetParameter('instance')){

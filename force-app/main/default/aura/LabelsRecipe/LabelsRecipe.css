@@ -1,0 +1,12 @@
+.THIS .slds-table_fixed-layout .slds-cell-shrink:first-child{
+    text-align: left;
+    padding-left: 0.5rem;
+}
+
+.THIS .profile .slds-form-element__label{
+    display: none;
+}
+
+.THIS .slds-form-element__label{
+    font-family: 'Salesforce Sans',Arial,sans-serif;
+}

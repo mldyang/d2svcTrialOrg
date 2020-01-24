@@ -1,0 +1,14 @@
+/*
+ * Copyright (c) 2017, Salesforce.com, inc.
+ * All rights reserved.
+ * Licensed under the BSD 3-Clause license.
+ * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
+
+.THIS .slds-input-has-icon_left-right .slds-combobox__input {
+  padding-left: 2.25rem;
+}
+
+.THIS .slds-listbox {
+  margin-bottom: 5rem;
+}

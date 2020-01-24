@@ -63,7 +63,7 @@
                             <form aura:id="frontdoor-form" target="_blank" method="POST" action="{! v.sfUrl + '/secur/frontdoor.jsp'}">
                                 <input type="hidden" name="sid"
                                        value="{!v.sfSessionId}" />
-                                <input type="hidden" name="retURL" 
+                                <input aura:id="retURL" type="hidden" name="retURL" 
                                        value="{!'lightning/o/Case'}" /> 
                             </form>
                             <h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak">Watch the three steps to migrate your data using the migration tool: Authenticate, Map, Migrate.</h1>

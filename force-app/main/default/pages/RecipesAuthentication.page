@@ -1,0 +1,50 @@
+<apex:page sidebar="false" showHeader="false"  >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Desk to Service Cloud</title>
+    <apex:includeLightning />
+    <apex:slds />
+    <script>
+       $Lightning.use("c:RecipesAuthenticationApp", function() {
+         $Lightning.createComponent("c:RecipeAuthentication",
+            {},
+            "SetupRecipeContainer",
+            function(cmp) {
+                
+            }
+         );
+     });
+      
+    var lexOrigin = "https://desktoservice--dev--c.cs21.visual.force.com";
+    window.addEventListener("message", function(event) {
+        if (event.origin !== lexOrigin) {
+            // Not the expected origin: reject message!
+            return;
+        }
+        // Handle message
+        console.log(event.data);
+    }, false);
+    </script>
+    <style>
+        
+        
+        .larger {
+            font-size: 30px !important;
+            font-family: Salesforce Sans;
+            font-weight: 400 !important;
+        }
+        
+        
+    </style>
+      
+  </head>
+  <body id="SetupRecipeContainer" class="slds-scope desk" style="margin: 0; padding: 0;" height="100%">
+    
+    
+    
+
+  </body>
+</apex:page>

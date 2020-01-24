@@ -46,7 +46,6 @@
             ? document.referrer
             : document.location.href;
         var mydomain = orgUrl.substring(orgUrl.indexOf('://')+3, orgUrl.indexOf('.'));
-        var baseUrl = 'https://desktosvc.secure.force.com/trial';
        if(orgId){       
        	   Visualforce.remoting.Manager.invokeAction(
                '{!$RemoteAction.TrialOnboardingController.checkIfVCAllowed}',              
@@ -57,6 +56,7 @@
                function(result,event){
                    if(event.status){
                        console.log('result: ',result);
+                       var baseUrl = 'https://dev3-desktosvc.cs26.force.com/trial'; 
                        if(result){
                            window.location.replace(baseUrl + '/trialonboardingV2?days='+trialDays+'&createdDate='+createdDate+'&orgId='+orgId+'&mydomain='+mydomain);
                        }else{
@@ -66,8 +66,6 @@
                },
                {escape: true}
        	   );
-        }else{
-           window.location.replace(baseUrl + '/trialonboardingV1?days='+trialDays+'&createdDate='+createdDate+'&orgId='+orgId+'&mydomain='+mydomain); 
         }
         
    }, false);

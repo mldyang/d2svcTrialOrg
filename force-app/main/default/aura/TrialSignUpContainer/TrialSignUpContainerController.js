@@ -2,7 +2,7 @@
 	doneRendering : function(cmp, event, helper) {
 		
 	},
-    
+   
     handleTrialCreatedEvent: function(cmp, event, helper) {
         var isVCAllowed = event.getParam("isVCAllowed");
         if(!isVCAllowed){
@@ -25,6 +25,8 @@
                 cmp.find('trialSignUpVirtualConsultantLeft').set('v.isActive',true);
                 cmp.set('v.showSpinner',false)
             }), 1500) 
-        }   
+        }
+        
+        
     }
 })

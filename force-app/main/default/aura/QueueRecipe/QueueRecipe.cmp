@@ -76,7 +76,7 @@
                             <aura:if isTrue="{! v.sectionDisplay.deskGroups}">
                                 <aura:if isTrue="{!v.isProcessing == false}">
                                     <h1 class="slds-text-heading_large slds-m-bottom_medium slds-text-color_weak ">Select the groups from Desk you would like to create in Service cloud</h1>
-                                    <ul class="slds-list--dotted slds-text-color_weak slds-m-left_medium slds-m-bottom_xx-large">
+                                    <ul class="slds-list--dotted slds-text-color_weak slds-m-left_medium slds-m-bottom_x-large">
                                   		<li aura:id="auto-response-sf-from-email" class="slds-text-heading_small slds-text-color_weak">Groups will be created as Queues in Service Cloud.</li>
                                     	<li class="slds-text-heading_small slds-text-color_weak">Desk groups that already exist in Service Cloud are shown with their checkbox disabled.</li>
                                         <li class="slds-text-heading_small slds-text-color_weak">Adding groups as Queues to Service Cloud will not affect your existing Desk functioning.</li>

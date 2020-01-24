@@ -23,7 +23,6 @@ global class TrialOnboardingController {
         
         String deskSiteId;
         String AOVBand;
-        String deskEndpoint;
         String trialSignUpId;
         List<Trial_SignUp__c> tsList = [select id, Desk_Endpoint__c, created_Org__c, Desk_Site_Id__c from Trial_Signup__c where 
                                         mydomain__c = :myDomain and 
@@ -40,7 +39,6 @@ global class TrialOnboardingController {
                 if(deskSiteId == null){
                     deskSiteId = ts.Desk_Site_Id__c;
                 }
-                deskEndpoint = ts.Desk_Endpoint__c;
                 trialSignUpId = ts.Id;
             }
             if(!hasOrgId){
@@ -48,6 +46,7 @@ global class TrialOnboardingController {
                 tsToUpdate.created_Org__c = sfOrgId;
                 update tsToUpdate;
             }
+            
         }
         
         
@@ -97,7 +96,7 @@ global class TrialOnboardingController {
                 }else{
                     Recipe_Allow_List__c ral = new Recipe_Allow_List__c(
                 							orgId__c = sfOrgId,
-                        				Trial_SignUp__c = trialSignUpId
+                        			trial_SignUp__c = trialSignUpId
                     						);
                  	insert ral;
                     return true;

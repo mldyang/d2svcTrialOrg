@@ -30,14 +30,14 @@ public class RecipeOauth {
  		
     Map<String,String> parameters = new Map<String,String>();
     //parameters.put('oauth_callback', EncodingUtil.urlEncode(URL.getSalesforceBaseUrl().toExternalForm() + '/apex/CompleteAuth?endPoint='+endPoint, 'UTF-8'));
-    parameters.put('oauth_callback', EncodingUtil.urlEncode('https://desktosvc.secure.force.com/trial/RecipeCompleteAuth?recordIdentifier='+recordIdentifier, 'UTF-8'));
+    parameters.put('oauth_callback', EncodingUtil.urlEncode('https://dev3-desktosvc.cs26.force.com/trial/RecipeCompleteAuth?recordIdentifier='+recordIdentifier, 'UTF-8'));
     parameters.put('oauth_consumer_key', consumerKey);
     parameters.put('oauth_nonce', nonce);
     parameters.put('oauth_signature_method', 'HMAC-SHA1');
     parameters.put('oauth_timestamp', timestamp);
     parameters.put('oauth_version', '1.0');
       
-      System.debug('URL: '+EncodingUtil.urlEncode('https://desktosvc.secure.force.com/trial/RecipeCompleteAuth?recordIdentifier='+recordIdentifier, 'UTF-8'));
+      System.debug('URL: '+EncodingUtil.urlEncode('https://dev3-desktosvc.cs26.force.com/trial/RecipeCompleteAuth?recordIdentifier='+recordIdentifier, 'UTF-8'));
 
     //callbackUrl = EncodingUtil.urlEncode('https://'+ApexPages.currentPage().getHeaders().get('Host')+ Page.CompleteAuth.getUrl(),'UTF-8');
 	System.debug('Pos A.3');
@@ -51,7 +51,7 @@ public class RecipeOauth {
         		 
     String signature = generateSignature(req, consumerSecret, '', parameters);
 		//String body = 'oauth_callback=' + URL.getSalesforceBaseUrl().toExternalForm() + '/apex/CompleteAuth?endPoint='+endPoint + '&';
-		String body = 'oauth_callback=' + 'https://desktosvc.secure.force.com/trial/RecipeCompleteAuth?recordIdentifier='+recordIdentifier + '&';
+		String body = 'oauth_callback=' + 'https://dev3-desktosvc.cs26.force.com/trial/RecipeCompleteAuth?recordIdentifier='+recordIdentifier + '&';
 		body += 'oauth_consumer_key=' + consumerKey + '&';
 		body += 'oauth_nonce=' + nonce + '&';
 		body += 'oauth_signature_method=HMAC-SHA1&';

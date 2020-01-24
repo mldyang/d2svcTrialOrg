@@ -7,7 +7,7 @@ public with sharing class AuthController {
     DeskOAuth oa = new DeskOAuth();
     String trialSignUpId = ApexPages.currentPage().getParameters().get('trialSignUpId');
     String deskSiteName = ApexPages.currentPage().getParameters().get('deskSiteName');
-    System.debug('DeskSiteName: '+deskSiteName);
+    System.debug('DeskSiteNames: '+deskSiteName);
     Boolean remoteSiteResult = ToolingClient.createRemoteSiteSetting(Helper.parseEndPoint(deskSiteName), deskSiteName , 'Created for Trial Sign Up');
       if(remoteSiteResult){
           authUrl = oa.startAuthorization(trialSignUpId, deskSiteName);
@@ -22,6 +22,7 @@ public with sharing class AuthController {
       }
       return new PageReference('javascript: "window.close()"');
   }
+	
     
   public PageReference completeAuthorization() {
     String token = ApexPages.currentPage().getParameters().get('oauth_token');

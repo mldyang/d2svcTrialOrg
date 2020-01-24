@@ -2,15 +2,21 @@ public class ToolingClient {
     
     //private static final string host = 'https://scmt.herokuapp.com';
     private static final string host = 'https://desk2svc-recipe.herokuapp.com';
-    private static final String API_URL = 'https://desktoservice.my.salesforce.com/services/Soap/u/41.0/' + UserInfo.getOrganizationId();
-	public static final String TOOLING_URL = URL.getSalesforceBaseUrl().toExternalForm() + '/services/data/v41.0/tooling';
+    public static final String TOOLING_URL = URL.getSalesforceBaseUrl().toExternalForm() + '/services/data/v41.0/tooling';
+   
+    //The URL.getSalesforceBaseUrl().toExternalForm() is having issues in heroku server show as https://dev2-desktosvc.cs21.force.com which is odd
+    //Debug log is showing https://desktoservice--dev2.cs21.my.salesforce.com
     
+    //private static final String API_URL = URL.getSalesforceBaseUrl().toExternalForm() + '/services/Soap/u/43.0/' + UserInfo.getOrganizationId();
+    private static final String API_URL = 'https://desktoservice--dev3.cs26.my.salesforce.com' + '/services/Soap/u/43.0/' + UserInfo.getOrganizationId();
+
     private String recordIdentifier;
     private String salesforce_endpoint;
     private String TOOLING_URL_CUST;
     private String access_token;
     private static ToolingClient instance;
     private String userId;
+    
     
     private ToolingClient(){
         
@@ -58,9 +64,7 @@ public class ToolingClient {
    */
   public static Boolean createRemoteSiteSetting(String fullName, String url, String description) {
     try {
-        
-      System.debug('RemoteSiteSetting Before: '+ '{"fullName":"' + fullName + '","url":"' + url + '","description":"' + description + '"}');  
-        
+        System.debug('RemoteSiteSetting fullname: '+fullName+', API_URL: '+API_URL);
       HttpResponse res = SimpleHttpClient.post(host + '/meta/remotesite')
                                         .salesforce(API_URL, Helper.getSessionId())
                                         .body('{"fullName":"' + fullName + '","url":"' + url + '","description":"' + description + '"}')
@@ -96,7 +100,7 @@ public class ToolingClient {
 
     return false;
   }
-    
+
     public String getDebugLevel(){
 		String debugLevelId;
 		String toExec = 'Select id, developerName from DebugLevel';
@@ -250,4 +254,19 @@ public class ToolingClient {
       Map<String, Object> m = (Map<String, Object>) JSON.deserializeUntyped(jString);
       return (String) m.get('sessionId');
   }
+    
+    
+    
+    /*public static void test(){
+        try {
+          HttpResponse res = SimpleHttpClient.get(TOOLING_URL + '/serviceTemplates/orgShape')
+                                            .auth('Bearer '+Helper.getSessionId())
+                                            .compressed(false)
+                                            .send();
+            System.debug('test Res: '+res.getBody());
+           
+        } catch (System.CalloutException ex) {
+           System.debug('exception: '+ex.getMessage());
+        }
+    }*/
 }

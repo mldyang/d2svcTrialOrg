@@ -7,7 +7,7 @@
     <aura:attribute name="customFields" type="Boolean" default="false"/>
     <aura:attribute name="isD2SVCOrg" type="Boolean" default="true"/>
     <aura:attribute name="showError" type="Boolean" default="false" />
-    <aura:attribute name="oauthRecordIdentifier" type="String" default="bw8u3Xm81547509012512"/>
+    <aura:attribute name="oauthRecordIdentifier" type="String" />
     <aura:attribute name="errorMessage" type="String" />
     <aura:attribute name="processingMessage" type="String" default="Loading ..." />
     <aura:attribute name="isProcessing" type="Boolean" default="false" />
@@ -574,8 +574,7 @@
                                 <!-- CONTENT TITLE -->
                                 <h2 class="slds-text-heading_medium">Support Center</h2>
                                 <!-- CONTNET BYLINE -->
-                                <p class="slds-text-color_weak slds-m-bottom_large">Setup your customer facing Support Center</p>
-                                
+                                <p class="slds-text-color_weak slds-m-bottom_large">Setup your customer facing Support Center</p>                                
                                 <!-- ACTION ITEMS HOLDER // COPY FROM HERE TO "END ACTION ITEMS HOLDER" AND PASTE BELOW TO MAKE A SECOND ROW OF ICONS  -->
                                 <div class="slds-grid slds-m-top_small">
                                     

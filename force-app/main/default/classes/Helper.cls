@@ -1,11 +1,11 @@
 public class Helper {
     
-    private static string client_id = '3MVG9CEn_O3jvv0wj46UeBbZOG54FlWrivruQbVhwcdUteFi9ni0DQWF15a26k497XXAm8p_F.A21wGDNxmLX ';
-    private static string client_secret = '7921753268483970843';
+    private static string client_id = '3MVG9bx.kiqxiA6YCm6j54YBhlmnto0C695bJVTiZsRHLXxxbytF8cqzLFyFQiX_losWLbEyS_EvtRkLJZ3nF';
+    private static string client_secret = '1989100364669403936';
     
     public static string getSessionId() {
         System.debug('grant_type=refresh_token&refresh_token='+Label.refresh_token+'&client_id='+client_id+'&client_secret='+client_secret);
-        HttpResponse res = SimpleHttpClient.post('https://login.salesforce.com/services/oauth2/token')
+        HttpResponse res = SimpleHttpClient.post('https://test.salesforce.com/services/oauth2/token')
             							.header('Content-Type','application/x-www-form-urlencoded')
                                         .body('grant_type=refresh_token&refresh_token='+Label.refresh_token+'&client_id='+client_id+'&client_secret='+client_secret)
                                         .compressed(false)
@@ -22,8 +22,16 @@ public class Helper {
     
     }
     
-    public static string parseEndPoint(String endPoint){
-       return 'x'+endPoint.replace('-','_').replace('https://','').replace('.','_').replace('/','_').replace('\\','_').left(40);
+     public static string parseEndPoint(String endPoint){
+         String revisedEndpoint = endPoint.replace('-','_').replace('https://','').replace('.','_').replace('/','_').replace('\\','_').left(40);
+         if(revisedEndpoint.endswith('_')){
+             revisedEndpoint = revisedEndpoint.removeEnd('_');
+         }
+         if(revisedEndpoint.contains('__')){
+             revisedEndpoint = revisedEndpoint.replace('__','');
+         }
+       return revisedEndpoint;
+         
     }
     
     public static Boolean validateEmail(String email) {

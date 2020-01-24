@@ -1,0 +1,47 @@
+<aura:component >
+    <div class="demo-only" style="height: 10rem;">
+   		<div class="slds-form-element">
+    	<label class="slds-form-element__label" for="combobox-unique-id-2">Search</label>
+   		<div class="slds-form-element__control">
+    		<div class="slds-combobox_container slds-has-inline-listbox slds-has-input-focus">
+   				<div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-is-open" aria-expanded="true" aria-haspopup="listbox" role="combobox">
+    				<div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none">
+                        <input type="text" class="slds-input slds-combobox__input" id="combobox-unique-id-2" aria-autocomplete="list" aria-controls="listbox-unique-id" autocomplete="off" role="textbox" placeholder="Search Salesforce" />
+                        <lightning:icon iconName="utility:search" variant="success" size="x-small" class="slds-icon_container slds-icon-utility-search slds-input__icon slds-input__icon_right"/> 
+                    </div>
+    				<div id="listbox-unique-id" role="listbox">
+
+    					<ul class="slds-listbox slds-listbox_vertical slds-dropdown slds-dropdown_fluid" role="optgroup" aria-label="Main">
+                            <li role="presentation" class="slds-listbox__item">
+    							<div id="listbox-option-unique-id-01" class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta" role="option">
+    								<span class="slds-media__figure">
+	                                    <lightning:icon iconName="standard:account" variant="success" size="small" class="slds-icon_container slds-icon-standard-account"/> 
+                                    </span>
+   									<span class="slds-media__body">
+                                        <span class="slds-listbox__option-text slds-listbox__option-text_entity">Acme</span>
+                                        <span class="slds-listbox__option-meta slds-listbox__option-meta_entity">Account • San Francisco</span>
+                                    </span>
+                            	</div>
+                            </li>
+                            <li role="presentation" class="slds-listbox__item">
+    							<div id="listbox-option-unique-id-01" class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta" role="option">
+    								<span class="slds-media__figure">
+	                                    <lightning:icon iconName="standard:account" variant="success" size="small" class="slds-icon_container slds-icon-standard-account"/> 
+                                    </span>
+   									<span class="slds-media__body">
+                                        <span class="slds-listbox__option-text slds-listbox__option-text_entity">Bcme</span>
+                                        <span class="slds-listbox__option-meta slds-listbox__option-meta_entity">Account • San Francisco</span>
+                                    </span>
+                            	</div>
+                            </li>
+    					</ul>
+                        
+                        
+    				</div>
+    			</div>
+    		</div>
+    	</div>
+    </div>
+	</div>
+	
+</aura:component>

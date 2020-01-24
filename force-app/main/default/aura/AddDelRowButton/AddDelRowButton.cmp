@@ -1,0 +1,22 @@
+<aura:component>
+    
+    <fieldset class="slds-form-element">
+    	<div class="slds-form-element__control">
+    		<div class="slds-radio_button-group">
+    			<span class="slds-button slds-radio_button">
+    				<input type="radio" name="radio" id="monday" value="monday" disabled="" />
+    				<label class="slds-radio_button__label" for="monday">
+    					<span class="slds-radio_faux">Add</span>
+   					</label>
+    			</span>
+    			<span class="slds-button slds-radio_button" style="cursor: default" >
+                    <input type="radio" name="radio" id="tuesday" value="tuesday" disabled="" />
+                    <label class="slds-radio_button__label" for="tuesday" style="color:grey">
+                    <span class="slds-radio_faux" style="cursor: default">Del</span>
+                    </label>
+    			</span>
+
+            </div>
+        </div>
+	</fieldset>
+</aura:component>

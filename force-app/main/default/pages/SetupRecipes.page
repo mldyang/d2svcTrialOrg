@@ -1,46 +1,14 @@
-<apex:page sidebar="false" showHeader="false" >
+<apex:page sidebar="false" showHeader="false"  controller="SetupRecipesController" docType="html-5.0" standardStylesheets="false">
 
   <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+   
+      <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1"/>
     <title>Desk to Service Cloud</title>
     <apex:includeLightning />
     <apex:slds />
-    <script type="text/javascript" src="https://cs21.salesforce.com/canvas/sdk/js/42.0/canvas-all.js"></script>  
+
     <script>
-      /* $Lightning.use("c:RecipesApp", function() {
-         $Lightning.createComponent("c:RecipeWrapper",
-            {},
-            "SetupRecipeContainer",
-            function(cmp) {
-                
-            }
-         );
-     });
-      
-    function callback(msg) {
-       if (msg.status !== 200) {
-          alert("Error: " + msg.status);
-          console.log(msg);
-          return;
-       }
-       
-       alert("Payload: ", msg.payload);
-    }
-    
-    Sfdc.canvas(function() {
-    	var ctxlink = Sfdc.canvas.byId("ctxlink");
-        var client = Sfdc.canvas.oauth.client();
-    	ctxlink.onclick=function() {
-           Sfdc.canvas.client.ctx(callback, client);
-        };
-    });*/
-
-
-
-      
-    $Lightning.use("c:RecipesApp", function() {
+       $Lightning.use("c:RecipesApp", function() {
          $Lightning.createComponent("c:RecipeAuthentication",
             {},
             "SetupRecipeContainer",
@@ -49,16 +17,7 @@
             }
          );
      });
-      
-    var lexOrigin = "https://desktoservice.cs21.visual.force.com";
-    window.addEventListener("message", function(event) {
-        if (event.origin !== lexOrigin) {
-            // Not the expected origin: reject message!
-            return;
-        }
-        // Handle message
-        console.log(event.data);
-    }, false);
+    
     </script>
     <style>
         
@@ -73,15 +32,9 @@
     </style>
       
   </head>
-    <!-- <h2>
-          {! $CurrentPage.parameters.signed_request } 
-        {! $CurrentPage.parameters._sfdc_canvas_authvalue}
-        {! $CurrentPage.URL}
-        Hi2
-      </h2>
-    <a id="ctxlink" href="#">Get Context</a> -->
-  <body class="slds-scope desk" style="margin: 0; padding: 0;" height="100%">
-  	<div id="SetupRecipeContainer">
+    
+  <body   style="margin: 0; padding: 0;" height="100%">
+      <div id="SetupRecipeContainer">
           
       </div>
     
@@ -97,9 +50,6 @@
           
       </iframe> 
 	</div>
-      
-    
-    
-
+	
   </body>
 </apex:page>

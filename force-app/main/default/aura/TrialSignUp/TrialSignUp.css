@@ -1,0 +1,17 @@
+.THIS .slds-required {
+    display: none
+}
+
+.THIS .slds-input {
+
+}
+
+
+.THIS .slds-form-element__row .slds-form-element.slds-size_1-of-2 {
+    padding-right: .25rem;
+}
+
+.THIS .slds-form-element__row .slds-form-element.slds-size_1-of-2:last-child {
+    padding-left: .25rem;
+    margin-left: 0;
+}

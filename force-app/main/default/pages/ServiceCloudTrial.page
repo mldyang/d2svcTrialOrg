@@ -57,8 +57,7 @@
   <body id="trialSignUpContainer" class="slds-scope desk" style="margin: 0; padding: 0;" height="100%">
     
     
-        <!-- Google Analytics recommends adding the component at the bottom of the page to avoid increasing page load time. -->
-    <site:googleAnalyticsTracking />
+    
 
   </body>
 </apex:page>

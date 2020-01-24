@@ -1,0 +1,215 @@
+<aura:component controller="CaseAssignmentByRuleRecipeController">
+    <aura:attribute name="oauthRecordIdentifier" type="String" access="public" default="30tEKnEO1545421068529"/>
+    
+    <aura:attribute name="users" type="List" access="public"/>    
+    <aura:attribute name="queues" type="List" access="public"/>
+    <aura:attribute type="List" name="existingEmailToCase" access="public" />
+    <aura:attribute type="List" name="newEmailToCase" access="public" />
+    <aura:attribute type="String" name="ruleName" access="public" />
+    
+    <!-- This map determines which steps are to be shown -->
+    <aura:attribute name="sectionDisplay" type="Map" default="{ model: true, channel: false, complete: false }" />
+    <aura:attribute name="completeHeader" type="String" default="Congrats! You have completed the Case assignment using rules Recipe."/>
+    
+    <aura:attribute name="modelSelected" type="Boolean" default="false"/>  
+    
+     <aura:attribute name="modelOptions" type="List" default="[
+    {'label': 'Assign new cases based on content of email', 'value': 'content'},
+    {'label': 'Assign new cases based on case or customer properties', 'value': 'entity'},                                                             
+    {'label': 'Assign new cases based on a combination of the models above', 'value': 'advanced'}
+    ]"/>
+    
+    <aura:attribute name="isProcessing" type="Boolean" default="false"/>
+    <aura:attribute name="processingMessage" type="String" default="Fetching queues from Desk &amp; Salesforce" />
+    
+    <aura:attribute name="showError" type="Boolean" default="false" />
+    <aura:attribute name="errorMessage" type="String" />
+    <aura:attribute name="unknownError" type="Boolean" default="false" />
+    <aura:attribute name="assignmentByChannel" type="List" default="false" />
+    
+    <aura:handler name="init" action="{!c.init}" value="{!this}" />
+    <aura:registerEvent name="recipeComponentChange" type="c:RecipeComponentChangeEvent"/>
+	
+    <body class="desk" style="background:white;">
+	  <!-- TEST CONTENT HOLDER -->
+	  <div style="margin: auto; width: 100%; height: 100vh;">
+          
+          <!-- RECIPE HOLDER -->
+          <div style="margin: 3em 3em 0 3em;">
+              
+              <!-- ERRORS SECTION -->
+
+                    <div style="{! if(v.showError,'display:block','display:none')}">
+                         <c:Toast aura:id="toast" isActive="{!v.showError}" message="{!v.errorMessage}" type="warning">
+                            {!v.errorMessage}
+                        </c:Toast> 
+                    </div>
+                    
+
+              <!-- END OF ERRORS SECTION-->
+              
+              <!-- BLOCKING ERROR -->    
+              <aura:if isTrue="{!v.unknownError}">
+                  
+                  <div aura:id="unknownErrorMessage" id="unknonw" class="middle" >
+                      
+                      <lightning:icon iconName="utility:error" variant="error" size="large"/>
+                       
+                      
+                      <div class="slds-text-heading_small slds-m-top_x-small">There seems to be an issue with creating your trial org. Please contact <a href = "mailto: support@desk.com">support@desk.com</a></div>
+                  </div>
+                  
+              </aura:if>
+              <!-- BLOCKING ERROR END -->
+              
+              <!-- GRID START -->
+              <div class="slds-col slds-size_1-of-1 slds-p-around_medium" style="max-width:800px">
+                  
+                  <div class="slds-grid">
+                      
+                      <div class="slds-col slds-size_12-of-12 slds-show_small">
+                          
+                          <!-- BREADCRUMBS -->
+                          <div class="slds-m-bottom_large">
+                              <nav role="navigation" aria-label="Breadcrumbs">
+                                  <ol class="slds-breadcrumb slds-list_horizontal slds-wrap">
+                                      <li class="slds-breadcrumb__item slds-text-title_caps"><a href="javascript:void(0);">Setup Recipes</a></li>
+                                      <li class="slds-breadcrumb__item slds-text-title_caps"><a href="javascript:void(0);">Case Assignment By Rules</a></li>
+                                      <!-- <li class="slds-breadcrumb__item slds-text-title_caps" style="padding-left:8px;padding-right:8px;">Step 1 of 3</li> -->
+                                  </ol>
+                              </nav>
+                          </div>
+                          <!-- END BREADCRUMBS -->
+        
+                        <!-- MODEL -->
+                        <aura:if isTrue="{! and(v.sectionDisplay.model, v.unknownError == false)}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_xx-large slds-text-color_weak">What's the model that you would like to use for assigning cases?</h1>
+                                   <fieldset class="slds-form-element slds-m-left_small slds-m-bottom_xx-large">
+                                       <lightning:input aura:id="modelCommon" type="radio" label="Assign new cases based on channel" name="red" checked="{! v.modelSelected}" onchange="" disabled="{!v.existingEmailToCase.length == 0}"/>
+                                       <lightning:radioGroup aura:id="mygroup"
+                                            name="radioButtonGroup"
+                                            label=""
+                                            options="{! v.modelOptions }"
+                                            value=""                                                     
+                                            disabled="true" />
+                                        
+                                </fieldset>
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF MODEL SECTION -->
+                          
+                        <!-- CHANNEL BASED ASSIGNMENT SECTION -->
+                        <aura:if isTrue="{! v.sectionDisplay.channel}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_xx-large slds-text-color_weak ">
+                                    Select the User/Queue you would like to assign to for your channel</h1>
+                                <!-- <div class="slds-text-heading_small slds-text-color_weak slds-m-bottom_xx-large" style="font-family:SalesforceSans-Light">
+                                    {!v.createQueuesSubHeading}
+                                </div> -->
+                                <fieldset class="slds-form-element slds-m-bottom_xx-large">
+	                                 <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white;">
+                                   <thead>
+                                      <tr class="slds-text-title_caps" >
+                                         <th scope="col" class="slds-cell-wrap" >
+                                            <div  title="Name">
+                                               CHANNEL
+                                            </div>
+                                         </th>
+                                         <th scope="col" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="Developer Name">
+                                               ASSIGN TO USER
+                                            </div>
+                                         </th>
+                                          <th scope="col" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="Developer Name">
+                                               ASSIGN TO QUEUE
+                                            </div>
+                                         </th>  
+                                      </tr>
+                                   </thead>
+                                   <tbody>
+                                     <aura:iteration items="{!v.newEmailToCase}" var="email" indexVar="count"> 
+                                      		<tr class="slds-hint-parent">
+                                          <td class="slds-cell-shrink" data-label="Select Row">
+                                               {!email.email}
+                                          </td>
+                                         <td scope="row" data-label="Name" class="slds-cell-wrap" >
+                                           <lightning:select name="{! concat('userAssignedTo',count)}" label="" value="{!email.caseOwner}" onchange="{!c.channelUserSelected}" class="profile" disabled="{!email.caseOwnerType == 'Queue'}">
+                                                 <option value="">Choose</option>
+                                                 <aura:iteration items="{!v.users}" var="user">
+                                                     <option text="{!user.name}" value="{!user.sfUsername}" selected="{! user.sfUsername == email.caseOwner}"/>
+                                                 </aura:iteration>
+                                             </lightning:select>
+                                         </td>
+                                         <td data-label="Assign to Queue" class="slds-cell-wrap">
+                                             <lightning:select name="{! concat('queueAssignedTo',count)}" label="" value="{!email.caseOwner}" onchange="{!c.channelQueueSelected}" class="profile" disabled="{!email.caseOwnerType == 'User'}">
+                                                 <option value="">Choose</option>
+                                                 <aura:iteration items="{!v.queues}" var="queue">
+                                                     <option text="{!queue.name}" value="{!queue.sfDeveloperName}" selected="{! queue.sfDeveloperName == email.caseOwner}"/>
+                                                 </aura:iteration>
+                                             </lightning:select>
+                                         </td> 
+                                      </tr>
+                                       </aura:iteration>	
+                                   </tbody>
+                            	</table>
+                            	</fieldset>
+                           	<aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                            
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF CHANNEL BASED ASSIGNMENT SECTION -->
+                          
+                        <!-- COMPLETE SECTION -->
+                        <aura:if isTrue="{! v.sectionDisplay.complete}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak ">{!v.completeHeader}</h1>
+                           	<aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                            
+                            </aura:if>
+                        </aura:if>
+                        <!-- COMPLETE SECTION -->  
+                          
+                        <!-- COMMON BUTTONS -->
+                        <!-- <aura:if isTrue="{! and(v.isInitialising == false, v.unknownError == false)}"></aura:if> -->
+                        <footer class="slds-m-top_x-large" style="{! and(v.isProcessing == false, v.unknownError == false) ? 'display:block' : 'display:none' }">
+                         	
+                            <lightning:button aura:id="backButton" variant="neutral" label="Back" onclick="{!c.back}" disabled="false" class="wide-button"/>
+                            <lightning:button aura:id="nextButton" variant="neutral" label="Next >" onclick="{!c.next}" disabled="false" class="wide-button"/>
+                        </footer> 
+                        
+                        <!-- END OF COMMON BUTTONS -->
+                          
+                        </div>
+											    
+			    	</div>
+	
+			    </div>
+			    <!-- GRID START END -->
+		  		
+			</div>
+			<!-- END RECIPE HOLDER -->
+
+			
+	  </div>
+	  <!-- END CONTENT TEST HOLDER -->
+    
+    </body>  
+    
+
+	
+</aura:component>

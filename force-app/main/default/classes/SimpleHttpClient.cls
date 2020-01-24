@@ -19,6 +19,23 @@ public class SimpleHttpClient {
   public static SimpleHttpClient get(String endpoint) {
     return new SimpleHttpClient().request('GET', endpoint);
   }
+  
+  
+    
+ /* public static SimpleHttpClient params(Map<String, Object> params) {
+    if (this.req.getMethod() == 'DELETE') {
+        return this;
+    }
+    // if or post or patch
+    if (this.req.getMethod() == 'GET') {
+      // create url params form param map
+      this.req.setEndpoint(this.req.getEndpoint() + '?' + queryParams(params));
+    } else {
+        
+    }
+    
+    return this;
+  }*/
 
   public static SimpleHttpClient post(String endpoint) {
     return new SimpleHttpClient().request('POST', endpoint);
@@ -63,6 +80,7 @@ public class SimpleHttpClient {
   private SimpleHttpClient request(String method, String endpoint) {
     this.req.setMethod(method);
     this.req.setEndpoint(endpoint);
+    this.req.setTimeout(30 * 1000);
     return this;
   }
 }

@@ -1,0 +1,10 @@
+.THIS .wide-button{
+    width: 9em;
+    margin-right: 5px;
+}
+
+.THIS .wide-button-right{
+    width: 9em;
+    margin-right: 5px;
+    float: right;
+}

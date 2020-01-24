@@ -1,0 +1,93 @@
+<!--
+  ~ Copyright (c) 2017, Salesforce.com, Inc.
+  ~ All rights reserved.
+  ~ Licensed under the BSD 3-Clause license.
+  ~ For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+  -->
+
+<aura:component description="Lightning Design System Lookup Component">
+  <aura:attribute name="class" type="String" access="public" description="Additional CSS class for the container." />
+  <aura:attribute name="label" type="String" access="public" description="Label for the field." />
+  <aura:attribute name="iconName" type="String" access="public" description="Object icon name." default="custom:custom1" />
+  <aura:attribute name="value" type="Map" access="public" description="Field value." />
+  <aura:attribute name="required" type="Boolean" access="public" description="Is the field required?" default="false" />
+  <aura:attribute name="isRemovable" type="Boolean" access="public" description="Should the remove icon be shown." default="true" />
+  <aura:attribute name="name" type="String" access="public" description="The name of the lookup object." />
+  <aura:attribute name="noValueBody" type="Aura.Component[]" description="Body to render if there is no value set." />
+  <aura:attribute name="labelVar" type="String" access="public" description="Var to use to access the label. Defaults to `Name`." default="Name" />
+  <aura:attribute name="idVar" type="String" access="public" description="Var to use to access the id. Defaults to `Id`." default="Id" />
+  <aura:attribute name="iconVar" type="String" access="public" description="Var to use to access the icon name." />
+  <aura:attribute name="metaVar" type="String" access="public" description="Var to use to access the meta." />
+  <aura:attribute name="options" type="Object[]" access="public" description="An array of options to present." />
+  <aura:attribute name="openOnFocus" type="Boolean" access="public" description="Open the options on focus." />
+  <aura:attribute name="oldValue" type="Map" access="public" description="Field to map to." />
+  <aura:attribute name="clickToRemove" type="Boolean" access="public" description="If set to true, clicking anywhere in the selected field will remove the value." default="false" />
+  <aura:attribute name="placeholder" type="String" access="public" description="A placeholder for the field." />
+  <aura:attribute name="onchange" type="Aura.Action" access="public" description="Action to execute on value change." />
+
+  <aura:attribute name="privateValueLabel" type="String" access="private" />
+  <aura:attribute name="privateOptions" type="Array" access="private" />
+  <aura:attribute name="privateHasFocus" type="Boolean" access="private" default="false" />
+  <aura:attribute name="privateFocusedItem" type="Integer" access="private" default="0" />
+  <aura:attribute name="privateShowMenu" type="Boolean" access="private" default="false" />
+  <aura:attribute name="privateHasNoValueBody" type="Boolean" access="private" default="false" />
+  <aura:attribute name="privateIconName" type="String" access="private" />
+
+  <aura:handler name="init" action="{!c.init}" value="{!this}" />
+  <aura:handler name="change" value="{!v.value}" action="{!c.onValueChange}" />
+  <aura:handler name="change" value="{!v.options}" action="{!c.onOptionsChange}" />
+  <aura:handler name="change" value="{!v.iconName}" action="{!c.onIconChange}" />
+  <aura:handler name="change" value="{!v.privateHasFocus}" action="{!c.onChangeFocus}" />
+
+  <div class="{!'slds-form-element' + (v.class ? ' ' + v.class : '')}" id="{!globalId}" onchange="{!v.onchange}">
+    <label class="{!'slds-form-element__label' + (v.label ? '' : ' slds-hide')}" for="{!globalId + '-combobox'}">{!v.label}</label>
+    <div class="slds-form-element__control">
+      <div class="{!'slds-combobox_container slds-has-inline-listbox' + (v.privateHasFocus ? ' slds-has-input-focus' : '')}">
+        <div class="{!'slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click' + (v.privateHasFocus ? ' slds-is-open' : '')}" aria-expanded="false" aria-haspopup="listbox" role="combobox">
+          <aura:if isTrue="{!v.value}">
+            <!-- <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_left-right" role="none" onclick="{!c.unselectAnywhere}">
+              <lightning:icon iconName="{!v.privateIconName}" class="slds-combobox__input-entity-icon" size="small" /> -->
+            <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none" onclick="{!c.unselectAnywhere}">
+              <input type="text" aura:id="search-value" class="slds-input slds-combobox__input" id="{!globalId + '-combobox'}" aria-autocomplete="list" aria-controls="{!globalId + '-listbox'}" autocomplete="off" role="textbox" readonly="readonly" value="{!v.privateValueLabel}" />
+              <aura:if isTrue="{!v.isRemovable}">
+                <lightning:buttonIcon iconName="utility:close" alternativeText="Remove" class="slds-input__icon slds-input__icon_right" variant="bare" onclick="{!c.unselect}" />
+              </aura:if>
+            </div>
+            <aura:set attribute="else">
+              <aura:if isTrue="{!v.privateHasNoValueBody}">
+                {!v.noValueBody}
+                <aura:set attribute="else">
+                  <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none">
+                    <input type="text" aura:id="search-novalue" class="slds-input slds-combobox__input" id="{!globalId + '-combobox'}" aria-autocomplete="list" aria-controls="{!globalId + '-listbox'}" autocomplete="off" role="textbox" placeholder="{!v.placeholder}" onkeyup="{!c.onKeyUp}" onkeydown="{!c.onKeyDown}" onfocus="{!c.onFocus}" onblur="{!c.onBlur}" />
+                    <lightning:icon iconName="utility:search" class="slds-input__icon slds-input__icon_right" size="x-small" />
+                  </div>
+                </aura:set>
+              </aura:if>
+            </aura:set>
+          </aura:if>
+          <aura:if isTrue="{!v.privateShowMenu}">
+            <div id="{!globalId + '-listbox'}" role="listbox" style="z-index:5">
+              <ul class="slds-listbox slds-listbox_vertical slds-dropdown slds-dropdown_fluid" role="presentation">
+                <aura:iteration items="{!v.privateOptions}" var="item" indexVar="idx">
+                  <li role="presentation" class="slds-listbox__item" id="{!globalId + '-listbox-option-' + idx}" onmouseenter="{!c.onMouseEnter}" onmousedown="{!c.select}">
+                    <span class="{!'slds-media slds-listbox__option slds-listbox__option_entity' + (v.privateFocusedItem == idx ? ' slds-has-focus' : '') + (item.meta ? ' slds-listbox__option_has-meta' : '')}" role="option">
+                      <!--<span class="slds-media__figure">
+                        <lightning:icon iconName="{!item.icon}" size="small" />
+                      </span>-->
+                      <span class="slds-media__body">
+                        <span class="slds-listbox__option-text slds-listbox__option-text_entity">{!item.label}</span>
+                        <aura:if isTrue="{!item.meta}">
+                          <span class="slds-listbox__option-meta slds-listbox__option-meta_entity">{!item.meta}</span>
+                        </aura:if>
+                      </span>
+                    </span>
+                  </li>
+                </aura:iteration>
+              </ul>
+            </div>
+          </aura:if>
+        </div>
+      </div>
+    </div>
+  </div>
+</aura:component>

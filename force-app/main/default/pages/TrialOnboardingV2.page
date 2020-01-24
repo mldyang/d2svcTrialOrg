@@ -52,7 +52,7 @@
         else{
             var mydomain = getParamValue('mydomain');
             window.open(
-              'https://desktosvc.secure.force.com/trial/setuprecipes?instance='+mydomain,
+              'http://dev3-desktosvc.cs26.force.com/trial/setuprecipes?instance='+mydomain,
               '_blank',
             );
         }
@@ -151,7 +151,6 @@
     }, false);
     
     function logVC(vcEvent){
-        console.log('Logging VC Event: ',vcEvent);
         Visualforce.remoting.Manager.invokeAction(
            '{!$RemoteAction.TrialOnboardingController.logVC}',              
            getParamValue('orgId'),
