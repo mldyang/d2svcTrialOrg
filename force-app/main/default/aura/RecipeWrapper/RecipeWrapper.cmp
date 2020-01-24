@@ -1,0 +1,21 @@
+<aura:component >
+    <aura:handler name="init" action="{!c.init}" value="{!this}" /> 
+    <aura:handler name="recipeComponentChange" event="c:RecipeComponentChangeEvent" action="{!c.changeRecipeComponent}"/>
+    <aura:attribute name="oauthRecordIdentifier" type="String" access="public"/>
+    
+    <div aura:id='headerDiv' class="slds-page-header">
+            <div class="slds-media" style=" width: 800px;">
+                <div class="slds-media__figure">
+                    <lightning:icon iconName="standard:iot_orchestrations"  size="large"/>
+                   
+                </div>
+                <div class="slds-media__body" >
+                    <h1 class="slds-page-header__title slds-truncate slds-align-middle" title="Setup Recipes" >Setup Recipes</h1>
+                    <p class="slds-text-color_weak" style="font-family: Salesforce Sans;">Move your setup from Desk to Service Cloud </p>
+                </div>
+            </div>
+        </div>   
+    <div aura:id='recipeComponent'>
+   		 <c:RecipeList oauthRecordIdentifier="{!v.oauthRecordIdentifier}"/>
+    </div>    
+</aura:component>

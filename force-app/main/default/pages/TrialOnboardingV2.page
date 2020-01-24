@@ -1,0 +1,695 @@
+<apex:page controller="TrialOnboardingController" showHeader="false" sidebar="false" standardStylesheets="false" docType="html-5.0" >
+
+    <apex:slds />
+    
+    <script>
+    
+    var lexOrigin = "https://yourdomain-dev-ed.lightning.force.com";
+    var firstTimeRecipeUser = false;
+    
+    function sendToLC() {
+        var message = document.getElementById("message").value;
+        parent.postMessage(message, lexOrigin);
+    }
+    
+    function getParamValue(paramName)
+    {
+        var url = window.location.search.substring(1); //get rid of "?" in querystring
+        var qArray = url.split('&'); //get key-value pairs
+        for (var i = 0; i < qArray.length; i++) 
+        {
+            var pArr = qArray[i].split('='); //split key and value
+            if (pArr[0] == paramName) 
+                return pArr[1]; //return value
+        }
+    }
+    
+    function checkIfParamExists(paramName)
+    {
+        console.log('window url: ',window.location);
+        var url = window.location.search.substring(1); //get rid of "?" in querystring
+        var qArray = url.split('&'); //get key-value pairs
+        for (var i = 0; i < qArray.length; i++) 
+        {
+            var pArr = qArray[i].split('='); //split key and value
+            if (pArr[0] == paramName) 
+                return true; //return value
+        }
+        return false;
+    }
+    
+    function launchVC(){
+        /*var orgUrl = (window.location != window.parent.location)
+            ? document.referrer
+            : document.location.href;
+        console.log('orgUrl',orgUrl);*/
+        logVC('Start');
+        var sBrowser = detectBrowser();
+        if(sBrowser != "Google Chrome"){
+            document.getElementById('browser-modal').style.display = 'block';
+            return false;
+        }
+        else{
+            var mydomain = getParamValue('mydomain');
+            window.open(
+              'https://desktosvc.secure.force.com/trial/setuprecipes?instance='+mydomain,
+              '_blank',
+            );
+        }
+    }
+    
+    function closeBrowserModal(){
+        console.log('close browser modal');
+        document.getElementById('browser-modal').style.display = 'none';
+        console.log(document.getElementById('browser-modal').style.display);
+    }
+        
+    function detectBrowser(){
+        var sBrowser, sUsrAg = navigator.userAgent;
+
+        // The order matters here, and this may report false positives for unlisted browsers.
+        
+        if (sUsrAg.indexOf("Firefox") > -1) {
+          sBrowser = "Mozilla Firefox";
+          // "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"
+        } else if (sUsrAg.indexOf("Opera") > -1 || sUsrAg.indexOf("OPR") > -1) {
+          sBrowser = "Opera";
+          //"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 OPR/57.0.3098.106"
+        } else if (sUsrAg.indexOf("Trident") > -1) {
+          sBrowser = "Microsoft Internet Explorer";
+          // "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; .NET4.0C; .NET4.0E; Zoom 3.6.0; wbx 1.0.0; rv:11.0) like Gecko"
+        } else if (sUsrAg.indexOf("Edge") > -1) {
+          sBrowser = "Microsoft Edge";
+          // "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299"
+        } else if (sUsrAg.indexOf("Chrome") > -1) {
+          sBrowser = "Google Chrome";
+          // "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/66.0.3359.181 Chrome/66.0.3359.181 Safari/537.36"
+        } else if (sUsrAg.indexOf("Safari") > -1) {
+          sBrowser = "Apple Safari";
+          // "Mozilla/5.0 (iPhone; CPU iPhone OS 11_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.0 Mobile/15E148 Safari/604.1 980x1306"
+        } else {
+          sBrowser = "Unknown";
+        }
+        
+        return sBrowser;
+        
+        console.log('Browser: ',sBrowser);
+        
+        
+        return true;
+        
+    }
+        
+    document.addEventListener('DOMContentLoaded', function() {
+       console.log(window.location.protocol + "//" + window.location.host);
+       console.log('Trialonboarding V2 loaded');
+       var trialDays = getParamValue('days');
+       
+       if (trialDays == -1 || trialDays == null){
+           document.getElementById('trialdaysbar').style.display = 'none';
+       } else{
+           document.getElementById('trialdays').innerHTML = trialDays;
+       }
+       if(!checkIfParamExists('days')){
+         console.log('checking days');
+         document.getElementById('header').style.display = 'block'; 
+       }
+        
+       var createdDate = Date.parse(getParamValue('createdDate'));
+       var v1point5Date = new Date(Date.UTC(2018, 4, 3, 21, 0, 0, 0));
+       var v1point9point1Date = new Date(Date.UTC(2018, 7, 21, 0, 0, 0, 0));
+        //console.log(new Date(createdDate)," :: ",v1point9point1Date,createdDate >= v1point9point1Date);
+        
+        
+       if (createdDate == -1 || createdDate == null){
+           document.getElementById('MigrationToolsVideo-Large').src = 'https://www.youtube.com/embed/5m6PUy00mpU?enablejsapi=1&rel=0';
+           document.getElementById('MigrationToolsVideo-Small').src = 'https://www.youtube.com/embed/5m6PUy00mpU?enablejsapi=1&rel=0';
+       } else if (createdDate >= v1point5Date && createdDate < v1point9point1Date){
+           document.getElementById('MigrationToolsVideo-Large').src = 'https://www.youtube.com/embed/u6FkcFhyaXE?enablejsapi=1&rel=0';
+           document.getElementById('MigrationToolsVideo-Small').src = 'https://www.youtube.com/embed/u6FkcFhyaXE?enablejsapi=1&rel=0';
+       } else if (createdDate >= v1point9point1Date){
+           document.getElementById('MigrationToolsVideo-Large').src = 'https://www.youtube.com/embed/rxLF6WMxxi8?enablejsapi=1&rel=0';
+           document.getElementById('MigrationToolsVideo-Small').src = 'https://www.youtube.com/embed/rxLF6WMxxi8?enablejsapi=1&rel=0';
+       }
+        
+        logVC('Load');
+        /*Visualforce.remoting.Manager.invokeAction(
+           '{!$RemoteAction.TrialOnboardingController.checkIfFirstTime}',              
+           window.location.protocol + "//" + window.location.host,
+           function(result,event){
+               if(event.status){
+                   console.log('result: ',result);
+                   firstTimeRecipeUser = result;
+                   sessionStorage.setItem('firstTimeRecipeUser',result);
+               }
+           },
+           {escape: true}
+       );*/
+        
+        
+        
+    }, false);
+    
+    function logVC(vcEvent){
+        console.log('Logging VC Event: ',vcEvent);
+        Visualforce.remoting.Manager.invokeAction(
+           '{!$RemoteAction.TrialOnboardingController.logVC}',              
+           getParamValue('orgId'),
+           vcEvent,
+           detectBrowser(),
+           function(result,event){
+               if(event.status){
+                   console.log('result: ',result);
+               }
+           },
+           {escape: true}
+       );
+    }
+    
+    function showHideContent(element)
+    {
+        var contentId = element.id.substring(1);
+        
+        for (i = 1; i <= 5; i++) { 
+            if(i == contentId){
+                document.getElementById('R' + i).style.display = 'block';
+                document.getElementById('L' + i).classList.add("slds-theme_shade");
+     
+            }
+            else{
+                document.getElementById('R' + i).style.display = 'none';
+                document.getElementById('L' + i).classList.remove("slds-theme_shade");
+            }
+        }
+        
+        var iframeList = document.getElementsByTagName("iframe");
+        for (i = 0; i < iframeList.length; i++) { 
+            iframeList[i].contentWindow.postMessage('{"event":"command","func":"' + 'stopVideo' + '","args":""}', '*');   
+        }
+    }
+    
+    
+
+</script>
+    <style>
+    
+    .slds-scope .slds-page-header {
+    padding: 1rem;
+    border-bottom: 1px solid rgb(221, 219, 218);
+    border-radius: .25rem;
+    background: rgb(243, 242, 242);
+    background-clip: padding-box;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid rgb(221, 219, 218);
+}
+
+.slds-scope .slds-theme_shade, .slds-scope .slds-theme--shade {
+    background-color: rgb(243, 242, 242);
+}
+    
+    </style>
+    <body class="desk" style="background: #F5F6F8; ">
+                
+    
+    <!-- HEADER FOR ILLUSTRAITION OF WHAT THE PAGE WOULD LOOK LIKE -->
+    <div id="header" class="slds-page-header slds-m-bottom_medium slds-m-top_medium" style="display:none">
+      <div class="slds-media">
+        <div class="slds-media__figure">
+          <span class="slds-icon_container slds-icon-standard-opportunity" title="Description of icon when needed">
+            <svg class="slds-icon slds-page-header__icon" aria-hidden="true">
+              <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="assets/icons/standard-sprite/svg/symbols.svg#opportunity" />
+            </svg>
+          </span>
+        </div>
+        <div class="slds-media__body">
+          <h1 class="slds-page-header__title slds-truncate slds-align-middle" title="Trial Onboarding">Service Cloud Lightning Trial Onboarding</h1>
+          <p class="slds-text-body_small slds-line-height_reset">Your guide to successfully onboarding with your Service Cloud Trial</p>
+        </div>
+      </div>
+    </div>
+    <!-- HEADER ENDS -->
+    
+    
+    <!-- ONBOARDING APP STARTS -->
+    <div class="slds-box slds-theme_default" style="padding: 0;">
+        
+        
+        <div class="slds-grid">
+            <!-- LEFT COL -->
+            <div class="slds-col slds-size_1-of-3">
+                
+            <!-- LEFT LIST ITEMN START -->
+            <div id="L1" class="slds-col slds-size_1-of-1 slds-p-around_medium slds-border_bottom slds-theme_shade" style="cursor: pointer" onClick="showHideContent(this)">
+                
+                <div class="slds-grid">
+                    
+                    <div class="slds-col slds-size_1-of-8 slds-show_large">
+                        <!-- LIST ICON -->
+                        <span class="slds-avatar slds-avatar_circle">
+                            <abbr class="slds-avatar__initials slds-icon-standard-user" title="person name">1</abbr>
+                        </span>
+                        <!-- LIST ICON END -->
+                    </div>
+                    
+                    <div class="slds-col slds-size_7-of-8 slds-small-size_8-of-8 slds-medium-size_8-of-8 slds-large-size_7-of-8">
+                        <!-- LIST LINK -->
+                        <h2 class="slds-text-heading_medium slds-p-bottom_small">
+                            <a href="#link1">Move your setup from Desk to Service Cloud</a>
+                        </h2>
+                        <!-- LIST LINK END -->
+                        <!-- LIST BLURB -->
+                        <p class="slds-show_medium">
+                            Your Virtual Consultant will guide you through the process of setting up your Service Cloud.
+                        </p><br/>
+                        <!-- CTA BUTTON -->
+                        <!-- <button class="slds-button slds-button_neutral slds-align_absolute-center slds-m-top_small">Learn More</button> -->
+                        <!-- CTA BUTTON END -->
+                        <!-- LIST BLURB END -->
+                    </div>
+                </div>
+
+            </div>
+            <!-- LEFT LIST ITEM END --> 
+            
+            <!-- LEFT LIST ITEM START -->
+            <div id="L2" class="slds-col slds-size_1-of-1 slds-p-around_medium slds-border_bottom slds-border_right" style="cursor: pointer" onClick="showHideContent(this)">
+                
+                <div class="slds-grid">
+                    
+                    <div class="slds-col slds-size_1-of-8 slds-show_large">
+                        <!-- LIST ICON -->
+                        <span class="slds-avatar slds-avatar_circle">
+                            <abbr class="slds-avatar__initials slds-icon-standard-user" title="person name">2</abbr>
+                        </span>
+                        <!-- LIST ICON END -->
+                    </div>
+                    
+                    <div class="slds-col slds-size_7-of-8 slds-small-size_8-of-8 slds-medium-size_8-of-8 slds-large-size_7-of-8">
+                        <!-- LIST LINK -->
+                        <h2 class="slds-text-heading_medium slds-p-bottom_small">
+                            <a href="#link1">Introducing your Service Console</a>
+                        </h2>
+                        <!-- LIST LINK END -->
+                        <!-- LIST BLURB -->
+                        <p class="slds-show_medium">
+                            Watch the basics of navigating your Service Console. See how to access the menu and go to your first Case!
+                        </p><br/>
+                        <!-- CTA BUTTON -->
+                        <!-- <button class="slds-button slds-button_neutral slds-align_absolute-center slds-m-top_small">Watch Video</button> -->
+                        <!-- CTA BUTTON END -->
+                        <!-- LIST BLURB END -->
+                    </div>
+                </div>
+
+            </div>
+            <!-- LEFT LIST ITEM END -->
+            
+            <!-- LEFT LIST ITEMN START -->
+            <div id="L3" class="slds-col slds-size_1-of-1 slds-p-around_medium slds-border_bottom slds-border_right" style="cursor: pointer" onClick="showHideContent(this)">
+                
+                <div class="slds-grid">
+                    
+                    <div class="slds-col slds-size_1-of-8 slds-show_large">
+                        <!-- LIST ICON -->
+                        <span class="slds-avatar slds-avatar_circle">
+                            <abbr class="slds-avatar__initials slds-icon-standard-user" title="person name">3</abbr>
+                        </span>
+                        <!-- LIST ICON END -->
+                    </div>
+                    
+                    <div class="slds-col slds-size_7-of-8 slds-small-size_8-of-8 slds-medium-size_8-of-8 slds-large-size_7-of-8">
+                        <!-- LIST LINK -->
+                        <h2 class="slds-text-heading_medium slds-p-bottom_small">
+                            <a href="#link1">Resolving a Case in Service Cloud</a>
+                        </h2>
+                        <!-- LIST LINK END -->
+                        <!-- LIST BLURB -->
+                        <p class="slds-show_medium">
+                            View the video walkthrough of an entire Case Life-cycle in Service Cloud! Get an overview of Case Details Page.
+                        </p><br/>
+                        <!-- CTA BUTTON -->
+                        <!-- <button class="slds-button slds-button_neutral slds-align_absolute-center slds-m-top_small">Read More</button> -->
+                        <!-- CTA BUTTON END -->
+                        <!-- LIST BLURB END -->
+                    </div>
+                </div>
+
+            </div>
+            <!-- LEFT LIST ITEM END -->
+             
+            <!-- LEFT LIST ITEMN START -->
+            <div id="L4" class="slds-col slds-size_1-of-1 slds-p-around_medium slds-border_bottom slds-border_right" style="cursor: pointer" onClick="showHideContent(this)">
+                
+                <div class="slds-grid">
+                    
+                    <div class="slds-col slds-size_1-of-8 slds-show_large">
+                        <!-- LIST ICON -->
+                        <span class="slds-avatar slds-avatar_circle">
+                            <abbr class="slds-avatar__initials slds-icon-standard-user" title="person name">4</abbr>
+                        </span>
+                        <!-- LIST ICON END -->
+                    </div>
+                    
+                    <div class="slds-col slds-size_7-of-8 slds-small-size_8-of-8 slds-medium-size_8-of-8 slds-large-size_7-of-8">
+                        <!-- LIST LINK -->
+                        <h2 class="slds-text-heading_medium slds-p-bottom_small">
+                             <a href="#link1">Migrate Your Data: Desk to Service Cloud Data Migration tools</a>
+                        </h2>
+                        <!-- LIST LINK END -->
+                        <!-- LIST BLURB -->
+                        <p class="slds-show_medium">
+                            Your Trial Org has the Desk Case and Article migration tools pre-installed. See how you can use them to migrate your data.
+                        </p><br/>
+                        <!-- CTA BUTTON -->
+                        <!-- <button class="slds-button slds-button_neutral slds-align_absolute-center slds-m-top_small">Open the Guide</button> -->
+                        <!-- CTA BUTTON END -->
+                        <!-- LIST BLURB END -->
+                    </div>
+                </div>
+
+            </div>
+            <!-- LEFT LIST ITEM END -->
+                
+            <!-- LEFT LIST ITEMN START -->
+            <div id="L5" class="slds-col slds-size_1-of-1 slds-p-around_medium slds-border_bottom slds-border_right" style="cursor: pointer" onClick="showHideContent(this)">
+                
+                <div class="slds-grid">
+                    
+                    <div class="slds-col slds-size_1-of-8 slds-show_large">
+                        <!-- LIST ICON -->
+                        <span class="slds-avatar slds-avatar_circle">
+                            <abbr class="slds-avatar__initials slds-icon-standard-user" title="person name">5</abbr>
+                        </span>
+                        <!-- LIST ICON END -->
+                    </div>
+                    
+                    <div class="slds-col slds-size_7-of-8 slds-small-size_8-of-8 slds-medium-size_8-of-8 slds-large-size_7-of-8">
+                        <!-- LIST LINK -->
+                        <h2 class="slds-text-heading_medium slds-p-bottom_small">
+                             <a href="#link1">Trial Org Customizations: What's Pre-configured in your Special Trial</a>
+                        </h2>
+                        <!-- LIST LINK END -->
+                        <!-- LIST BLURB -->
+                        <p class="slds-show_medium">
+                            Learn more about the pre-built customizations in your trial. Download the workbook for a deeper dive.
+                        </p><br/>
+                        <!-- CTA BUTTON -->
+                        <!-- <button class="slds-button slds-button_neutral slds-align_absolute-center slds-m-top_small">Open the Guide</button> -->
+                        <!-- CTA BUTTON END -->
+                        <!-- LIST BLURB END -->
+                    </div>
+                </div>
+
+            </div>
+            <!-- LEFT LIST ITEM END -->
+    
+          </div>
+            <!-- LEFT COL END -->
+         
+          
+          <!-- RIGHT COL -->
+          <div class="slds-col slds-size_2-of-3 slds-theme_shade" style="position:relative">
+              
+            <!-- RIGHT CONTENT SECTION -->  
+              <div id="R1" class="onboarding-content" style="display:block;">
+                <!-- TEST CONTENT HOLDER -->
+                <div style="margin: auto; width: 1000px; margin-top: 100px;height: auto; overflow: hidden;">
+                      
+                    <!-- <h1 class="slds-text-heading_large slds-m-bottom_large slds-text-align_center">Select a Recipe Bundle</h1> -->
+                    
+
+                    <!-- BUNDLE GRID -->
+                    <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_medium">
+                      
+                        <div class="slds-col slds-size_4-of-12 slds-m-bottom_small"></div>
+                        <!-- BUNDLE ITEM -->    
+                        <div class="slds-col slds-size_4-of-12 slds-m-bottom_small">
+                        
+                        <div class="slds-box slds-theme_default add-bg slds-has-bottom-magnet" style="background: url({!$Resource.SetupRecipe}/SetupRecipe/bg.png) repeat">
+                            
+                            <!-- CENTRALIZE ICON COMBO -->
+                            <div class="slds-align_absolute-center" style="height: 10rem;">
+                                <span class="slds-avatar slds-avatar_circle slds-avatar_large" style="height:6rem;width:6rem;">
+                                  <img alt="Person name" src="{!$Resource.SetupRecipe}/SetupRecipe/avatar1.jpg" title="User avatar" />
+                                </span>
+                            </div>
+                            <!-- END CENTRALIZE ICON COMBO -->
+                            
+                        </div>
+                        <!-- BUNDLE TITLE BOX -->
+                        <div class="slds-col slds-box slds-theme_default slds-has-top-magnet">
+                            <!-- BUNDLE TITLE -->
+                            <div class="slds-align_absolute-center" style="height: 5rem;">
+                                    <h2 class="slds-text-heading_large slds-text-align_center">Virtual Consultant</h2>
+                            </div>
+                            <!-- CTA BUTTON -->
+                            <div class="slds-align_absolute-center" style="height: 2rem;">
+                                <a href="#" onclick="launchVC();return false;"><button class="slds-button slds-button_brand">Launch</button></a>
+                            </div>
+                        </div>
+                        <!-- END BUNDLE TITLE BOX -->
+            
+                    </div>
+                        <!-- BUNDLE ITEM END -->
+                    
+                    </div>
+                    <!-- END BUNDLE GRID -->
+
+                    <!-- CONTENT SECTION END -->
+                    </div>
+                    <!-- END CONTENT TEST HOLDER -->
+                	<img src="{!$Resource.SetupRecipe}/SetupRecipe/friends.png" style="position:absolute;left:0px;bottom:0px;opacity:0.5;"/>  
+            </div>
+            <!-- RIGHT CONTENT SECTION END -->   
+            
+            <!-- RIGHT CONTENT SECTION -->  
+            <div id="R2" class="onboarding-content" style="display:none;">
+                <!-- VIDEO LARGE HOLDER -->
+                <div class="slds-col slds-size_1-of-1 slds-show_large ">
+                    <iframe width="100%" height="534" src="https://www.youtube.com/embed/qCy0L1qTq1I?enablejsapi=1&rel=0" frameborder="0" allowfullscreen="true" enablejsapi="1"></iframe>
+                </div>
+                <!-- VIDEO LARGE HOLDER END -->
+                <!-- VIDEO SMALL HOLDER -->
+                <div class="slds-col slds-size_1-of-1 slds-hide_large">
+                    <iframe width="100%" height="534" src="https://www.youtube.com/embed/qCy0L1qTq1I?enablejsapi=1&rel=0" frameborder="0" allowfullscreen="true" enablejsapi="1"></iframe>
+                </div>
+                <!-- VIDEO SMALL HOLDER END -->
+                
+                
+                <!-- CONTENT TITLE -->
+                <div class="slds-col slds-size_1-of-1 slds-p-left_xx-large slds-p-right_xx-large slds-m-top_medium">
+                    <h1 class="slds-text-heading_large">Introducing your Service Console</h1>
+                </div>
+                <!-- CONTENT TITLE END -->
+                
+                <!-- CONTENT SECTION -->
+                <div class="slds-col slds-size_1-of-1">
+                    
+                    <div class="slds-theme_default slds-box slds-m-left_xx-large slds-m-right_xx-large slds-m-top_medium slds-m-bottom_medium">
+                        <p>1. Click on the arrow next to Cases on the navigation bar. The menu will show the key entities that you can acesss: Case, Account (Company in Desk), Contact (Customer in Desk), Reports, Dashboard. You can also see Trial Onboarding here, which will bring you back to this tab.</p><br/>
+                        <p>2. Select the Case. From the page, select All Cases List View. Click on Case number against 'Welcome to your first case on Servcie Cloud". This will take you to the Case View page.</p><br/>
+                        <p>3. Case Console page shows the 360 degree view to the left, the Case Path and Case feed in the middle, and knowledge articles, related list to the right.</p>
+                    </div>
+                    
+                </div>
+                <!-- CONTENT SECTION END -->
+                
+            </div>
+            <!-- RIGHT CONTENT SECTION END -->  
+              
+            <!-- RIGHT CONTENT SECTION -->  
+            <div id="R3" class="onboarding-content" style="display:none;">
+                <!-- VIDEO LARGE HOLDER -->
+                
+                <div class="slds-col slds-size_1-of-1 slds-show_large ">
+                    <iframe width="100%" height="534" src="https://www.youtube.com/embed/K8AbAtRhzwk?enablejsapi=1&rel=0" frameborder="0" allowfullscreen="true" enablejsapi="1"></iframe>
+                </div>
+                <!-- VIDEO LARGE HOLDER END -->
+                <!-- VIDEO SMALL HOLDER -->
+                <div class="slds-col slds-size_1-of-1 slds-hide_large">
+                    <iframe width="100%" height="534" src="https://www.youtube.com/embed/K8AbAtRhzwk?enablejsapi=1&rel=0" frameborder="0" allowfullscreen="true" enablejsapi="1"></iframe>
+                </div>
+                <!-- VIDEO SMALL HOLDER END -->
+                
+                
+                <!-- CONTENT TITLE -->
+                <div class="slds-col slds-size_1-of-1 slds-p-left_xx-large slds-p-right_xx-large slds-m-top_medium">
+                    <h1 class="slds-text-heading_large">Resolving a Case in Service Cloud</h1>
+                </div>
+                <!-- CONTENT TITLE END -->
+                
+                <!-- CONTENT SECTION -->
+                <div class="slds-col slds-size_1-of-1">
+                    
+                    <div class="slds-theme_default slds-box slds-m-left_xx-large slds-m-right_xx-large slds-m-top_medium slds-m-bottom_medium">
+                        <p>1. Select the Case menu, and from the Case views, select unresolved cases list view.</p><br/>
+                        <p>2. Go to the case details page by clicking the case number.</p><br/>
+                        <p>3. Use the Email Action to send a reply to the customer. You can also use a macro as shown in the video. Notice status automatically changes to Pending</p><br/>
+                    </div>
+                    
+                </div>
+                <!-- CONTENT SECTION END -->
+                
+            </div>
+            <!-- RIGHT CONTENT SECTION END -->  
+              
+            <!-- RIGHT CONTENT SECTION -->  
+            <div id="R4" class="onboarding-content" style="display:none;">
+                <!-- VIDEO LARGE HOLDER -->
+                
+                <div class="slds-col slds-size_1-of-1 slds-show_large ">
+                    <iframe id="MigrationToolsVideo-Large" width="100%" height="534" src="https://www.youtube.com/embed/5m6PUy00mpU?enablejsapi=1&rel=0" frameborder="0" allowfullscreen="true" enablejsapi="1"></iframe>
+                </div>
+                <!-- VIDEO LARGE HOLDER END -->
+                <!-- VIDEO SMALL HOLDER -->
+                <div class="slds-col slds-size_1-of-1 slds-hide_large">
+                    <iframe id="MigrationToolsVideo-Small" width="100%" height="534" src="https://www.youtube.com/embed/5m6PUy00mpU?enablejsapi=1&rel=0" frameborder="0" allowfullscreen="true" enablejsapi="1"></iframe>
+                </div>
+                <!-- VIDEO SMALL HOLDER END -->
+                
+                
+                <!-- CONTENT TITLE -->
+                <div class="slds-col slds-size_1-of-1 slds-p-left_xx-large slds-p-right_xx-large slds-m-top_medium">
+                    <h1 class="slds-text-heading_large">Migrating your Data: Desk to Service Cloud data migration tools</h1>
+                </div>
+                <!-- CONTENT TITLE END -->
+                
+                <!-- CONTENT SECTION -->
+                <div class="slds-col slds-size_1-of-1">
+                    
+                    <div class="slds-theme_default slds-box slds-m-left_xx-large slds-m-right_xx-large slds-m-top_medium slds-m-bottom_medium">
+                        <p>1. Click on the apps icon. From the modal window Select Desk Case Migration.</p>
+                        <p>2. From the wizard that loads, follow the instructions to migrate your data.</p>
+                        <p>3. Follow the same steps to launch the Desk Article Migration tools</p>
+                    </div>
+                    
+                </div>
+                <!-- CONTENT SECTION END -->
+                
+            </div>
+            <!-- RIGHT CONTENT SECTION END --> 
+              
+            <!-- RIGHT CONTENT SECTION -->  
+            <div id="R5" class="onboarding-content" style="display:none;">
+                <!-- VIDEO LARGE HOLDER -->
+                
+                <div class="slds-col slds-size_1-of-1 slds-show_large ">
+                    <iframe width="100%" height="534" src="https://www.youtube.com/embed/yEGY3UdaYgw?enablejsapi=1&rel=0" frameborder="0" allowfullscreen="true" enablejsapi="1"></iframe>
+                </div>
+                <!-- VIDEO LARGE HOLDER END -->
+                <!-- VIDEO SMALL HOLDER -->
+                <div class="slds-col slds-size_1-of-1 slds-hide_large">
+                    <iframe width="100%" height="534" src="https://www.youtube.com/embed/yEGY3UdaYgw?enablejsapi=1&rel=0" frameborder="0" allowfullscreen="true" enablejsapi="1"></iframe>
+                </div>
+                <!-- VIDEO SMALL HOLDER END -->
+                
+                
+                <!-- CONTENT TITLE -->
+              
+                <div class="slds-col slds-size_1-of-1 slds-p-left_xx-large slds-p-right_xx-large slds-m-top_medium">
+                    <h1 class="slds-text-heading_large">Trial Org Pre-configured Customizations</h1>
+                </div>
+                    
+                <!-- CONTENT TITLE END -->
+                
+                <!-- CONTENT SECTION -->
+                <div class="slds-col slds-size_1-of-1">
+                    
+                    <div class="slds-theme_default slds-box slds-m-left_xx-large slds-m-right_xx-large slds-m-top_medium slds-m-bottom_medium">
+                        <p><a href="http://sforce.co/2p8WLZy" target="_blank">Download</a> the workbook for a detailed breakdown of all the pre-configured components in your trial.</p>                    
+                    </div>
+                    
+                </div>
+                <!-- CONTENT SECTION END -->
+                
+            </div>
+            <!-- RIGHT CONTENT SECTION END --> 
+           
+            
+        </div>
+            <!-- RIGHT COL ENDS -->
+           
+        </div>  
+    </div>
+    <!-- ONBOARDING APP ENDS -->
+    
+    <!-- FIXED TRIAL BOX --> 
+    <!-- <div style="height: 180px;"> -->
+    <div id="trialdaysbar" style="height: 50px;">
+        <div class="slds-docked-form-footer slds-popover_walkthrough">
+        <!-- DAYS -->
+        <h2 id="trialdays" class="slds-text-heading_large slds-text-align_center slds-m-right_medium">
+            28 
+        </h2>
+        <!-- TEXT -->
+        <p class="slds-text-align_center slds-text-title_caps slds-m-right_medium slds-m-top_x-small">
+            days left on your trial
+        </p>
+        <a class="slds-text-body_regular slds-text-align_center slds-m-top_xx-small" style="color: white" onClick="window.open('https://support.desk.com/customer/portal/emails/new')">Switch Licenses to Service Cloud</a>    
+        <!-- CTA -->
+        <!-- <button type="button" class="slds-button slds-button_brand" onClick="window.open('https://support.desk.com/customer/portal/emails/new')">Switch Licenses to Service Cloud</button> -->
+            
+      </div>
+    </div>
+    <!-- FIXED TRIAL BOX END --> 
+        
+    <!-- Authentication Instructions Modal -->
+    <div id="authentication-modal" class="demo-only" style="height: 640px;display:none;">
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
+                        <svg class="slds-button__icon slds-button__icon_large" aria-hidden="false">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#close" />
+                        </svg>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Authentication Instructions</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium slds-text-align_center" id="modal-content-id-1">
+                    <p class="slds-m-bottom_medium">In the new tab that opens, authenticate Virtual Consultant, by clicking on 'Allow' as shown below.</p>
+                    <img src="{!$Resource.SetupRecipe}/SetupRecipe/AllowAccess.png" style="height:300px;"/>  
+                </div>
+                <footer class="slds-modal__footer slds-text-align_center">
+                    <button class="slds-button slds-button_neutral">OK</button>
+                    <!-- <button class="slds-button slds-button_brand">Save</button> -->
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </div>
+   <!-- Modal End -->
+        
+    <!-- Chrome Browser Recommended Modal -->
+    <div id="browser-modal" class="demo-only" style="height: 640px;display:none;">
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
+                        <svg class="slds-button__icon slds-button__icon_large" aria-hidden="false">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#close" />
+                        </svg>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Chrome Browser Recommended</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium slds-text-align_center" id="modal-content-id-1">
+                    <p class="slds-m-bottom_medium">Virtual Consultant has been tested to work in Chrome browser. We are working to support Firefox, Safari and Edge browsers.</p>
+                    <p>
+                        Please launch using Chrome browser.
+                    </p>
+                    <!-- <img src="{!$Resource.SetupRecipe}/SetupRecipe/AllowAccess.png" style="height:300px;"/>  -->
+                </div>
+                <footer class="slds-modal__footer slds-text-align_center">
+                    <button class="slds-button slds-button_neutral" onclick="closeBrowserModal()">OK</button>
+                    <!-- <button class="slds-button slds-button_brand">Save</button> -->
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </div>
+   <!-- Modal End -->    
+
+  </body>
+
+</apex:page>

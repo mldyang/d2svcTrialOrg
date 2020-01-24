@@ -1,0 +1,107 @@
+<aura:component controller="RecipeAuthenticationController" extends="c:RecipeBase">
+    <aura:attribute name="deskEndpoint" type="String" access="private"/>
+    <aura:attribute name="sfMyDomain" type="String" access="private"/>
+    <aura:attribute name="authorizedDesk" type="Boolean" access="private" default="false"/>
+    <aura:attribute name="authorizedSalesforce" type="Boolean" access="private" default="false"/>
+    <aura:attribute name="authInProgress" type="Boolean" access="private"/>
+    <aura:attribute name="oauthRecordIdentifier" type="String" access="public"/>
+    <aura:attribute name="showError" type="Boolean" default="false" />
+    <aura:attribute name="errorMessage" type="String" default="" />
+    <aura:handler name="init" action="{!c.init}" value="{!this}" />
+    <div aura:id="wrapper">
+    
+    <aura:if isTrue="{!v.authInProgress}">
+      <div class="slds-align_absolute-center">
+     	 <lightning:spinner aura:id="spinner" variant="brand"  size="medium"/>
+      </div>
+    </aura:if> 
+    
+    <!-- TEST CONTENT HOLDER -->
+	  <div style="margin: auto; width: 600px; margin-top: 100px; height: auto; overflow: hidden;">
+          <!-- ERRORS SECTION -->
+              <div style="{! if(v.showError,'display:block','display:none')}">
+                  <c:Toast aura:id="toast" isActive="{!v.showError}" message="{!v.errorMessage}" type="error">
+                      {!v.errorMessage}
+                  </c:Toast> 
+              </div>
+              <!-- END OF ERRORS SECTION-->
+		  
+		  <!-- HEADLINE TEXT -->
+		  <h1 class="slds-text-heading_large slds-m-bottom_xx-large slds-text-align_center">Desk to Service Cloud Setup Recipes</h1>
+		  <!-- HEADLINE TEXT END -->
+		  
+		  	<!-- RECIPE HOLDER -->
+		  	<div class="slds-grid slds-box slds-theme_default  slds-align_absolute-center box-shadow" style="width:400px;margin:auto;min-height:200px;background:rgba(224, 229, 238, 0.1);">
+			 
+		  		<!-- GRID START -->
+			    <div class="slds-col slds-size_1-of-1 slds-p-around_medium">
+
+				    <div class="slds-grid">
+					    
+					    <div class="slds-col slds-size_12-of-12 slds-show_small">
+                            
+                            <aura:if isTrue="{!v.authorizedDesk}">
+                                <!-- SIGNUP SUCCESS -->
+                                <div aura:id="signUpSuccessDiv" class="slds-align_absolute-center" style="height: 4rem;"  >
+                                    
+                                    <!-- <lightning:icon iconName="standard:task2" variant="warning" size="large"/>      -->	
+                                    <lightning:icon iconName="utility:success" variant="success" size="large"/> 
+                                    
+                                </div>
+                                <div class="slds-align_absolute-center" style="height: 2rem;">	
+                                    <p class="slds-text-heading_small slds-p-left_large slds-p-right_large slds-text-align_center">Successfully Authenticated with Desk</p>
+                                </div>
+                                <!-- SIGNUP SUCCESS END -->
+                            
+							<aura:set attribute="else">
+							<!-- FORM STARTS -->
+							<div class="slds-col slds-size_1-of-1">                               
+									
+				    
+							    <div class="slds-grid slds-wrap">
+										<div class="slds-col slds-size_12-of-12">
+											<lightning:input aura:id="deskEndpoint" type="text" label="Desk.com Endpoint" name="endpoint" value="{!v.deskEndpoint}" placeholder="https://sitename.desk.com" required="true"
+                                                                   pattern="^https:\/\/[^\/]+?$"
+                                                                   messageWhenPatternMismatch="The format expected is https://sitename.desk.com"
+                                                                   />
+										</div>
+										 
+						    	</div>
+				
+						    </div>
+                            </aura:set>
+                            </aura:if>
+							<!-- FORM ENDS -->
+							
+							<!-- ACTION BUTTONS -->
+							<footer class="slds-m-top_small">
+								<div class="slds-grid slds-grid_align-center" style="width:100%">
+								  <div class="slds-col" style="width:100%">
+								    <aura:if isTrue="{!v.authorizedDesk}">
+                                        <lightning:button variant="brand" class="slds-align_absolute-center slds-m-top_medium button-width" label="Authenticate with your Salesforce Admin Login >" onclick="{!c.authenticateSalesforce}" />
+                                        <aura:set attribute="else">
+                                            <lightning:button variant="brand" class="slds-align_absolute-center slds-m-top_medium button-width" label="Authenticate with your Desk Admin Login >" onclick="{!c.authenticateDesk}" />
+                                        </aura:set>
+                                      </aura:if>    
+                                      <!--  -->
+								  </div>
+								</div>
+		      				</footer>
+		      				<!-- ACTION BUTTONS END -->
+						
+					    </div>
+											    
+			    	</div>
+	
+			    </div>
+			    <!-- GRID START END -->
+		  		
+			</div>
+			<!-- END RECIPE HOLDER -->
+
+			
+	  </div>
+	  <!-- END CONTENT TEST HOLDER -->
+    </div>
+    
+</aura:component>

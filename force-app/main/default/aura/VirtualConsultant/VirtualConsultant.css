@@ -1,0 +1,133 @@
+.THIS .vc-main{
+    display: none;
+    -webkit-transition: opacity 500ms linear;
+    position: relative;
+}
+
+.THIS .vid-container {
+    width: 150px;
+	border-radius: 49.9%;
+    border: 1px solid rgb(107, 109, 112);
+    box-shadow: 1px 1px 1px 1px lightgrey;
+   	cursor: pointer;
+    position: absolute;
+    z-index: 9;   
+}
+
+
+.THIS .vid {
+    width: 150px;
+	border-radius: 49.9%;
+    border: 1px solid rgb(107, 109, 112);
+    /*box-shadow: 1px 1px 1px 1px lightgrey;*/
+   	cursor: pointer;
+}
+
+.THIS .play-button {
+    width: 40px;
+   	cursor: pointer;
+}
+
+.THIS .play-button-container {
+    z-index: 10;
+    position: absolute;
+    top: 55px;
+    left: 60px;
+    width: 40px;
+}
+
+.THIS .custom-seekbar
+{  
+  cursor: pointer;
+  height: 10px;
+  margin-bottom: 10px;
+  border: thin solid rgb(217, 219, 221);
+  overflow: hidden;
+  position: absolute;
+  width: 150px;
+  top: 160px;
+  left: 0px;
+  display: none;
+  border-radius: 25px;
+  z-index: 10;  
+}
+
+.THIS .custom-seekbar-span
+{
+  background-color: #F7F7F9;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  height: 10px;
+  width: 0px;
+  z-index: 10;  
+}
+
+.THIS .video-duration{
+  font-size:0.6rem;
+  position: absolute;
+  width: 150px;
+  top: 172px;
+  left: 0px;
+  text-align: right;
+  display:none;
+  z-index: 10;
+}
+
+.THIS .explainWrapper{
+    top: 150px;
+    left: 150px;
+    width: 800px;
+    position: absolute;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    min-height: 600px; 
+    z-index: 11;
+}
+
+.THIS .helpTrayHeader {
+    height: 39px;
+    background: #2E749C;
+    color: rgb(255, 255, 255);
+    padding: 0;
+    border-top-left-radius: .25rem;
+    border-top-right-radius: .25rem;
+
+}
+
+.THIS .helpTrayHeader .helpTrayTitle {
+    padding: 8px 20px 4px;
+    font-size: 14px;
+    font-weight: 200;
+    /* text-shadow: 0 0 4px #000; */
+}
+
+.THIS .helpTrayHeader .helpTrayHeaderDeckeledEdge {
+    height: 6px;
+    background: transparent url(/trial/resource/SetupRecipe/SetupRecipe/deckeled-edge.png) repeat-x; 
+    /* background: transparent url(/resource/SetupRecipe/SetupRecipe/deckeled-edge.png) repeat-x; */
+}
+
+.THIS .vc-explain{
+    position: absolute;
+    background: white;
+   	height: 560px;
+    z-index: 8;
+    display: inline-block;
+    width: 100%;
+    padding: 10px;
+}
+
+.THIS .modal-vid {
+    max-height: 580px;
+    max-width: 780px;
+    margin: auto;
+    display: none;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.THIS .show-modal {
+    opacity: 1;
+    -webkit-transition: opacity 500ms linear;
+}

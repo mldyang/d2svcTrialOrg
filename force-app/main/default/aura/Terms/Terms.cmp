@@ -1,0 +1,21 @@
+<aura:component >
+    <aura:attribute name="checked" type="Boolean" default="false" />
+    <aura:attribute name="id" type="String" default="none" required="true"/>
+    <aura:attribute name="showError" type="Boolean" default="false"/>
+    <aura:attribute name="errorMessage" type="String" default="nones"/>
+    
+    <div class="slds-form-element__control">
+        <span class="slds-checkbox">
+            <input type="checkbox" id="{!v.id}" name="red" value="" onchange="{!c.change}" checked="{!v.checked}" />
+            <label class="slds-checkbox__label" for="{!v.id}">
+                <span class="slds-checkbox--faux"></span>
+                <span class="slds-form-element__label">
+                    <span class="" >{!v.body}</span>
+                </span>
+            </label>
+            <aura:if isTrue="{!v.showError}">
+            	<div class="slds-text-color_error slds-form-element__help" role="alert">{!v.errorMessage}</div>
+            </aura:if>    
+        </span>
+    </div>
+</aura:component>

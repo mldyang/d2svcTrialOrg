@@ -1,0 +1,568 @@
+<aura:component controller="AutoResponseRecipeController" extends="c:RecipeBase">
+    
+    <aura:attribute name="oauthRecordIdentifier" type="String" access="public" default="bw8u3Xm81547509012512"/>
+    
+    <aura:attribute name="orgWideEmailAddresses" type="List" access="public"/>
+
+    <aura:attribute name="orgWideEmailAddressesUnverified" type="List" access="public"/>
+    <aura:attribute name="users" type="List" access="public"/>
+	<aura:attribute name="currentUser" type="List" access="public"/>
+    <aura:attribute name="singleModel" type="Object"/>    
+    
+    <!-- This map determines which steps are to be shown -->
+    <aura:attribute name="sectionDisplay" type="Map" default="{ existing: true, model: false, fromAddress: false, verify: false, reply:false, content: false, contentMultiple: false, complete: false }" />
+   
+    <!-- This map stores the links for VC videos -->
+    <aura:set attribute="vcVideos" value="{ existing: 'https://s3-us-west-1.amazonaws.com/desktosvc/Autoresponse/Existing_3.mp4', 
+                                          modelWithIntro: 'https://s3-us-west-1.amazonaws.com/desktosvc/Autoresponse/Model+-+With+Intro_3.mp4', 
+                                          modelWithoutIntro: 'https://s3-us-west-1.amazonaws.com/desktosvc/Autoresponse/Model+-+Without+Intro.mp4',	
+                                          fromAddressWithIntroWithoutExistingEmail: 'https://s3-us-west-1.amazonaws.com/desktosvc/Autoresponse/From+Address+with+Intro+without+Existing+Email.mp4',
+                                          fromAddressWithoutIntroWithoutExistingEmail: 'https://s3-us-west-1.amazonaws.com/desktosvc/Autoresponse/From+Address+without+Intro+without+Existing+Email.mp4', 	
+                                          fromAddressWithIntroWithExistingEmail: 'https://s3-us-west-1.amazonaws.com/desktosvc/Autoresponse/From+Address+with+Intro+with+Existing+Email.mp4',
+                                          fromAddressWithoutIntroWithExistingEmail: 'https://s3-us-west-1.amazonaws.com/desktosvc/Autoresponse/From+Address+without+Intro+with+Existing+Email.mp4', 	
+                                          verifyEmail: 'https://s3-us-west-1.amazonaws.com/desktosvc/Autoresponse/Verify+Email+V3.mp4',
+                                          verifyError: 'https://s3-us-west-1.amazonaws.com/desktosvc/Verify+Emails+-+Error+V3.mp4',
+                                          customerReply: 'https://s3-us-west-1.amazonaws.com/desktosvc/Autoresponse/Customer+Reply.mp4',
+                                          emailTemplateSingle: 'https://s3-us-west-1.amazonaws.com/desktosvc/Autoresponse/Email+Template+-+Single.mp4',
+                                          emailTemplateMultiple: 'https://s3-us-west-1.amazonaws.com/desktosvc/Autoresponse/Email+Template+-+Multiple.mp4',
+                                          complete: 'https://s3-us-west-1.amazonaws.com/desktosvc/Autoresponse/Complete+V2.mp4' }" />
+    
+    <aura:set attribute="highlightTimestampsMap" value="{ existing: { 11: 0, 12: ['customize-email-template','bottom'], 17 : 0, 25: ['nextButton-div','bottom',12]}, 
+                                                          modelWithIntro: { 12: 0, 13: ['modelCommon-span','bottom',-4], 19: 0, 22: ['modelCustomPerChannel-span','bottom',-4] },
+                                                          modelWithoutIntro: { 4: 0, 5: ['modelCommon-span','bottom',-4], 12: 0, 14: ['modelCustomPerChannel-span','bottom',-4] }, 
+                                                          fromAddressWithIntroWithoutExistingEmail: { 10: 0, 11: ['auto-response-sf-from-email','bottom'], 21: 0, 23: ['from-address-options','bottom',-22], 29: 0, 31: ['from-address-name','bottom',4], 37: 0, 39: ['from-address-options','bottom'], 49: 0 },
+                                                          fromAddressWithoutIntroWithoutExistingEmail: { 1: 0, 11: ['auto-response-sf-from-email','bottom'], 15: 0, 17: ['from-address-options','bottom',-22], 21: 0, 22: ['from-address-name','bottom',4], 27: 0, 30: ['from-address-options','bottom'], 39: 0 },
+                                                          fromAddressWithIntroWithExistingEmail: { 8: 0, 10: ['auto-response-sf-from-email','bottom'], 20: 0, 23: ['from-address-options','bottom',-44], 28: 0, 29: ['from-address-name','bottom',4], 34: 0, 37: ['from-address-options','bottom',-24], 43: 0, 45: ['from-address-options','bottom'], 51: 0 },
+                                                          fromAddressWithoutIntroWithExistingEmail: { 2: 0, 3: ['auto-response-sf-from-email','bottom'], 12: 0, 14: ['from-address-options','bottom',-44], 18: 0, 19: ['from-address-name','bottom',4], 25: 0, 27: ['from-address-options','bottom',-24], 34: 0, 37: ['from-address-options','bottom'], 42: 0 },	
+                                                          verifyEmail: { 16: ['emails-to-verify','left',-10] },
+                                                          verifyError: { },
+                                                          customerReply: { 4: ['customer-reply-options','left',-10], 8:0 },
+                                                          emailTemplateSingle: {3:0, 5: ['customize-url','bottom'], 9:0, 19: ['single-emailTemplate-img','bottom',-500,70], 30:0, 32: ['nextButton-div','bottom',12], 36:0},
+                                                          emailTemplateMultiple: {1: 'function', 2:0, 3: ['multiple-emailTemplates','left',-10], 8:0, 12: ['customize-email-template','bottom'], 17: 0, 24: 'function', 25: ['single-emailTemplate-img','bottom',-490,55], 40: 0, 42: ['nextButton-div','bottom',12], 45: 0},
+                                                          complete: { 1: 0, 2: ['channel','bottom'], 7 : 0, 8: ['email-services-address','bottom'], 15: 0	} }" />
+    
+    <aura:set attribute="vcModalVideos" value="{ verifyEmail: ['https://s3-us-west-1.amazonaws.com/desktosvc/Autoresponse/Verify+Email+Demo+without+Audio.mp4','https://s3-us-west-1.amazonaws.com/desktosvc/Autoresponse/Verify+Email+Demo+VC+V2.mp4','Verifying New Auto-response From Email'],
+                                                 complete: ['https://s3-us-west-1.amazonaws.com/desktosvc/Autoresponse/Test+Demo+No+Audio.mp4', 'https://s3-us-west-1.amazonaws.com/desktosvc/Autoresponse/Test+Demo+VC+V2.mp4','Testing Email Auto-response']
+                                               }" />
+    
+    <!-- This map stores the checkbox value of model options -->
+    <aura:attribute name="modelOptions" type="Map" default="{ common: false, businessHours: false, customPerChannel: false }" />
+    
+    <!-- This map determines which model options are to be shown -->
+    <aura:attribute name="toShowModelOptions" type="Map" default="{ common: true, businessHours: true, customPerChannel: false }" />
+    
+    <!-- Existing Email-to-case in Salesforce -->
+    <aura:attribute type="List" name="existingEmailToCase" access="public" />
+    
+    <aura:attribute type="Object" name="existingAutoresponse" access="public" />
+    
+    <aura:attribute type="Map" name="emailToVerify" default="{email: '' ,name: '' , verified: '', selected: ''}" access="public" />
+
+	<aura:attribute name="fromName" type="String" default="" />
+   	<aura:attribute name="fromEmail" type="String" default="" />
+    <aura:attribute name="fromEmailId" type="String" default="" />
+    <aura:attribute name="replyEmail" type="String" default="" />
+    <aura:attribute name="emailErrorMessage" type="String" default="" />
+    <aura:attribute name="noVerifiedEmail" type="Boolean" default="false" />
+
+    <aura:attribute name="isFetchingUsers" type="Boolean" default="false" />    
+    <aura:attribute name="isProcessingOrgWideAddress" type="Boolean" default="false" />
+    <aura:attribute name="processingMessage" type="String" default="Fetching existing email addresses" />
+    <aura:attribute name="isInitialising" type="Boolean" default="false" />
+    <aura:attribute name="isVerifying" type="Boolean" default="false" />
+    <aura:attribute name="isProcessing" type="Boolean" default="false" />
+    <aura:attribute name="isFetchingTemplate" type="Boolean" default="false" />
+    <aura:attribute name="verifyEmailSelected" type="Boolean" default="false" />
+    <aura:attribute name="caseOrigin" type="List"/>
+    <aura:attribute name="ruleName" type="String"/>
+    
+    <aura:attribute name="fromEmailOptions" type="List" default="[
+    {'label': 'Add a new from email address (verification required)', 'value': 'new'},
+    {'label': 'Choose an existing verified from Email address (cannot be any of your support emails)', 'value': 'existing'},                                                             
+    {'label': 'User your email (from the user record) as from address', 'value': 'user'}
+    ]"/>
+    <aura:attribute name="fromEmailSelectedOption" type="String" default="new"/>  
+    
+    <aura:attribute name="replyEmailOptions" type="List" default="[
+    {'label': 'No, the auto-response email will only serve as a notification.', 'value': 'no'},
+    {'label': 'Yes, the customer should be able reply to the auto-response', 'value': 'yes'}                                                           
+    ]"/>
+    <aura:attribute name="replyEmailSelectedOption" type="String" default="yes"/>  
+    
+    <aura:attribute name="templateInfo" type="Map" default="{Id: '', SessionId: '', url: ''}"/>
+    <aura:attribute name="allTemplateInfo" type="List"/>
+        
+    <aura:attribute name="value" type="String" default="option1"/>
+    
+    <aura:attribute name="emailError" type="Boolean" default="false" />
+    <aura:attribute name="showError" type="Boolean" default="false" />
+    <aura:attribute name="errorMessage" type="String" />
+    <aura:attribute name="unknownError" type="Boolean" default="false" />
+    
+    <aura:handler name="init" action="{!c.init}" value="{!this}" />
+ 	<aura:registerEvent name="recipeComponentChange" type="c:RecipeComponentChangeEvent"/>
+    <aura:handler name="vcEvent" event="c:VirtualConsultantEvent" action="{!c.handleVCEvent}"/>
+    
+    <body class="desk" style="background:white;">
+	  <!-- TEST CONTENT HOLDER -->
+	  <div style="margin: auto; width: 100%; height: 100vh;">
+          
+          <!-- RECIPE HOLDER -->
+          <div style="margin: 3em 3em 0 3em;">
+              
+              <!-- ERRORS SECTION -->
+
+                    <div style="{! if(v.showError,'display:block','display:none')}">
+                         <c:Toast aura:id="toast" isActive="{!v.showError}" message="{!v.errorMessage}" type="warning">
+                            {!v.errorMessage}
+                        </c:Toast> 
+                    </div>
+                    
+
+              <!-- END OF ERRORS SECTION-->
+              
+              <!-- BLOCKING ERROR -->    
+              <aura:if isTrue="{!v.unknownError}">
+                  
+                  <div aura:id="unknownErrorMessage" id="unknonw" class="middle" >
+                      
+                      <lightning:icon iconName="utility:error" variant="error" size="large"/>
+                       
+                      
+                      <div class="slds-text-heading_small slds-m-top_x-small">There seems to be an issue with creating your trial org. Please contact <a href = "mailto: support@desk.com">support@desk.com</a></div>
+                  </div>
+                  
+              </aura:if>
+              <!-- BLOCKING ERROR END -->
+              
+              <!-- VIRTUAL CONSULTANT -->
+              <c:VirtualConsultant aura:id="vc" hightlightTimestamps="" recipe="Auto-response"/>
+			  <div aura:id="vc-highlight" id="vc-highlight" class="vc-highlight"></div>	
+			  <!-- VIRTUAL CONSULTANT END -->
+              
+              <!-- GRID START -->
+              <div id="main-grid" aura-id="main-grid" class="slds-col slds-size_1-of-1 slds-p-around_medium" style="max-width:800px">
+                  
+                  <div class="slds-grid">
+                      
+                      <div class="slds-col slds-size_12-of-12 slds-show_small">
+                          
+                          <!-- BREADCRUMBS -->
+                          <c:Breadcrumb recipe="Auto-response"/>
+                          <!-- END BREADCRUMBS -->
+                          
+                        <!-- EXISTING AUTO-RESPONSE -->
+                        <aura:if isTrue="{! v.sectionDisplay.existing &amp;&amp; v.unknownError == false &amp;&amp; v.noVerifiedEmail == false}">
+                            <aura:if isTrue="{!v.isInitialising == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_xx-large slds-text-color_weak">There is an existing active auto-response {!v.existingAutoresponse.fullName}. Email templates used are shown below </h1>
+                                   <div class="slds-m-bottom_small">
+                                       <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white;width: 700px;">
+                                           <thead>
+                                               <tr class="slds-text-title_caps" >
+                                                   <th scope="col" class="slds-cell-wrap" style="width: 14rem;">
+                                                       <div  title="Name">
+                                                           Name
+                                                       </div>
+                                                   </th>
+                                                   <th scope="col" class="slds-cell-wrap">
+                                                       <div class="slds-truncate" title="Email">
+                                                           Email
+                                                       </div>
+                                                   </th>
+                                                   <th scope="col" class="slds-cell-wrap" style="width: 12rem;">
+                                                       <div aura:id="email-template" class="slds-truncate" title="Email">
+                                                           Email Template
+                                                       </div>
+                                                   </th>
+                                               </tr>
+                                           </thead>
+                                           <tbody>
+                                               <aura:if isTrue="{! empty(v.singleModel) == true}">
+                                               	<aura:iteration items="{!v.existingEmailToCase}" var="email" indexVar="count"> 
+                                                   <aura:if isTrue="{! empty(email.emailTemplate) == false}">
+                                                       <tr class="slds-hint-parent">
+                                                           <td scope="row" data-label="Name" class="slds-cell-wrap" >
+                                                               <div   title="{!email.name}">{!email.name}</div>
+                                                           </td>
+                                                           <td data-label="Email" class="slds-cell-wrap">
+                                                               <div class="slds-truncate" title="{!email.email}">{!email.email}</div>
+                                                           </td>
+                                                           <td aura:id="customize-email-template" data-label="Customize" class="slds-cell-wrap">
+                                                               <form aura:id="{!'frontdoor-form-'+email.viewLabel}" target="_blank" method="POST" action="{! email.url + '/secur/frontdoor.jsp'}">
+                                                                   <input type="hidden" name="sid"
+                                                                          value="{!email.sessionId}" />
+                                                                   <input type="hidden" name="retURL" 
+                                                                          value="{!'one/one.app#/setup/CommunicationTemplatesEmail/page?address=%2F' + email.emailTemplateId}" /> 
+                                                               </form>
+                                                               <a aura:id="customize-email-template" href="#" name="{!'frontdoor-form-link-'+email.viewLabel}" onclick="{!c.customizeLinkMultipleEmail}">Customize</a>
+                                                               <!--<ui:outputURL aura:id="{!'frontdoor-form-button'+template.email.name}" value="#" click="{!c.customizeLink}" label="Customize"/>-->
+                                                           </td> 
+                                                       </tr>
+                                                   </aura:if>
+                                               </aura:iteration>	
+                                               <aura:set attribute="else">
+                                               		<tr class="slds-hint-parent">
+                                                           <td scope="row" data-label="Name" class="slds-cell-wrap" >
+                                                               <div   title="Email">Email</div>
+                                                           </td>
+                                                           <td data-label="Email" class="slds-cell-wrap">
+                                                               <div class="slds-truncate" title="NA"> {!v.singleModel.emails} </div>
+                                                           </td>
+                                                           <td  data-label="Customize" class="slds-cell-wrap">
+                                                               <form aura:id="frontdoor-form-allEmail" target="_blank" method="POST" action="{! v.singleModel.url + '/secur/frontdoor.jsp'}">
+                                                                   <input type="hidden" name="sid"
+                                                                          value="{!v.singleModel.sessionId}" />
+                                                                   <input type="hidden" name="retURL" 
+                                                                          value="{!'one/one.app#/setup/CommunicationTemplatesEmail/page?address=%2F' + v.singleModel.emailTemplateId}" /> 
+                                                               </form>
+                                                               <a aura:id="customize-email-template" href="#" name="frontdoor-form-link-allEmail" onclick="{!c.customizeLinkMultipleEmail}">Customize</a>
+                                                               <!--<ui:outputURL aura:id="{!'frontdoor-form-button'+template.email.name}" value="#" click="{!c.customizeLink}" label="Customize"/>-->
+                                                           </td> 
+                                                       </tr>
+                                               </aura:set>
+                                               </aura:if>
+                                           </tbody>
+                                       </table>
+                                </div>
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>Initialising
+                                </div>    
+                            </aura:set>
+                            
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF EXISTING AUTORESPONSE SECTION -->
+        
+                        <!-- MODEL -->
+                        <aura:if isTrue="{! and(v.sectionDisplay.model, v.unknownError == false)}">
+                            <aura:if isTrue="{!v.isInitialising == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_xx-large slds-text-color_weak">What's the model that you would like to use for your auto-response?</h1>
+                                   <fieldset class="slds-form-element slds-m-left_small slds-m-bottom_xx-large">
+                                       <aura:if isTrue="{!v.toShowModelOptions.common}">
+                                           <span aura:id="modelCommon-span">
+                                           	<lightning:input aura:id="modelCommon" type="checkbox" label="A common auto-response for all email cases received. This is the preferred model" name="red" checked="{! v.modelOptions.common}" onchange="{!c.modelOptions}" disabled="{!v.modelOptions.customPerChannel}"/>
+                                           </span>
+                                       </aura:if>
+                                       <aura:if isTrue="{!v.toShowModelOptions.customPerChannel}">
+                                           <span aura:id="modelCustomPerChannel-span">
+                                            <lightning:input aura:id="modelCustomPerChannel" type="checkbox" label="Customize auto-response by email channel. Have different auto-responses for each of your support email channel" name="red" checked="{! v.modelOptions.customPerChannel}" disabled="{!or(v.modelOptions.common, v.existingEmailToCase.length == 1)}" onchange="{!c.modelOptions}"/>
+                                           </span>
+                                       </aura:if>
+                                       <!--
+                                       <aura:if isTrue="{!v.toShowModelOptions.businessHours}">
+                                            <lightning:input aura:id="modelBusinessHours" type="checkbox" label="Send a different auto-response if customer email received outside of business hours" name="red" checked="{! v.modelOptions.businessHours}" disabled="{!or(v.modelOptions.common, v.modelOptions.customPerChannel) == false}" onchange="{!c.modelOptions}"/>
+                                       </aura:if>
+									   -->	
+                                        
+                                </fieldset>
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>Initialising
+                                </div>    
+                            </aura:set>
+                            
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF MODEL SECTION -->
+                        
+                        <!-- FROM EMAIL SECTION -->
+                        <aura:if isTrue="{!v.sectionDisplay.fromAddress}">
+                            <aura:if isTrue="{!v.isProcessingOrgWideAddress == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_medium slds-text-color_weak">What would be the from address for the auto-response?</h1>
+                                <ul class="slds-list--dotted slds-text-color_weak slds-m-left_medium slds-m-bottom_xx-large">
+                                  <li aura:id="auto-response-sf-from-email" class="slds-m-bottom_x-small slds-text-heading_small slds-text-color_weak">This email address has to be different from your support email address. For e.g. you could use auto-response@yourcompany.com. The email address has to be verified</li>
+                                    <li class="slds-text-heading_small slds-text-color_weak">You can also use your user email address as the from address</li>
+                                </ul>
+                                <div class="slds-m-bottom_xx-large slds-m-left_medium">
+                                    <span aura:id="from-address-options">
+                                    <lightning:radioGroup aura:id="mygroup"
+                                            name="radioButtonGroup"
+                                            label=""
+                                            options="{! v.fromEmailOptions }"
+                                            value="{! v.fromEmailSelectedOption }"
+                                            onchange="{! c.fromAddressOptionSelect }"                                                      
+                                            required="true" />
+                                    </span>
+                                    <aura:if isTrue="{!v.fromEmailSelectedOption == 'new'}">
+                                        <div class="slds-grid slds-m-top_medium">
+                                            <div aura:id="from-address-name" class="slds-col slds-size_4-of-12 slds-m-right_small">
+                                                <lightning:input type="text" label="" placeholder="Name" value="{!v.fromName}" required="true" pattern="[A-Za-z0-9 ]*" messageWhenPatternMismatch="Enter alpha-numeric characters"/>
+                                            </div>
+                                            <div aura:id="from-address-email" class="slds-col slds-size_5-of-12 slds-m-right_small">
+                                                <lightning:input type="text" label="" placeholder="Email" required="true" value="{!v.fromEmail}"
+                                                                 onblur="{!c.validateEmail}" messageWhenPatternMismatch="Email format is invalid"/>
+                                                <aura:if isTrue="{!v.emailErrorMessage}">
+                                                    <div class="slds-text-color_error slds-form-element__help">
+                                                        {!v.emailErrorMessage}
+                                                    </div>
+                                                </aura:if>
+                                            </div>
+                                            
+                                            <div class="slds-col slds-size_3-of-12">
+                                                
+                                            </div>
+                                        </div>
+                                    </aura:if>
+                                    <aura:if isTrue="{!v.fromEmailSelectedOption == 'existing'}">
+                                        <div class="slds-grid slds-m-top_medium">
+                                            <div class="slds-col slds-size_4-of-12 slds-m-right_small">
+                                                <lightning:select name="existingEmailsList" label="" value="{!v.fromEmail}" onchange="{!c.showDisplayName}">
+                                                    <option value="">choose one...</option>
+                                                    <aura:iteration items="{!v.orgWideEmailAddresses}" var="item">
+                                                        <option text="{!item.email}" value="{!item.email}"/>
+                                                    </aura:iteration>
+                                                </lightning:select>
+                                            </div>
+                                            <div class="slds-col slds-size_5-of-12 slds-m-right_small">
+                                                <lightning:input aura:id="existingDisplayName" type="text" label="" placeholder="Display Name" required="true" value="{!v.fromName}"
+                                                                 pattern="[A-Za-z0-9 ]*" messageWhenPatternMismatch="Display Name can only contain Alphanumeric Characters" disabled="{!empty(v.fromEmail)}"/>
+                                            </div>
+                                        </div>
+                                    </aura:if>
+                                    <aura:if isTrue="{!v.fromEmailSelectedOption == 'user1'}">
+                                        <aura:if isTrue="{!v.isFetchingUsers == false}">
+                                            <div class="slds-grid slds-m-top_medium">
+                                                <div class="slds-col slds-size_4-of-12 slds-m-right_small">
+                                                    <lightning:select name="existingEmailsList" label="" value="{!v.fromEmail}" onchange="{!c.showDisplayName}">
+                                                        <option value="">choose one...</option>
+                                                        <aura:iteration items="{!v.users}" var="item">
+                                                            <option text="{!item.email}" value="{!item.email}"/>
+                                                        </aura:iteration>
+                                                    </lightning:select>
+                                                </div>
+                                                <div class="slds-col slds-size_5-of-12 slds-m-right_small">
+                                                    <lightning:input aura:id="existingDisplayName" type="text" label="" placeholder="Display Name" required="true" value="{!v.fromName}"
+                                                                     pattern="[A-Za-z0-9 ]*" messageWhenPatternMismatch="Display Name can only contain Alphanumeric Characters" disabled="{!empty(v.fromEmail)}"/>
+                                                </div>
+                                            </div>
+                                        <aura:set attribute="else">
+                                            <div class="slds-align_absolute-center slds-is-relative">
+                                                 <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>Fetching current user information
+                                            </div>
+                                        </aura:set>
+                                        </aura:if>
+                                    </aura:if>
+                                </div>
+                            <!-- <lightning:button variant="brand" label="Add Row" onclick="{! c.addManualEmailRow }" /> -->
+                    
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                               		 <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>
+                            </aura:set>    
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF FROM EMAIL SECTION -->
+                        
+                        <!-- VERIFY EMAIL CONFIRMATION SECTION -->
+                        <aura:if isTrue="{!v.sectionDisplay.verify}">
+                            <aura:if isTrue="{!v.isVerifying == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak">Verification emails have been sent. Check the emails added and verify by clicking on the link in the emails </h1>
+                                <div class="slds-text-heading_small slds-text-color_weak slds-m-bottom_large" style="font-family:SalesforceSans-Light">Please check the box after you verify the email(s).</div>
+                                <span aura:id="emails-to-verify">
+                                    <fieldset class="slds-form-element slds-m-left_small slds-m-bottom_xx-large">
+                                        <lightning:input type="checkbox" label="{! join(': ', v.fromName, v.fromEmail) }" name="" checked="{! v.verifyEmailSelected}"/>
+                                    </fieldset>
+                                </span>
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                	<lightning:spinner variant="brand" size="small" /><br/><br/><br/>Checking if email(s)  have been verified
+                                </div>
+                            </aura:set>
+                            
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF VERIFY EMAIL CONFIRMATION SECTION -->
+                          
+                        <!-- REPLY EMAIL SECTION -->
+                        <aura:if isTrue="{!v.sectionDisplay.reply}">
+                            <aura:if isTrue="{!empty(v.existingEmailToCase) == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_medium slds-text-color_weak">Would you like your customer to be able to reply to the auto-response email?</h1>
+                                <div aura:id="customer-reply-options" class="slds-m-bottom_xx-large slds-m-left_medium"> 
+                                    <lightning:radioGroup aura:id="mygroup"
+                                            name="radioButtonGroup"
+                                            label=""
+                                            options="{! v.replyEmailOptions }"
+                                            value="{! v.replyEmailSelectedOption }"                                                      
+                                            required="true" />
+                                    <!--
+                                    <aura:if isTrue="{!v.replyEmailSelectedOption == 'yes'}">
+                                        <div class="slds-grid slds-m-top_large">
+                                            <div class="slds-col slds-size_4-of-12 slds-m-right_small">
+                                                <lightning:select name="existingEmailsList" label="Existing Support Channels" value="{!v.replyEmail}" onchange="{!c.showDisplayName}">
+                                                    <option value="">choose one...</option>
+                                                    <aura:iteration items="{!v.existingEmailToCase}" var="item">
+                                                        <option text="{!item.email}" value="{!item.email}"/>
+                                                    </aura:iteration>
+                                                </lightning:select>
+                                            </div>
+                                        </div>
+                                    </aura:if>
+									-->
+                                </div>
+                            <!-- <lightning:button variant="brand" label="Add Row" onclick="{! c.addManualEmailRow }" /> -->   
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF REPLY EMAIL SECTION -->  
+                          
+                        <!-- CONTENT SECTION SINGLE EMAIL -->
+                        <aura:if isTrue="{!v.sectionDisplay.content}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                                <form aura:id="frontdoor-form" target="_blank" method="POST" action="{! v.templateInfo.url + '/secur/frontdoor.jsp'}">
+                                    <input type="hidden" name="sid"
+                                          value="{!v.templateInfo.sessionId}" />
+                                    <input type="hidden" name="retURL" 
+                                          value="{!'one/one.app#/setup/CommunicationTemplatesEmail/page?address=%2F' + v.templateInfo.Id}" /> 
+                                </form>
+                                <h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak">What would you like to include in the auto-response?</h1>
+                                <div class="slds-text-heading_small slds-m-left_small slds-text-color_weak slds-m-bottom_large" >
+                                    Here is a sample we recommend <!-- <a href="#" class="slds-m-left_small slds-m-right_medium">Learn More</a> --> 
+                                    <span aura:id='customize-url'>
+                                    	<ui:outputURL value="#" click="{!c.customizeLink}" label="Customize"/>
+                                    </span>    
+                                </div>
+                                	<div aura:id='single-emailTemplate-img' class="slds-form slds-form_compound">
+                               			<img class="slds-text-align_center slds-show_medium slds-m-left_small emailtemplate" src="{!$Resource.SetupRecipe + '/SetupRecipe/AutoresponseSS.png'}" alt="Service Cloud"/>
+                                    </div>        
+
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                	<lightning:spinner variant="brand" size="small" /><br/><br/><br/>{!v.processingMessage}
+                                </div>
+                            </aura:set>
+                            
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF CONTENT SINGLE EMAIL SECTION -->
+                          
+                        <!-- CONTENT MUTIPLE EMAIL SECTION -->
+                        <aura:if isTrue="{!v.sectionDisplay.contentMultiple}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak">Create/customize your auto-response email template for each channel.</h1>
+                                <ul class="slds-list--dotted slds-text-color_weak slds-m-left_medium slds-m-bottom_xx-large">
+                                  <li class="slds-m-bottom_x-small slds-text-heading_small slds-text-color_weak">When an existing auto-response email template does not exist for the email channel, a new email template is created with the content shown in the recommended template.</li>
+                                    <li class="slds-text-heading_small slds-text-color_weak">Uncheck the checkbox if you do not want to create auto-response for an email channel.</li>
+                                </ul>
+                                <!-- <div class="slds-text-heading_small slds-text-color_weak slds-m-bottom_large" >When an existing auto-response email template does not exist for the email channel, a new email template is created with the content shown in the recommended template.</div>
+                                <div class="slds-text-heading_small slds-text-color_weak slds-m-bottom_large" >Uncheck the checkbox if you do not want to create auto-response for an email channel.</div> -->
+                                <lightning:tabset aura:id="multiple-emailtemplate-tabs" variant="scoped" selectedTabId="one">
+                                    <lightning:tab label="Auto-Response Templates" title="Customize Email Templates for each channel" id="one"  >
+                                        <div class="slds-m-left_small slds-m-bottom_small">
+                                            <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white;">
+                                               <thead>
+                                                  <tr class="slds-text-title_caps" >
+                                                     <th scope="col" class="slds-cell-wrap" style="width: 3rem;">
+  
+                                                     </th>
+                                                     <th scope="col" class="slds-cell-wrap" style="width: 10rem;">
+                                                        <div  title="Name">
+                                                           Name
+                                                        </div>
+                                                     </th>
+                                                     <th scope="col" class="slds-cell-wrap">
+                                                        <div class="slds-truncate" title="Email">
+                                                           Email
+                                                           
+                                                        </div>
+                                                     </th>
+                                                     <!-- 
+                                                     <th scope="col" class="slds-cell-wrap">
+                                                        <div class="slds-truncate" title="Email">
+                                                            New/Existing
+                                                           
+                                                        </div>
+                                                     </th>
+													 -->
+                                                     <th scope="col" class="slds-cell-wrap">
+                                                        <div class="slds-truncate" title="Email">
+                                                           Customize
+                                                           
+                                                        </div>
+                                                     </th>
+                                                  </tr>
+                                               </thead>
+                                               <tbody aura:id="multiple-emailTemplates">
+                                                 <aura:iteration items="{!v.allTemplateInfo}" var="template" indexVar="count"> 
+                                                    <aura:if isTrue="{! empty(template.email) == false}">
+                                                        <tr class="slds-hint-parent">
+                                                          <td class="slds-cell-shrink" data-label="Select Row">
+                                                              <lightning:input type="checkbox" checked="{! template.selected}"/>
+                                                          </td> 
+                                                         <td scope="row" data-label="Name" class="slds-cell-wrap" >
+                                                            <div   title="{!template.email.name}">{!template.email.name}</div>
+                                                         </td>
+                                                         <td data-label="Email" class="slds-cell-wrap">
+                                                            <div class="slds-truncate" title="{!template.email.email}">{!template.email.email}</div>
+                                                         </td>
+                                                         <td data-label="Customize" class="slds-cell-wrap">
+                                                              <form aura:id="{!'frontdoor-form-'+template.email.viewLabel}" target="_blank" method="POST" action="{! template.url + '/secur/frontdoor.jsp'}">
+                                                                <input type="hidden" name="sid"
+                                                                      value="{!template.sessionId}" />
+                                                                <input type="hidden" name="retURL" 
+                                                                      value="{!'one/one.app#/setup/CommunicationTemplatesEmail/page?address=%2F' + template.Id}" /> 
+                                                              </form>
+                                                              <a aura:id="customize-email-template" href="#" name="{!'frontdoor-form-link-'+template.email.viewLabel}" onclick="{!c.customizeLinkMultipleEmail}">Customize</a>
+                                                              <!--<ui:outputURL aura:id="{!'frontdoor-form-button'+template.email.name}" value="#" click="{!c.customizeLink}" label="Customize"/>-->
+                                                         </td> 
+                                                      </tr>
+                                                    </aura:if>
+                                                </aura:iteration>	
+                                               </tbody>
+                                            </table>
+                                        </div>
+                                    </lightning:tab>
+                                    <lightning:tab label="Recommended Template" id="two">                                        
+                                        <div  class="slds-form slds-form_compound">
+                                            <img aura:id='single-emailTemplate-img' class="slds-text-align_center slds-show_medium slds-m-left_small" src="{!$Resource.SetupRecipe + '/SetupRecipe/AutoresponseSS.png'}" alt="Service Cloud"/>
+                                        </div>   
+                                    </lightning:tab>
+                                </lightning:tabset>
+
+                                     
+
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                	<lightning:spinner variant="brand" size="small" /><br/><br/><br/>{!v.processingMessage}
+                                </div>
+                            </aura:set>
+                            
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF CONTENT MULTIPLE EMAIL SECTION -->
+                        
+                        <!-- COMPLETE SECTION -->
+                        <aura:if isTrue="{!v.sectionDisplay.complete}">
+                            <h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak">Congratulations you have setup auto-response for your email channel!</h1>
+                        </aura:if>
+                        <!-- END OF COMPLETE SECTION -->
+                          
+                        <!-- COMMON BUTTONS -->
+                        <!-- <aura:if isTrue="{! and(v.isInitialising == false, v.unknownError == false)}"></aura:if> -->
+                        <footer class="slds-m-top_xx-large" style="{! and(v.isInitialising == false, v.unknownError == false) ? 'display:block' : 'display:none' }">
+                         	
+                            <lightning:button aura:id="backButton" variant="neutral" label="Back" onclick="{!c.back}" disabled="false" class="wide-button"/>
+                            <span aura:id="nextButton-div">
+                            	<lightning:button aura:id="nextButton" variant="neutral" label="Next >" onclick="{!c.next}" disabled="false" class="wide-button"/>
+                            </span>
+                        </footer> 
+                        
+                        <!-- END OF COMMON BUTTONS -->
+                          
+                        </div>
+											    
+			    	</div>
+	
+			    </div>
+			    <!-- GRID START END -->
+		  		
+			</div>
+			<!-- END RECIPE HOLDER -->
+
+			
+	  </div>
+	  <!-- END CONTENT TEST HOLDER -->
+    
+    </body>
+	
+</aura:component>

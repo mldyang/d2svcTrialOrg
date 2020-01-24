@@ -1,0 +1,85 @@
+<aura:component >
+    <aura:attribute type="String" name="videoDuration" default=""  />
+    <aura:attribute type="String" name="videoName" default=""  />
+    <aura:attribute type="String" name="videoSource" default=""  />
+    <aura:attribute type="Integer" name="offsetTop" default="0"  />
+    <aura:attribute type="Integer" name="offsetLeft" default="0"  />
+    <aura:attribute type="Boolean" name="dragAllowed" default="True"  />
+    <aura:attribute name="hightlightTimestamps" type="Map" default=""/>
+    <aura:attribute name="vcPlay" type="Boolean" default="false"/>
+    <aura:attribute name="isLoading" type="Boolean" default="false"/>
+    <aura:attribute name="isModalShown" type="Boolean" default="false"/>
+    <aura:attribute name="recipe" type="String" default="Email" access="public"/>
+    <aura:handler name="render" action="{!c.afterRender}" value="{!this}" />
+    <aura:registerEvent name="vcEvent" type="c:VirtualConsultantEvent"/>
+    <aura:method name="changeVideo" action="{!c.changeVideo}">
+        <aura:attribute name="videoSource" type="String"/>
+        <aura:attribute name="videoName" type="String"/>
+        <aura:attribute name="highlightTimestamps" type="Map"/>
+        <aura:attribute name="offsetTop" type="Integer"/>
+        <aura:attribute name="offsetLeft" type="Integer"/>
+        <aura:attribute name="dragAllowed" type="Boolean"/>
+        <aura:attribute name="pauseVideo" type="Boolean"/>
+    </aura:method>
+    <aura:method name="launchModal" action="{!c.launchModal}"> 
+        <aura:attribute name="modalVideoSource" type="String"/>
+        <aura:attribute name="vcVideoSource" type="String"/>
+        <aura:attribute name="vcVideoTitle" type="String"/>
+        <aura:attribute name="offsetTop" type="Integer"/>
+        <aura:attribute name="offsetLeft" type="Integer"/>
+    </aura:method>
+    <aura:method name="closeModal" action="{!c.closeModal}"> 
+    </aura:method>
+    
+    <!-- VIRTUAL CONSULTANT HIGHLIGHT --> 
+    <div aura:id="vc-highlight" id="vc-highlight" class="vc-highlight"></div>
+    <!-- VIRTUAL CONSULTANT HIGHLIGHT END --> 
+
+    <div aura:id="vc" id="vc" class="vc-main" style="display:none;">
+        <div aura:id="vid-wrapper" id="vid-wrapper">
+            <div aura:id="play-button-container" id="play-button-container" class="play-button-container">
+                <img class="play-button" src="https://s3-us-west-1.amazonaws.com/desktosvc/video-play-button+3.png"/>
+            </div>
+            <!-- <div aura:id="vid-cover" class="vid-cover"></div> -->
+            <div aura:id="vid-container" id="vid-container" class="vid-container">
+                <video aura:id="vid" id="vid" class="vid">
+                    <source aura:id="vid-source" src="" type="video/mp4"/> -->
+                   <!-- <source aura:id="vid-source" src="https://s3-us-west-1.amazonaws.com/desktosvc/Desk+Emails+V2.mp4" type="video/mp4"/> -->
+                </video>
+            </div>				
+        </div> 
+        <div aura:id="custom-seekbar" id="custom-seekbar" class="custom-seekbar" onclick="{!c.seekbarClick}">
+            <span aura:id="custom-seekbar-span" class="custom-seekbar-span"></span>
+        </div>
+        <div aura:id="video-duration" id="video-duration" class="video-duration slds-text-color_weak slds-text-color_weak">{!v.videoDuration}</div>
+    </div>
+    
+    <div id="vc-modal-window" aura:id="vc-modal-window" style="top: 150px;
+    left: 120px;
+    width: 800px;
+    position: absolute;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    min-height: 600px;
+    z-index: 8;
+    display: none;
+    opacity: 0;
+    -webkit-transition: opacity 500ms linear;
+	}" >		
+        <header class="slds-p-vertical_medium helpTrayHeader">
+            <div id="vc-explain-title" aura-id="vc-explain-title" class="helpTrayTitle">Testing your Email Channel</div>
+            <lightning:icon iconName="utility:close" onclick="{!c.closeModal}" iconClass="white" variant="inverse" size="xx-small" class="slds-m-right_small" style="float:right;margin-top:-24px;cursor:pointer;"/>     
+            <div class="helpTrayHeaderDeckeledEdge"></div>
+        </header>
+        <div aura:id="vc-explain" id="vc-explain" class="vc-explain">
+            <aura:if isTrue="{!v.isLoading}">
+                <div class="slds-align_absolute-center slds-is-relative" style="height:80%">
+                    <lightning:spinner variant="brand" size="small" /><br/><br/><br/>Loading ...
+                </div>
+            </aura:if>
+        	<video aura:id="modal-vid" id="modal-vid" class="modal-vid">
+                <source aura:id="modal-vid-source" src="" type="video/mp4"/> 
+            </video>
+        </div>
+    </div>	
+	
+</aura:component>

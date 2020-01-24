@@ -1,0 +1,64 @@
+<apex:page sidebar="false" showHeader="false"  >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Desk to Service Cloud</title>
+    <apex:includeLightning />
+    <apex:slds />
+    <script>
+     $Lightning.use("c:TrialSignUpApp", function() {
+         $Lightning.createComponent("c:TrialSignUpContainer",
+            {},
+            "trialSignUpContainer",
+            function(cmp) {
+                
+            }
+         );
+     });
+      
+    var lexOrigin = "https://desktoservice--dev--c.cs21.visual.force.com";
+    window.addEventListener("message", function(event) {
+        if (event.origin !== lexOrigin) {
+            // Not the expected origin: reject message!
+            return;
+        }
+        // Handle message
+        console.log(event.data);
+    }, false);
+    </script>
+    <style>
+        .slds-form-element__label {
+                font-size: 14px !important;
+        }
+        
+        .larger {
+            font-size: 30px !important;
+            font-family: Salesforce Sans;
+            font-weight: 400 !important;
+        }
+        
+        .arrow {
+            background: #122a39;
+            width: 30px;
+            height: 30px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-left: -15px;
+            margin-top: -15px;
+            transform: rotate(45deg);
+        }
+        
+    </style>
+      
+  </head>
+  <body id="trialSignUpContainer" class="slds-scope desk" style="margin: 0; padding: 0;" height="100%">
+    
+    
+        <!-- Google Analytics recommends adding the component at the bottom of the page to avoid increasing page load time. -->
+    <site:googleAnalyticsTracking />
+
+  </body>
+</apex:page>

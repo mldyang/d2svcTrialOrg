@@ -1,0 +1,9 @@
+<aura:component extensible="true" abstract="true" controller="RecipeBaseController">
+    <aura:attribute name="vcVideos" type="Map" default=""/>
+    <aura:attribute name="highlightTimestampsMap" type="Map" default=""/>
+    <aura:attribute name="functionsMemory" type="Map" default=""/>
+    <aura:attribute name="vcModalVideos" type="Map" default=""/>
+    <aura:attribute name="vcPlay" type="Boolean" default="false"/>
+    <aura:attribute name="vcInUse" type="Boolean" default="false"/>
+    {!v.body}
+</aura:component>

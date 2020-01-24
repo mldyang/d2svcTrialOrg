@@ -1,0 +1,3 @@
+<aura:event type="COMPONENT" description="Event when a component has to be changed" >
+    <aura:attribute name="componentName" type="String"/>
+</aura:event>

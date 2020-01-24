@@ -1,0 +1,55 @@
+.THIS .slds-required {
+    display: none;
+}
+
+.THIS .slds-checkbox .slds-form-element__label{
+    font-size: 0.9rem;
+    font-family: Salesforce Sans;   
+}
+
+.THIS .slds-radio .slds-form-element__label{
+    font-size: 0.9rem;
+    font-family: Salesforce Sans;
+    
+}
+
+.THIS .slds-form-element .slds-form-element__label{
+    font-family: Salesforce Sans;
+}
+
+
+
+.THIS .slds-checkbox {
+    text-indent: -1.5rem;
+    margin-left: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+/*.THIS img {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    padding: 10px 5px 10px 5px;    
+}*/
+
+.THIS .emailtemplate {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    padding: 10px 5px 10px 5px;    
+}
+
+.THIS .wide-button{
+    width: 9em;
+    margin-right: 5px;
+}
+
+.THIS .slds-input{
+    font-family: Salesforce Sans;
+}
+
+/*.THIS .slds-table thead th {
+    background-color: #fafaf9;
+    color: #514f4d;
+    padding: 0.25rem 0.5rem;
+}*/
+
+.THIS .slds-tabs_default__nav{
+    border: 0px;
+}

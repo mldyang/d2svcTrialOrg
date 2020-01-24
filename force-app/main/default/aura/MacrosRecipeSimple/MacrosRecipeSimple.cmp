@@ -1,0 +1,120 @@
+<aura:component extends="c:RecipeBase">
+    <aura:attribute name="oauthRecordIdentifier" type="String" access="public" default="bw8u3Xm81547509012512"/>
+    <aura:attribute name="sfUrl" type="String" access="public"/>
+    <aura:attribute name="sfSessionId" type="String" access="public"/>
+    <aura:attribute name="isProcessing" type="Boolean" default="false"/>
+	<aura:attribute name="processingMessage" type="String" default="" />
+    <aura:handler name="init" action="{!c.init}" value="{!this}" />
+    <aura:registerEvent name="recipeComponentChange" type="c:RecipeComponentChangeEvent"/>
+	<body class="desk" style="background:white;">
+	  <!-- TEST CONTENT HOLDER -->
+	  <div style="margin: auto; width: 100%; height: 100vh;">
+          
+          <!-- RECIPE HOLDER -->
+          <div style="margin: 3em 3em 0 3em;">
+              
+              <!-- ERRORS SECTION -->
+
+                    <div style="{! if(v.showError,'display:block','display:none')}">
+                         <c:Toast aura:id="toast" isActive="{!v.showError}" message="{!v.errorMessage}" type="warning">
+                            {!v.errorMessage}
+                        </c:Toast> 
+                    </div>
+                    
+
+              <!-- END OF ERRORS SECTION-->
+              
+              <!-- BLOCKING ERROR -->    
+              <aura:if isTrue="{!v.unknownError}">
+                  
+                  <div aura:id="unknownErrorMessage" id="unknonw" class="middle" >
+                      
+                      <lightning:icon iconName="utility:error" variant="error" size="large"/>
+                       
+                      
+                      <div class="slds-text-heading_small slds-m-top_x-small">There seems to be an issue with creating your trial org. Please contact <a href = "mailto: support@desk.com">support@desk.com</a></div>
+                  </div>
+                  
+              </aura:if>
+              <!-- BLOCKING ERROR END -->
+              
+              <!-- VIRTUAL CONSULTANT -->
+              <c:VirtualConsultant aura:id="vc" hightlightTimestamps=""/>
+			  <div aura:id="vc-highlight" id="vc-highlight" class="vc-highlight"></div>	
+			  <!-- VIRTUAL CONSULTANT END -->
+              
+              <!-- GRID START -->
+              <div id="main-grid" aura-id="main-grid" class="slds-col slds-size_1-of-1 slds-p-around_medium" style="max-width:800px">
+                  
+                  <div class="slds-grid">
+                      
+                      <div class="slds-col slds-size_12-of-12 slds-show_small">
+                          
+                          <!-- BREADCRUMBS -->
+                          <div class="slds-m-bottom_large">
+                              <nav role="navigation" aria-label="Breadcrumbs">
+                                  <ol class="slds-breadcrumb slds-list_horizontal slds-wrap">
+                                      <li class="slds-breadcrumb__item slds-text-title_caps"><a href="javascript:void(0);">Setup Recipes</a></li>
+                                      <li class="slds-breadcrumb__item slds-text-title_caps" style="padding-left:8px;padding-right:8px;">Macros
+                                      </li>
+                                      <!-- <li class="slds-breadcrumb__item slds-text-title_caps" style="padding-left:8px">Step 1 of 5</li> -->
+                                  </ol>
+                              </nav>
+                          </div>
+                          <!-- END BREADCRUMBS -->
+                        
+                        <!-- VIDEO SECTION -->
+                        <aura:if isTrue="{!v.isProcessing == false}">
+                            <form aura:id="frontdoor-form" target="_blank" method="POST" action="{! v.sfUrl + '/secur/frontdoor.jsp'}">
+                                <input type="hidden" name="sid"
+                                       value="{!v.sfSessionId}" />
+                                <input type="hidden" name="retURL" 
+                                       value="{!'lightning/o/Case'}" /> 
+                            </form>
+                            <h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak">Watch the instructions to migrate Desk Macros to Service Cloud.</h1>
+                             <ul class="slds-list--dotted slds-text-color_weak slds-m-left_medium slds-m-bottom_xx-large">
+                                 <li class=" slds-text-heading_small slds-text-color_weak">Overview video shows you briefly how to create macros in Service Cloud.</li>
+                                 <li class=" slds-text-heading_small slds-text-color_weak">Deep dive video walks you through the details of moving your macros, and compares Desk macro actions to that in Service Cloud.</li>
+                                 <li class=" slds-text-heading_small slds-text-color_weak">Click <ui:outputURL value="#" click="{!c.customizeLink}" label="here"/> to go to Cases in Service Cloud.</li>
+                             </ul>
+                            <lightning:tabset aura:id="macro-overview" variant="scoped" selectedTabId="one" class="tabStyle">
+                                <lightning:tab label="Overview" title="Customize Email Templates for each channel" id="one"  >   
+                            		<iframe width="780" height="439" src="https://www.youtube.com/embed/nUBnXme9GgI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                                </lightning:tab>
+                                <lightning:tab label="Deep Dive" id="two">
+                                    <iframe width="780" height="439" src="https://www.youtube.com/embed/tNbLC6ZIVCQ" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                                </lightning:tab>
+                            </lightning:tabset>
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                        </aura:if>
+                        <!-- END OF VIDEO SECTION -->            
+  
+                        <!-- COMMON BUTTONS -->
+                        <!-- <aura:if isTrue="{! and(v.isInitialising == false, v.unknownError == false)}"></aura:if> -->
+                        <footer class="slds-m-top_xx-large" >
+                            <lightning:button aura:id="backButton" variant="neutral" label="Back" onclick="{!c.back}" disabled="false" class="wide-button"/>
+                            <lightning:button aura:id="nextButton" variant="neutral" label="Next >" onclick="" disabled="true" class="wide-button"/>
+                        </footer> 
+                        
+                        <!-- END OF COMMON BUTTONS -->
+                          
+                        </div>
+											    
+			    	</div>
+	
+			    </div>
+			    <!-- GRID START END -->
+		  		
+			</div>
+			<!-- END RECIPE HOLDER -->
+
+			
+	  </div>
+	  <!-- END CONTENT TEST HOLDER -->
+    
+    </body>
+</aura:component>

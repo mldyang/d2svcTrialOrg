@@ -1,0 +1,17 @@
+<aura:component >
+    <!-- SERVIVE CLOUD LOGO -->
+    <div class="slds-size_4-of-12 slds-medium-size_4-of-12 slds-large-size_4-of-12 slds-m-bottom_large slds-m-top_large slds-align_absolute-center" style="height: 5rem;">
+        <img class="slds-text-align_center" src="{! $Resource.TrialSignup + '/Salesforce-Service-Cloud-Logo.png'}" alt="Service Cloud" />
+    </div>
+    
+    <!-- TRIAL INTRO TEXT 
+   <h1 class="slds-text-heading_large slds-text-align_center slds-p-bottom_x-small slds-p-top_medium slds-p-right_xx-large slds-p-left_xx-large">Start your custom Service Cloud trial</h1>
+   <p class="slds-text-heading_medium slds-text-align_center slds-text-color_weak slds-p-bottom_medium slds-p-right_x-large slds-p-left_x-large">All the Desk.com features you love, ready to use directly in Service Cloud</p>
+   -->
+    <!-- FORM BOX STARTS -->
+    <div class="slds-box slds-m-around_xx-large slds-theme_default">
+        <c:TrialSignUpLandingPageForm />
+    </div>
+    <!-- END FORM BOX -->
+	
+</aura:component>

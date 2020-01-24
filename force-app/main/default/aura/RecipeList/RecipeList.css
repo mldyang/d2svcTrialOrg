@@ -1,0 +1,87 @@
+.THIS .right-banner{
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 2px 0px;
+    padding-top: 25px;
+    border-radius: 0.25rem;
+    background: padding-box #182337;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgb(221, 219, 218);
+    border-image: initial;
+    height: auto;
+    display: inline;
+    float: right;
+    width: 190px;
+    overflow: auto;
+    margin-left: 30px;
+    margin-right: 30px;
+    -webkit-transition: opacity 500ms linear;
+    -webkit-transition: background-color 2s linear;
+}
+
+.THIS .right-banner-after{
+    padding-top: 25px;
+    background: white;
+    border-width: 0px;
+    height: auto;
+    display: inline;
+    float: right;
+    width: 190px;
+    overflow: auto;
+    margin-left: 30px;
+    margin-right: 30px;
+    -webkit-transition: opacity 500ms linear;
+    -webkit-transition: background-color 2s linear;
+}
+
+.THIS .popover-show{
+    -webkit-transition: opacity 3000ms linear;
+    -webkit-transition: background-color 2s linear;
+    display: inline;
+}
+
+
+.THIS .recipe a{
+    background: #f7f7f7;
+}
+
+.THIS .maintab li{
+    padding: 0 1.75rem;
+}
+
+.THIS .recipe{
+    margin-top:1rem;
+    margin-bottom: 2rem;
+}
+
+.THIS .slds-page-header{
+    
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.1);
+    border-radius: .25rem;
+    background: rgb(243, 242, 242);
+    background-clip: padding-box;
+    padding: 10px 10px 10px 10px;
+    
+    
+}
+
+.THIS p{
+    font-family: Salesforce Sans;
+}
+
+.THIS a[disabled=disabled], .THIS a.disabled {
+        /*color: #A9A9A9!important;
+        cursor: not-allowed!important;*/
+        
+    }
+
+.THIS .maintab{
+    /* background: white; */
+}
+
+.THIS .maintab a{
+    /*background: white;*/
+}
+
+/*.THIS .maintab a[disabled=disabled], .THIS .maintab a.disabled{
+    background: white;
+}*/

@@ -1,0 +1,12 @@
+<aura:event type="COMPONENT" description="On a specific timestamp of the video" >
+    <aura:attribute name="isVideoHighlight" type="Boolean"/>
+    <aura:attribute name="isVideoPlayPauseEnd" type="Boolean"/>
+    <aura:attribute name="isModal" type="Boolean"/>
+    <aura:attribute name="timestamp" type="Integer"/>
+    <aura:attribute name="videoName" type="String"/>
+    <aura:attribute name="videoPlay" type="Boolean"/>
+    <aura:attribute name="videoEnd" type="Boolean"/>
+    <aura:attribute name="modalClosed" type="Boolean"/>
+    <aura:attribute name="seekbarClick" type="Boolean"/>
+    <aura:attribute name="recipe" type="String"/>
+</aura:event>

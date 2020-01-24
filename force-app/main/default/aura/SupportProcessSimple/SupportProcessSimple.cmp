@@ -1,0 +1,119 @@
+<aura:component extends="c:RecipeBase">
+    <aura:attribute name="oauthRecordIdentifier" type="String" access="public" default="bw8u3Xm81547509012512"/>
+    <aura:attribute name="sfUrl" type="String" access="public"/>
+    <aura:attribute name="sfSessionId" type="String" access="public"/>
+    <aura:attribute name="isProcessing" type="Boolean" default="false"/>
+	<aura:attribute name="processingMessage" type="String" default="" />
+    <aura:attribute name="setVC" type="Boolean" default="true" />
+    
+    <aura:set attribute="vcVideos" value="{ intro: 'https://s3-us-west-1.amazonaws.com/desktosvc/SupportProcess/Support+Process+VC.mp4'
+                                           }" />
+    
+    <aura:set attribute="highlightTimestampsMap" value="{ intro: {5: 0, 7: ['default-case-status-values','bottom'], 11 : 0, 12: ['resolved-status-mapping','bottom'], 17:0, 18: ['basic-support-process-img','bottom',-240,40], 25: 0, 28: ['basic-support-process-img','bottom',-240,278], 38:0, 40: ['basic-support-process-img','bottom',-240,545], 46:0, 47: ['basic-support-process-img','bottom',-90,545], 53:0, 55: ['basic-support-process-img','bottom',-90,278], 70: 0}}" />
+    
+    <aura:set attribute="vcModalVideos" value="{ intro: ['https://s3-us-west-1.amazonaws.com/desktosvc/SupportProcess/Support+Process+Demo.mp4','https://s3-us-west-1.amazonaws.com/desktosvc/SupportProcess/Support+Process+Demo+VC.mp4', 'Testing Support Process']
+                                               }" />
+    
+    <aura:handler name="init" action="{!c.init}" value="{!this}" />
+    <aura:handler name="render" action="{!c.afterRender}" value="{!this}" />
+    <aura:registerEvent name="recipeComponentChange" type="c:RecipeComponentChangeEvent"/>
+    <aura:handler name="vcEvent" event="c:VirtualConsultantEvent" action="{!c.handleVCEvent}"/>
+    
+	<body class="desk" style="background:white;">
+	  <!-- TEST CONTENT HOLDER -->
+	  <div style="margin: auto; width: 100%; height: 100vh;">
+          
+          <!-- RECIPE HOLDER -->
+          <div style="margin: 3em 3em 0 3em;">
+              
+              <!-- ERRORS SECTION -->
+
+                    <div style="{! if(v.showError,'display:block','display:none')}">
+                         <c:Toast aura:id="toast" isActive="{!v.showError}" message="{!v.errorMessage}" type="warning">
+                            {!v.errorMessage}
+                        </c:Toast> 
+                    </div>
+                    
+
+              <!-- END OF ERRORS SECTION-->
+              
+              <!-- BLOCKING ERROR -->    
+              <aura:if isTrue="{!v.unknownError}">
+                  
+                  <div aura:id="unknownErrorMessage" id="unknonw" class="middle" >
+                      
+                      <lightning:icon iconName="utility:error" variant="error" size="large"/>
+                       
+                      
+                      <div class="slds-text-heading_small slds-m-top_x-small">There seems to be an issue with creating your trial org. Please contact <a href = "mailto: support@desk.com">support@desk.com</a></div>
+                  </div>
+                  
+              </aura:if>
+              <!-- BLOCKING ERROR END -->
+              
+              <!-- VIRTUAL CONSULTANT -->
+              <c:VirtualConsultant aura:id="vc" hightlightTimestamps="" recipe="Support Process"/>
+			  <div aura:id="vc-highlight" id="vc-highlight" class="vc-highlight"></div>	
+			  <!-- VIRTUAL CONSULTANT END -->
+              
+              <!-- GRID START -->
+              <div id="main-grid" aura-id="main-grid" class="slds-col slds-size_1-of-1 slds-p-around_medium" style="max-width:800px">
+                  
+                  <div class="slds-grid">
+                      
+                      <div class="slds-col slds-size_12-of-12 slds-show_small">
+                          
+                          <!-- BREADCRUMBS -->
+                          <c:Breadcrumb recipe="Support Process"/>
+                          <!-- END BREADCRUMBS -->
+                        
+                        <!-- VIDEO SECTION -->
+                        <aura:if isTrue="{!v.isProcessing == false}">
+                            <form aura:id="frontdoor-form" target="_blank" method="POST" action="{! v.sfUrl + '/secur/frontdoor.jsp'}">
+                                <input type="hidden" name="sid"
+                                       value="{!v.sfSessionId}" />
+                                <input type="hidden" name="retURL" 
+                                       value="{!'lightning/setup/SetupOneHome/home'}" /> 
+                            </form>
+                            <h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak">Your trial comes with a basic support process. Let's take a look.</h1>
+                             <ul class="slds-list--dotted slds-text-color_weak slds-m-left_medium slds-m-bottom_xx-large">
+                                 <li aura:id="default-case-status-values" class="slds-text-heading_small slds-text-color_weak">Case status values: New, Open, Pending and Closed.</li>
+                                 <li aura:id="resolved-status-mapping" class="slds-text-heading_small slds-text-color_weak">Resolved status in Desk is mapped to Closed status.</li>
+                                 <li aura:id="vc-demo-text" class="slds-text-heading_small slds-text-color_weak">Watch the Virtual Consultant video to see how you can test the support process (at the end of the video, a demo is shown).</li>
+                             </ul>
+                            <div aura:id='basic-support-process-img' class="slds-form slds-form_compound">
+                                <img class="slds-text-align_center slds-show_medium slds-m-left_small flowdiagram" src="{!$Resource.SetupRecipe + '/SetupRecipe/DefaultSupportProcess.png'}" alt="Service Cloud"/>
+                            </div>
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                        </aura:if>
+                        <!-- END OF VIDEO SECTION -->            
+  
+                        <!-- COMMON BUTTONS -->
+                        <!-- <aura:if isTrue="{! and(v.isInitialising == false, v.unknownError == false)}"></aura:if> -->
+                        <footer class="slds-m-top_xx-large" >
+                            <lightning:button aura:id="backButton" variant="neutral" label="Back" onclick="{!c.back}" disabled="false" class="wide-button"/>
+                            <lightning:button aura:id="nextButton" variant="neutral" label="Next >" onclick="" disabled="true" class="wide-button"/>
+                        </footer> 
+                        
+                        <!-- END OF COMMON BUTTONS -->
+                          
+                        </div>
+											    
+			    	</div>
+	
+			    </div>
+			    <!-- GRID START END -->
+		  		
+			</div>
+			<!-- END RECIPE HOLDER -->
+
+			
+	  </div>
+	  <!-- END CONTENT TEST HOLDER -->
+    
+    </body>
+</aura:component>

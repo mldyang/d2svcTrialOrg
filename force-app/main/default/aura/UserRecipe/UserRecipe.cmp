@@ -1,0 +1,614 @@
+<aura:component controller="UserRecipeController" extends="c:RecipeBase">
+	<aura:attribute name="oauthRecordIdentifier" type="String" access="public" default="JXVoathJ1536879062704"/>
+    
+    <!-- Users has list of all users to start with, but changes from step to step -->
+    <aura:attribute name="users" type="List" access="public"/>
+    <!-- allUsers has list of all users -->
+    <aura:attribute name="allUsers" type="List" access="public"/>
+    <!-- usersSuccessful has list of all users successfully created-->
+    <aura:attribute name="usersSuccessful" type="List" access="public"/>
+    <!-- existingSFUsers has list of SF Users -->
+    <aura:attribute name="existingSFUsers" type="List" access="public"/>
+    <aura:attribute name="updatedUsersToActivate" type="List" access="public"/>
+    <aura:attribute name="currentUserId" type="String" access="public"/>
+    <aura:attribute name="noOfUsersSuccessful" type="Integer" access="public"/>
+    <aura:attribute name="noOfUsersFailed" type="Integer" access="public"/>
+    <aura:attribute name="usersActivated" type="Integer" access="public"/>
+    <aura:attribute name="createUsersHeading" type="String" access="public"/>
+    <aura:attribute name="createUsersSubHeading" type="String" access="public"/>
+    <aura:attribute name="updateUsersHeading" type="String" access="public" default="Update the user's profile, or activate/deactivate users"/>
+    <aura:attribute name="updateUsersSubHeading" type="String" access="public"/>
+    <aura:attribute name="goBackTo" type="String" access="public"/>
+    <aura:attribute name="postUpdate" type="Boolean" access="public" default="false"/>
+     
+    <aura:attribute name="profiles" type="Map" access="public"/>
+    <aura:attribute name="allowedProfiles" type="List" access="public"/>
+    <aura:attribute name="allowedProfilesForUpdate" type="List" access="public"/>
+    <aura:attribute name="sfLicenseInfo" type="Map" access="public"/>
+    <aura:attribute name="sfLicenseSubHeader" type="String" access="public"/>
+    <aura:attribute name="completeHeader" type="String" access="public" default="You have reached the end of User Recipe."/>
+    
+    <!-- This map determines which steps are to be shown -->
+    <aura:attribute name="sectionDisplay" type="Map" default="{ model: true, deskUsers: false, manualUsers: false, createUsers: false, welcomeEmail: false, update: false, complete: false }" />
+    
+    <!-- Manages the rows for adding email address Manually -->
+    <aura:attribute name="manualUsers" type="List" default="[ {firstName: '', lastName: '', email: '', emailError: '', sfProfileId: ''}]"/>
+    
+    <aura:attribute name="userModelOptions" type="List" default="[
+    {'label': 'Add new users in Service Cloud. Select the users from Desk that you want to add to Service Cloud.', 'value': 'new'},
+    {'label': 'Activate the users that you have already added, and send them the password email.', 'value': 'update'}            
+    ]"/>
+    <aura:attribute name="modelSelectedOption" type="String" default=""/> 
+    
+    
+    <aura:attribute name="isProcessing" type="Boolean" default="false"/>
+    <aura:attribute name="processingMessage" type="String" default="Fetching users from Desk &amp; Salesforce" />
+    
+    <aura:attribute name="showError" type="Boolean" default="false" />
+    <aura:attribute name="errorMessage" type="String" />
+    <aura:attribute name="unknownError" type="Boolean" default="false" />
+    
+    <aura:handler name="init" action="{!c.init}" value="{!this}" />
+    <aura:registerEvent name="recipeComponentChange" type="c:RecipeComponentChangeEvent"/>
+   
+    
+    <body class="desk" style="background:white;">
+	  <!-- TEST CONTENT HOLDER -->
+	  <div style="margin: auto; width: 100%; height: 100vh;">
+          
+          <!-- RECIPE HOLDER -->
+          <div style="margin: 3em 3em 0 3em;">
+              
+              <!-- ERRORS SECTION -->
+
+                    <div style="{! if(v.showError,'display:block','display:none')}">
+                         <c:Toast aura:id="toast" isActive="{!v.showError}" message="{!v.errorMessage}" type="warning">
+                            {!v.errorMessage}
+                        </c:Toast> 
+                    </div>
+                    
+
+              <!-- END OF ERRORS SECTION-->
+              
+              <!-- BLOCKING ERROR -->    
+              <aura:if isTrue="{!v.unknownError}">
+                  
+                  <div aura:id="unknownErrorMessage" id="unknown" class="middle" >
+                      <lightning:icon iconName="utility:error" variant="error" size="large"/>
+                      <div class="slds-text-heading_small slds-m-top_x-small">There seems to be an issue with creating your trial org. Please contact <a href = "mailto: support@desk.com">support@desk.com</a></div>
+                  </div>
+                  
+              </aura:if>
+              <!-- BLOCKING ERROR END -->
+              
+              <!-- GRID START -->
+              <div class="slds-col slds-size_1-of-1 slds-p-around_medium" style="max-width:800px">
+                  
+                  <div class="slds-grid">
+                      
+                      <div class="slds-col slds-size_12-of-12 slds-show_small">
+                          
+                          <!-- BREADCRUMBS -->
+                          <c:Breadcrumb recipe="Users"/>
+                          <!-- END BREADCRUMBS -->
+        				
+                        <!-- MODEL -->
+                        <aura:if isTrue="{! and(v.sectionDisplay.model, v.unknownError == false)}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_small slds-text-color_weak">What would you like to do?</h1>
+                                <div class="slds-text-heading_small slds-text-color_weak slds-m-bottom_x-large" style="font-family:SalesforceSans-Light">Adding users to Service Cloud will not affect your existing Desk functioning.</div>
+                                   <fieldset class="slds-form-element slds-m-left_small slds-m-bottom_xx-large">
+                                       <lightning:radioGroup aura:id="mygroup"
+                                            name="radioButtonGroup"
+                                            label=""
+                                            options="{! v.userModelOptions }"
+                                            value="{!v.modelSelectedOption}"
+                                            onchange=""                                                      
+                                            required="true" />
+                                </fieldset>
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF MODEL SECTION -->
+                          
+                        <!-- DESK USERS SECTION -->
+                        <aura:if isTrue="{! v.sectionDisplay.deskUsers}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak ">Select the Users from Desk you would like to create in Service Cloud</h1>
+                                <div class="slds-text-heading_small slds-text-color_weak slds-m-bottom_xx-large" style="font-family:SalesforceSans-Light">Desk users existing in salesforce are shown with their checkbox disabled. Adding users to Service Cloud does not affect your existing Desk functioning.</div>
+                                <fieldset class="slds-form-element slds-m-bottom_xx-large">
+	                                 <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white;row-height:3rem">
+                                   <thead>
+                                      <tr class="slds-text-title_caps" >
+                                         <th class="slds-text-align_right" scope="col" style="width: 3.25rem;">
+                                            
+                                          </th>
+                                         <th scope="col" class="slds-cell-wrap" style="width: 10rem;">
+                                            <div  title="Name">
+                                               Name
+                                               
+                                            </div>
+                                         </th>
+                                         <th scope="col" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="Email">
+                                               Email
+                                               
+                                            </div>
+                                         </th>
+                                          <!--
+                                         <th scope="col" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="Email">
+                                               Username
+                                               
+                                            </div>
+                                         </th>
+										-->
+                                         <th scope="col">
+                                            <div class="slds-truncate" title="Profile" style="width: 6rem;">
+                                               Profile
+                                               
+                                            </div>
+                                         </th>
+                                         
+                                        
+                                      </tr>
+                                   </thead>
+                                   <tbody>
+                                     <aura:iteration items="{!v.users}" var="user" indexVar="count"> 
+                                         <aura:if isTrue="{!user.inDesk == true}">
+                                      		<tr class="slds-hint-parent">
+                                          <td class="slds-cell-shrink" data-label="Select Row">
+                                              <lightning:input type="checkbox" disabled="{! user.sfUsername}" checked="{! user.selected}"/>
+                                          </td>
+                                         <td scope="row" data-label="Name" class="slds-cell-wrap" >
+                                            <div   title="{!user.name}">{!user.name}</div>
+                                         </td>
+                                         <td data-label="Email" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="{!user.email}">{!user.email}</div>
+                                         </td>
+                                         <!--       
+                                         <td data-label="Username" class="slds-cell-wrap">
+                                            <div  title="{!user.sfUsername}">{!user.sfUsername}</div>
+                                         </td>
+										--> 
+                                         <td data-label="Profile">
+                                            <div class="slds-truncate" title="System Admin">
+                                                <aura:if isTrue="{! empty(user.sfUsername)}">
+                                                    <lightning:select name="existingProfiles" label="" value="{! user.sfProfileId}" onchange="" class="profile">
+                                                    <option value="">Select Profile</option>
+                                                    <aura:iteration items="{!v.allowedProfiles}" var="profile">
+                                                        <option text="{!profile.profileName}" value="{!profile.profileId}"/>
+                                                    </aura:iteration>
+                                                	</lightning:select>
+                                                <aura:set attribute="else">
+                                                	<div class="slds-truncate" title="{!user.sfProfileName}">{!user.sfProfileName}</div>    
+                                                </aura:set>
+                                                </aura:if>    
+                                             </div>
+                                         </td>
+                                         
+                                      </tr>
+                                    	 </aura:if>
+                                       </aura:iteration>	
+                                   </tbody>
+                            	</table>
+                            	</fieldset>
+                           	<aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                            
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF DESK USERS SECTION -->                       
+                          
+                        <!-- MANUAL USERS SECTION -->
+                        <aura:if isTrue="{!v.sectionDisplay.manualUsers}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_xx-large slds-text-color_weak">Would you like to add a new user, besides those from Desk? </h1>
+                                <div class="slds-m-bottom_xx-large slds-m-left_small">    
+                                    <aura:iteration items="{!v.manualUsers}" var="user" indexVar="count">
+	                                    <div  class="{! if(count >= 1 , 'slds-grid slds-m-top_medium slds-p-top_medium slds-border_top', 'slds-grid slds-m-top_medium')}">
+                                       <!--  <div  class="slds-grid slds-m-top_medium"> -->
+                                            <div class="slds-col slds-size_4-of-12 slds-m-right_small">
+                                                <lightning:input type="text" label="" placeholder="First Name" value="{!user.firstName}" required="true" pattern="[A-Za-z0-9 ]*" messageWhenPatternMismatch="Enter alpha-numeric characters"/>
+                                            </div>
+                                            <div class="slds-col slds-size_4-of-12 slds-m-right_small">
+                                                <lightning:input type="text" label="" placeholder="Last Name" value="{!user.lastName}" required="true" pattern="[A-Za-z0-9 ]*" messageWhenPatternMismatch="Enter alpha-numeric characters"/>
+                                            </div>
+                                        </div>
+                                        <div class="slds-grid slds-m-top_medium">
+                                            <div class="slds-col slds-size_4-of-12 slds-m-right_small">
+                                                <lightning:input name="{! concat('email',count)}" type="text" label="" placeholder="Email" required="true" value="{!user.email}"
+                                                                        onblur="{!c.validateEmail}" messageWhenPatternMismatch="Email format is invalid"/>
+                                                <aura:if isTrue="{!user.emailError}">
+                                                    <div class="slds-text-color_error slds-form-element__help">
+                                                        {!user.emailError}
+                                                    </div>
+                                                </aura:if>
+                                            </div> 
+                                            
+                                            <div class="slds-col slds-size_4-of-12 slds-m-right_small">
+                                                <lightning:select name="profileOptions" label="" value="{!user.sfProfileId}" onchange="" >
+                                                    <option value="">Select Profile</option>
+                                                    <aura:iteration items="{!v.allowedProfiles}" var="profile">
+                                                        <option text="{!profile.profileName}" value="{!profile.profileId}"/>
+                                                    </aura:iteration>
+                                                </lightning:select>
+                                            </div>
+                                            <aura:if isTrue="{! count == v.manualUsers.length-1}"> 
+                                                <div class="slds-col slds-size_3-of-12">
+                                                    <lightning:icon iconName="utility:add" variant="success" size="xx-small"/> 
+                                                    <button class="slds-button" onclick="{! c.addManualUserRow }" style="padding-top: 2px; margin: 2px 0px 0 2px;">
+                                                        Add
+                                                    </button>
+                                                </div>
+                                            <aura:set attribute="else">
+                                                <div class="slds-col slds-size_3-of-12">
+                                                    <lightning:icon iconName="utility:delete" variant="success" size="xx-small"/> 
+                                                    <button  name="{! concat('del',count)}" class="slds-button" onclick="{! c.delManualUserRow }" style="padding-top: 2px; margin: 2px 0px 0 2px;">
+                                                        Del
+                                                    </button>
+                                                </div>
+                                            </aura:set>
+                                            </aura:if> 
+                                        </div>
+                                    </aura:iteration>
+                                </div>
+                            <!-- <lightning:button variant="brand" label="Add Row" onclick="{! c.addManualEmailRow }" /> -->
+                    
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                               		 <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>
+                            </aura:set>    
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF MANUAL USERS SECTION -->
+                         
+                        <!-- CREATE USERS SECTION --> 
+                        <aura:if isTrue="{! v.sectionDisplay.createUsers}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak " style="width:1000px">
+                                    {!v.createUsersHeading}</h1>
+                                <div class="slds-text-heading_small slds-text-color_weak slds-m-bottom_xx-large" style="font-family:SalesforceSans-Light">
+                                    {!v.createUsersSubHeading}
+                                </div>
+                                <fieldset class="slds-form-element slds-m-bottom_xx-large">
+	                               <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white; width:1000px">
+                                   <thead>
+                                      <tr class="slds-text-title_caps" >
+                                         <th class="slds-text-align_right" scope="col" style="width: 3.25rem;">
+                                            
+                                          </th>
+                                         <th scope="col" class="slds-cell-wrap" style="width: 10rem;">
+                                            <div  title="Name">
+                                               Name
+                                               
+                                            </div>
+                                         </th>
+                                         <th scope="col" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="Email">
+                                               Email
+                                               
+                                            </div>
+                                         </th>
+                                         <th scope="col" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="Email">
+                                               Username
+                                               
+                                            </div>
+                                         </th>
+                                         <th scope="col">
+                                            <div class="slds-truncate" title="Profile" style="width: 6rem;">
+                                               Profile
+                                               
+                                            </div>
+                                         </th>
+                                         
+                                        
+                                      </tr>
+                                   </thead>
+                                   <tbody>
+                                     <aura:iteration items="{!v.users}" var="user" indexVar="count"> 
+                                         <aura:if isTrue="{! or(user.inDesk == true, user.isManual == true)}">
+                                      		<tr class="slds-hint-parent">
+                                          <td class="slds-cell-shrink" data-label="Select Row">
+                                               <aura:if isTrue="{!user.errorMessage}">
+                                                   <lightning:input type="checkbox" disabled="{! or(empty(user.errorStatusCode), not(user.errorStatusCode == 'DUPLICATE_USERNAME'))}" checked="{! user.selected}"/>
+                                               <aura:set attribute="else">
+                                                  	<lightning:icon iconName="utility:success" variant="success" size="small"/> 
+                                              </aura:set>
+                                              </aura:if>    
+                                          </td>
+                                         <td scope="row" data-label="Name" class="slds-cell-wrap" >
+                                            <div   title="{!user.name}">{!user.name}</div>
+                                         </td>
+                                         <td data-label="Email" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="{!user.email}">{!user.email}</div>
+                                         </td>
+                                         <td data-label="Username" class="slds-cell-wrap">
+                                             <aura:if isTrue="{!user.errorStatusCode == 'DUPLICATE_USERNAME'}">
+                                             <lightning:input name="{! concat('username',count)}" type="text" label="" placeholder="Username" required="true" value="{!user.sfUsername}"
+                                                                    onblur="{!c.validateUserName}" messageWhenPatternMismatch="Username has to be in email format"/>
+          										 <div class="slds-text-color_error slds-form-element__help">
+                                                     {!user.usernameError}
+                                                 </div>
+                                                 <div class="slds-text-color_error slds-form-element__help">
+                                                     {!user.errorMessage}
+                                                 </div>
+
+                                             <aura:set attribute="else">
+                                                 
+                                                     <div title="{!user.sfUsername}">{!user.sfUsername}</div>
+                                                 <aura:if isTrue="{!user.errorMessage}">
+                                                     <div class="slds-text-color_error slds-form-element__help">
+                                                         {!user.errorMessage}
+                                                     </div>
+                                             	</aura:if>
+                                             </aura:set> 
+                                                 
+                                            </aura:if>
+                                         </td> 
+                                         <td data-label="Profile">
+                                            <div class="slds-truncate" title="Profile">
+                                                <aura:if isTrue="{! user.errorStatusCode == 'DUPLICATE_USERNAME' }">
+                                                    <lightning:select name="existingEmailsList" label="" value="{!user.sfProfileId}" onchange="" class="profile">
+                                                        <option value="">Select Profile</option>
+                                                        <aura:iteration items="{!v.allowedProfiles}" var="profile">
+                                                            <option text="{!profile.profileName}" value="{!profile.profileId}" selected="{! profile.profileId == user.sfProfileId}"/>
+                                                        </aura:iteration>
+                                                    </lightning:select>
+                                                <aura:set attribute="else">
+                                                	<div class="slds-truncate" title="{!user.sfProfileName}">{!user.sfProfileName}</div>    
+                                                </aura:set>
+                                                </aura:if> 
+                                             </div>
+                                         </td>
+                                         
+                                      </tr>
+                                    	 </aura:if>
+                                       </aura:iteration>	
+                                   </tbody>
+                            	</table>
+                            	</fieldset>
+                           	<aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                            
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF CREATE USERS SECTION -->
+                        
+                        <!-- WELCOME EMAIL SECTION -->
+                        <aura:if isTrue="{! v.sectionDisplay.welcomeEmail}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak " style="width:1000px">Would you like to activate the users and send them a welcome email with their Salesforce login information?</h1>
+                                <div class="slds-text-heading_small slds-text-color_weak slds-m-bottom_xx-large" style="font-family:SalesforceSans-Light;width:1000px;">
+                                  {! v.sfLicenseSubHeader}
+                                </div>
+                                <fieldset class="slds-form-element slds-m-bottom_xx-large">
+	                                 <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white; width:1000px">
+                                   <thead>
+                                      <tr class="slds-text-title_caps" >
+                                         <th class="slds-text-align_right" scope="col" style="width: 3.25rem;">
+                                            
+                                          </th>
+                                         <th scope="col" class="slds-cell-wrap" style="width: 10rem;">
+                                            <div  title="Name">
+                                               Name
+                                               
+                                            </div>
+                                         </th>
+                                         <th scope="col" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="Email">
+                                               Email
+                                               
+                                            </div>
+                                         </th>
+                                         
+                                         <th scope="col" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="Email">
+                                               Username
+                                               
+                                            </div>
+                                         </th>
+										
+                                         <th scope="col">
+                                            <div class="slds-truncate" title="Profile" style="width: 6rem;">
+                                               Profile
+                                               
+                                            </div>
+                                         </th>
+                                         
+                                        
+                                      </tr>
+                                   </thead>
+                                   <tbody>
+                                     <!-- <aura:iteration items="{!v.users}" var="user" indexVar="count"> -->
+                                       <aura:iteration items="{!v.usersSuccessful}" var="user" indexVar="count">
+                                         <aura:if isTrue="{! and(or(user.inDesk == true,user.isManual == true), empty(user.errorMessage))}">
+                                      		<tr class="slds-hint-parent">
+                                          <td class="slds-cell-shrink" data-label="Select Row">
+                                              <lightning:input type="checkbox" disabled="" checked="{! user.selected}"/>
+                                          </td>
+                                         <td scope="row" data-label="Name" class="slds-cell-wrap" >
+                                            <div   title="{!user.name}">{!user.name}</div>
+                                         </td>
+                                         <td data-label="Email" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="{!user.email}">{!user.email}</div>
+                                         </td>      
+                                         <td data-label="Username" class="slds-cell-wrap">
+                                            <div  title="{!user.sfUsername}">{!user.sfUsername}</div>
+                                         </td>
+                                         <td data-label="Profile">
+                                           	<div  title="{!user.sfUsername}">{!user.sfProfileName}</div>
+                                         </td> 
+                                      </tr>
+                                    	 </aura:if>
+                                       </aura:iteration>	
+                                   </tbody>
+                            	</table>
+                            	</fieldset>
+                           	<aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                            
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF WELCOME EMAIL SECTION -->
+                          
+                        <!-- UPDATE USERS SECTION -->
+                        <aura:if isTrue="{! v.sectionDisplay.update}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak ">{!v.updateUsersHeading}</h1>
+                                <aura:if isTrue="{!v.postUpdate == false}">
+                                    <ul class="slds-list--dotted slds-text-color_weak slds-m-left_medium slds-m-bottom_xx-large">
+                                        <li class="slds-text-heading_small slds-text-color_weak">{!v.sfLicenseSubHeader}</li>
+                                        <li class="slds-m-bottom_x-small slds-text-heading_small slds-text-color_weak">For other changes click on the username to go to User setup page</li>
+                                    </ul> 
+                                </aura:if>
+                                <fieldset class="slds-form-element slds-m-bottom_xx-large">
+	                                 <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white;row-height:3rem">
+                                   <thead>
+                                      <tr class="slds-text-title_caps" >
+                                          <aura:if isTrue="{!v.postUpdate}">
+                                              <th class="slds-text-align_right" scope="col" style="width: 3.25rem;">
+                                                
+                                              </th>
+                                          </aura:if>
+                                         <th scope="col" class="slds-cell-wrap" style="width: 10rem;">
+                                            <div  title="Name" style="padding-left:0.5rem;">
+                                               Name
+                                               
+                                            </div>
+                                         </th>
+                                         <th scope="col" class="slds-cell-wrap" >
+                                            <div class="slds-truncate" title="Email">
+                                               Username
+                                               
+                                            </div>
+                                         </th>
+                                        
+                                         <th scope="col" style="width: 15rem;">
+                                            <div class="slds-truncate" title="Profile" style="width: 10rem;">
+                                               Profile
+                                               
+                                            </div>
+                                         </th>
+                                          
+                                         <th scope="col" class="slds-cell-wrap" style="width: 5rem;">
+                                            <div class="slds-truncate" title="Active">
+                                               Active
+                                               
+                                            </div>
+                                         </th>
+                                         
+                                        
+                                      </tr>
+                                   </thead>
+                                   <tbody>
+                                     <aura:iteration items="{!v.existingSFUsers}" var="user" indexVar="count"> 
+                                         <aura:if isTrue="{! user.inSalesforce == true  }">
+                                      		<tr class="slds-hint-parent">
+                                         <aura:if isTrue="{!v.postUpdate}">
+                                             <td>
+                                                 <aura:if isTrue="{!user.errorMessage}">
+                                                   <lightning:icon iconName="utility:warning" variant="error" size="small"/>
+                                               <aura:set attribute="else">
+                                                  	<lightning:icon iconName="utility:success" variant="success" size="small"/> 
+                                              </aura:set>
+                                                 </aura:if>
+                                             </td>       
+                                         </aura:if>
+                                         <td scope="row" data-label="Name" class="slds-cell-wrap" style="padding-left:1rem;" >
+                                            <div   title="{!user.name}">{!user.name}</div>
+                                         </td>
+                                         <td data-label="Username" class="slds-cell-wrap">
+                                                                                      
+                                                <lightning:input name="{! concat('username',count)}" type="text" value="{!user.sfUsername}" variant="label-hidden" disabled = "{! v.currentUserId == user.sfUserId}" onblur="{!c.validateUserNameForUpdate}"/>
+                                                <div class="slds-text-color_error slds-form-element__help">
+                                                     {!user.usernameError}
+                                                 </div>
+                                                 <div class="slds-text-color_error slds-form-element__help">
+                                                     {!user.errorMessage}
+                                                 </div>
+                                            
+                                         </td>
+                                               
+                                         <td data-label="Profile" class="slds-cell-wrap">
+                                         	<lightning:select name="existingProfiles" label="" value="{! user.sfProfileId}" onchange="" class="profile" disabled = "{! v.currentUserId == user.sfUserId}" >
+                                                <aura:iteration items="{!v.allowedProfilesForUpdate}" var="profile">
+                                                    	<option text="{!profile.profileName}" value="{!profile.profileId}" selected="{!user.sfProfileId == profile.profileId}"/>
+                                                </aura:iteration>
+                                                
+                                             </lightning:select>
+                                         </td>
+                                         <td data-label="Profile" class="slds-cell-wrap" style="text-align: center">
+                                         		<lightning:input type="checkbox"  checked="{! user.isActive}" disabled = "{! v.currentUserId == user.sfUserId}"/>
+                                        </td>
+                                      </tr>
+                                    	 </aura:if>
+                                       </aura:iteration>	
+                                   </tbody>
+                            	</table>
+                            	</fieldset>
+                           	<aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                            
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF ACTIVATE / DEACTIVATE EXISTING USERS SECTION -->   
+                          
+                        <!-- COMPLETE SECTION -->
+                        <aura:if isTrue="{! v.sectionDisplay.complete}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak " style="width:1000px">{!v.completeHeader}</h1>
+                           	<aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                            
+                            </aura:if>
+                        </aura:if>
+                        <!-- COMPLETE SECTION -->
+                          
+                         <!-- COMMON BUTTONS -->
+                        <!-- <aura:if isTrue="{! and(v.isInitialising == false, v.unknownError == false)}"></aura:if> -->
+                        <footer class="slds-m-top_x-large" style="{! and(v.isProcessing == false, v.unknownError == false) ? 'display:block' : 'display:none' }">
+                         	
+                            <lightning:button aura:id="backButton" variant="neutral" label="Back" onclick="{!c.back}" disabled="false" class="wide-button"/>
+                            <lightning:button aura:id="nextButton" variant="neutral" label="Next >" onclick="{!c.next}" disabled="false" class="wide-button"/>
+                        </footer> 
+                        
+                        <!-- END OF COMMON BUTTONS -->
+                          
+                        </div>
+											    
+			    	</div>
+	
+			    </div>
+			    <!-- GRID START END -->
+		  		
+			</div>
+			<!-- END RECIPE HOLDER -->
+
+			
+	  </div>
+	  <!-- END CONTENT TEST HOLDER -->
+    
+    </body>  
+</aura:component>

@@ -1,0 +1,21 @@
+.THIS .profile .slds-form-element__label{
+    display: none;
+}
+
+.THIS .wide-button{
+    width: 9em;
+    margin-right: 5px;
+}
+
+.THIS .slds-required {
+    display: none;
+}
+
+.THIS .slds-icon-utility-success .slds-icon-text-default {
+  fill: green;
+}
+
+.THIS .slds-checkbox .slds-form-element__label{
+    font-size: 0.9rem;
+    font-family: Salesforce Sans;   
+}

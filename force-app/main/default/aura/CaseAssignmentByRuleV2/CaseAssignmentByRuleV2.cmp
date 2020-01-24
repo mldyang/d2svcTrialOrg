@@ -1,0 +1,670 @@
+<aura:component controller="CaseAssignmentByRuleControllerV2" extends="c:RecipeBase">
+    <aura:attribute name="oauthRecordIdentifier" type="String" access="public" default="bw8u3Xm81547509012512"/>
+    <aura:attribute name="sfUrl" type="String" access="public"/>
+    <aura:attribute name="sfSessionId" type="String" access="public"/>
+    <aura:attribute name="users" type="List" access="public"/>    
+    <aura:attribute name="queues" type="List" access="public"/>
+    <aura:attribute type="List" name="existingEmailToCase" access="public" />
+    <aura:attribute type="List" name="existingSFActiveUsers" access="public" />
+    <aura:attribute name="existingAssignmentRules" type="List" />
+    <aura:attribute name="existingActiveAssignmentRule" type="Object" />
+    <aura:attribute name="newAssignmentRule" type="Object" />
+    <aura:attribute name="newRuleEntryList" type="List" />
+    <aura:attribute name="catchAllRuleEntryList" type="List" />
+    <aura:attribute name="byChannelRuleEntryList" type="List" />
+    <aura:attribute name="byCustomerRuleEntryList" type="List" />
+    <aura:attribute name="byEmailKeywordsRuleEntryList" type="List" />
+    <aura:attribute name="allOtherCasesRuleEntryList" type="List" />
+    <aura:attribute name="sectionDisplay" type="Map" default="{ existing: true, model: false, catchAll: false, byChannel: false, byCustomer: false, byEmailKeywords: false, ordering: false, allOtherCases: false, complete: false}" />
+    <aura:attribute name="model" type="Map" default="{ catchAll: false, byChannel: false, byCustomer: false, byEmailKeywords: false, advanced: false}" />
+    <aura:attribute name="isProcessing" type="Boolean" default="false"/>
+    <aura:attribute name="processingMessage" type="String" default="Checking for existing Assignment Rules" />
+    <aura:attribute name="showError" type="Boolean" default="false" />
+    <aura:attribute name="errorMessage" type="String" />
+    <aura:attribute name="unknownError" type="Boolean" default="false" />
+    
+    <aura:handler name="init" action="{!c.init}" value="{!this}" /> 
+    <aura:registerEvent name="recipeComponentChange" type="c:RecipeComponentChangeEvent"/>
+
+	<body class="desk" style="background:white;">
+	  <!-- TEST CONTENT HOLDER -->
+	  <div style="margin: auto; width: 100%; height: 100vh;">
+          
+          <!-- RECIPE HOLDER -->
+          <div style="margin: 3em 3em 0 3em;">
+              
+              <!-- ERRORS SECTION -->
+
+                    <div style="{! if(v.showError,'display:block','display:none')}">
+                         <c:Toast aura:id="toast" isActive="{!v.showError}" message="{!v.errorMessage}" type="warning">
+                            {!v.errorMessage}
+                        </c:Toast> 
+                    </div>
+                    
+
+              <!-- END OF ERRORS SECTION-->
+              
+              <!-- BLOCKING ERROR -->    
+              <aura:if isTrue="{!v.unknownError}">
+                  <div aura:id="unknownErrorMessage" id="unknonw" class="middle" >
+                      <lightning:icon iconName="utility:error" variant="error" size="large"/>
+                      <div class="slds-text-heading_small slds-m-top_x-small">There seems to be an issue with creating your trial org. Please contact <a href = "mailto: support@desk.com">support@desk.com</a></div>
+                  </div>
+              </aura:if>
+              <!-- BLOCKING ERROR END -->
+              
+              <!-- GRID START -->
+              <div class="slds-col slds-size_1-of-1 slds-p-around_medium" style="max-width:800px">
+                  <div class="slds-grid">
+                      <div class="slds-col slds-size_12-of-12 slds-show_small">
+                          <!-- BREADCRUMBS -->
+                          <c:Breadcrumb recipe="Assignment Rules"/>
+                          <!-- END BREADCRUMBS -->
+        
+                        <!-- EXISTING ASSIGNMENT RULE -->
+                        <aura:if isTrue="{! and(v.sectionDisplay.existing)}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                                <form aura:id="frontdoor-form" target="_blank" method="POST" action="{! v.sfUrl + '/secur/frontdoor.jsp'}">
+                                    <input type="hidden" name="sid"
+                                          value="{!v.sfSessionId}" />
+                                    <input type="hidden" name="retURL" 
+                                          value="{!'lightning/setup/CaseRules/home'}" /> 
+                                </form>
+                                <h1 class="slds-text-heading_large slds-m-bottom_medium slds-text-color_weak">You have an active assignment rule {!v.existingActiveAssignmentRule.fullName}</h1>
+                                <ul class="slds-list--dotted slds-text-color_weak slds-m-left_medium slds-m-bottom_xx-large">
+                                  	<aura:if isTrue="{! not(v.existingActiveAssignmentRule.advancedModel)}">
+                                   		 <li class=" slds-text-heading_small slds-text-color_weak">The rule entries are listed here. To modify the rules click <ui:outputURL value="#" click="{!c.customizeLink}" label="here"/></li>
+                                    <aura:set attribute="else">
+                                        <li class=" slds-text-heading_small slds-text-color_weak">You are using an advanced model. To view/modify the rule entries click <ui:outputURL value="#" click="{!c.customizeLink}" label="here"/></li>
+                                    </aura:set>
+                                    </aura:if>
+                                    <li class="slds-text-heading_small slds-text-color_weak">To create a new rule click next below</li>
+                                </ul>
+                                <aura:if isTrue="{! not(v.existingActiveAssignmentRule.advancedModel)}">
+                                <fieldset class="slds-form-element slds-m-bottom_xx-large">
+	                                 <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white;row-height:3rem">
+                                   <thead>
+                                      <tr class="slds-text-title_caps" >
+
+                                         <th scope="col" class="slds-cell-wrap" style="width: 4rem;">
+                                            <div  title="Name">
+                                               Order
+                                            </div>
+                                         </th>
+                                         <th scope="col" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="Criteria">
+                                               Criteria
+                                            </div>
+                                         </th>
+                                         <th scope="col" class="slds-cell-wrap" style="width: 12rem;">
+                                            <div class="slds-truncate" title="Email">
+                                               Assign To
+                                            </div>
+                                         </th>
+                                         <th scope="col" style="width: 5rem;">
+                                            <div class="slds-truncate" title="Profile" >
+                                               Notify
+                                            </div>
+                                         </th>
+                                        
+                                      </tr>
+                                   </thead>
+                                   <tbody>
+                                     <aura:iteration items="{!v.existingActiveAssignmentRule.ruleEntryList}" var="ruleEntry" indexVar="count"> 
+                                      	<tr class="slds-hint-parent">
+                                          <td class="slds-cell-shrink" data-label="Select Row" style="text-align:center">
+                                              {!count+1}
+                                          </td>
+                                         <td scope="row" data-label="Name" class="slds-cell-wrap" >
+											  {!ruleEntry.displayText}	
+                                         </td>
+                                         <td data-label="Email" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="">{!ruleEntry.assignedToName}</div>
+                                         </td>
+                                         <td data-label="Profile" style="text-align:center">
+                                            <lightning:input type="checkbox" label="" name="" checked="{! not(empty(ruleEntry.emailTemplate))}" onchange="" disabled="true"/>
+                                         </td>
+                                      </tr>
+                                       </aura:iteration>	
+                                   </tbody>
+                            	</table>
+                            	</fieldset>
+                                </aura:if>
+                                   
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF EXISTING ASSIGNMENT RULE --> 
+                          
+                        <!-- MODEL SECTION -->
+                        <aura:if isTrue="{! and(v.sectionDisplay.model)}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                            <h1 class="slds-text-heading_large slds-m-bottom_medium slds-text-color_weak">Choose the models that you would like to use to assign cases</h1>
+                            <div class="slds-text-heading_small slds-text-color_weak slds-m-bottom_x-large" style="font-family:SalesforceSans-Light">Add your Users and Groups to Service Cloud before you set up assignment rules. Adding them will not affect your existing Desk functioning.</div>    
+                            <fieldset class="slds-form-element slds-m-top_medium slds-m-bottom_xx-large slds-m-left_large">
+                                <lightning:input aura:id="modelCatchAll" type="checkbox" label="Assign all new cases to a user or queue" name="" checked="{!v.model.catchAll}" onchange="" disabled="{! v.model.byChannel || v.model.byCustomer || v.model.byEmailKeywords || v.model.advanced}"/>
+                                <lightning:input aura:id="modelByChannel" type="checkbox" label="Assign new cases to a user or queue based on channel" name="" checked="{!v.model.byChannel}" onchange="" disabled="{!v.model.catchAll}"/>
+                                <lightning:input aura:id="modelByCustomer" type="checkbox" label="Assign new cases to a user or queue based on customer" name="" checked="{!v.model.byCustomer}" onchange="" disabled="{!v.model.catchAll}"/>
+                                <lightning:input aura:id="modelByEmailKeyWords" type="checkbox" label="Assign new cases to a user or queue based on keywords in customer email" name="" checked="{!v.model.byEmailKeywords}" onchange="" disabled="{!v.model.catchAll}"/>
+                                <lightning:input aura:id="modelAdvanced" type="checkbox" label="Assign new cases to a user or queue based on other criteria" name="" checked="{!v.model.advanced}" onchange="" disabled="{!v.model.catchAll}"/>
+                                
+                            </fieldset>
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF MODEL SECTION -->  
+                          
+                        <!-- MODEL CATCH ALL SECTION (Assign to all a user or queue -->
+                        <aura:if isTrue="{! and(v.sectionDisplay.catchAll)}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                            <h1 class="slds-text-heading_large slds-m-bottom_medium slds-text-color_weak">Choose the user or queue you would like to assign all your cases to</h1>
+                            <fieldset class="slds-form-element slds-m-bottom_xx-large">
+                                <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white;">
+                                   <thead>
+                                      <tr class="slds-text-title_caps" >
+                                         <th scope="col" class="slds-cell-wrap" >
+                                            <div  title="Name">
+                                               
+                                            </div>
+                                         </th>
+                                         <th scope="col" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="Developer Name">
+                                               ASSIGN TO USER
+                                            </div>
+                                         </th>
+                                          <th scope="col" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="Developer Name">
+                                               ASSIGN TO QUEUE
+                                            </div>
+                                         </th>  
+                                      </tr>
+                                   </thead>
+                                   <tbody>
+                                       <aura:iteration items="{!v.catchAllRuleEntryList}" var="rule" indexVar="count">   
+                                      	<tr class="slds-hint-parent">
+                                          <td class="slds-cell-shrink" data-label="Select Row" >
+                                               All Cases
+                                          </td>
+                                         <td scope="row" data-label="Name" class="slds-cell-wrap" style="vertical-align: top">
+                                           
+                                           <lightning:select name="{! concat('userAssignedTo',count)}" label="" value="{!rule.assignedTo}" onchange="{!c.channelUserSelected}" class="profile" disabled="{!rule.assignedToType == 'Queue'}">
+                                                 <option value="">Choose</option>
+                                                 <aura:iteration items="{!v.existingSFActiveUsers}" var="user">
+                                                     <option text="{!user.name}" value="{!user.sfUsername}" selected="{! user.sfUsername == rule.assignedTo}"/>
+                                                 </aura:iteration>
+                                             </lightning:select>
+                                             <aura:if isTrue="{!rule.assignedToType == 'User'}">
+                                             	<lightning:input name="{! concat('userNotification',count)}" type="checkbox" label="Send Notification" checked="{!rule.sendNotification}" onchange="" disabled="false" class="slds-m-top_small slds-m-left_xxx-small"/>
+                                             </aura:if>
+                                         </td>
+                                         <td data-label="Assign to Queue" class="slds-cell-wrap" style="vertical-align: top">
+                                             <lightning:select name="{! concat('queueAssignedTo',count)}" label="" value="{!rule.assignedTo}" onchange="{!c.channelQueueSelected}" class="profile" disabled="{!rule.assignedToType == 'User'}">
+                                                 <option value="">Choose</option>
+                                                 <aura:iteration items="{!v.queues}" var="queue">
+                                                     <option text="{!queue.name}" value="{!queue.sfDeveloperName}" selected="{! queue.sfDeveloperName == rule.assignedTo}"/>
+                                                 </aura:iteration>
+                                             </lightning:select>
+                                             <aura:if isTrue="{!rule.assignedToType == 'Queue'}">
+                                             	<lightning:input name="{! concat('queueNotification',count)}" type="checkbox" label="Send Notification" checked="{!rule.sendNotification}" onchange="" disabled="false" class="slds-m-top_small slds-m-left_xxx-small"/>
+                                             </aura:if>
+                                         </td> 
+                                      </tr>
+                                      </aura:iteration>
+                                   </tbody>
+                            	</table>
+                            </fieldset>
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF CATCH ALL SECTION --> 
+                          
+                        <!-- MODEL ASSIGN BY CHANNEL SECTION -->
+                        <aura:if isTrue="{! and(v.sectionDisplay.byChannel)}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                            <h1 class="slds-text-heading_large slds-m-bottom_xx-large slds-text-color_weak">To assign by email channel, select the User/Queue you would like to assign for each of your channels</h1>
+                            <fieldset class="slds-form-element slds-m-bottom_xx-large">
+                                <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white;">
+                                   <thead>
+                                      <tr class="slds-text-title_caps" >
+                                         <th scope="col" class="slds-cell-wrap" >
+                                            <div  title="Name">
+                                               EMAIL
+                                            </div>
+                                         </th>
+                                         <th scope="col" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="Developer Name">
+                                               ASSIGN TO USER
+                                            </div>
+                                         </th>
+                                          <th scope="col" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="Developer Name">
+                                               ASSIGN TO QUEUE
+                                            </div>
+                                         </th>  
+                                      </tr>
+                                   </thead>
+                                   <tbody>
+                                       <aura:iteration items="{!v.byChannelRuleEntryList}" var="rule" indexVar="count">   
+                                      	<tr class="slds-hint-parent">
+                                          <td class="slds-cell-shrink" data-label="Select Row" >
+                                               {!rule.email}
+                                          </td>
+                                         <td scope="row" data-label="Name" class="slds-cell-wrap" style="vertical-align: top">
+                                           
+                                           <lightning:select name="{! concat('userAssignedTo',count)}" label="" value="{!rule.assignedTo}" onchange="{!c.channelUserSelected}" class="profile" disabled="{!rule.assignedToType == 'Queue'}">
+                                                 <option value="">Choose</option>
+                                                 <aura:iteration items="{!v.existingSFActiveUsers}" var="user">
+                                                     <option text="{!user.name}" value="{!user.sfUsername}" selected="{! user.sfUsername == rule.assignedTo}"/>
+                                                 </aura:iteration>
+                                             </lightning:select>
+                                             <aura:if isTrue="{!rule.assignedToType == 'User'}">
+                                             	<lightning:input name="{! concat('userNotification',count)}" type="checkbox" label="Send Notification" checked="{!rule.sendNotification}" onchange="" disabled="false" class="slds-m-top_small slds-m-left_xxx-small"/>
+                                             </aura:if>
+                                         </td>
+                                         <td data-label="Assign to Queue" class="slds-cell-wrap" style="vertical-align: top">
+                                             <lightning:select name="{! concat('queueAssignedTo',count)}" label="" value="{!rule.assignedTo}" onchange="{!c.channelQueueSelected}" class="profile" disabled="{!rule.assignedToType == 'User'}">
+                                                 <option value="">Choose</option>
+                                                 <aura:iteration items="{!v.queues}" var="queue">
+                                                     <option text="{!queue.name}" value="{!queue.sfDeveloperName}" selected="{! queue.sfDeveloperName == rule.assignedTo}"/>
+                                                 </aura:iteration>
+                                             </lightning:select>
+                                             <aura:if isTrue="{!rule.assignedToType == 'Queue'}">
+                                             	<lightning:input name="{! concat('queueNotification',count)}" type="checkbox" label="Send Notification" checked="{!rule.sendNotification}" onchange="" disabled="false" class="slds-m-top_small slds-m-left_xxx-small"/>
+                                             </aura:if>
+                                         </td> 
+                                      </tr>
+                                      </aura:iteration>
+                                   </tbody>
+                            	</table>
+                            </fieldset>
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF ASSIGN BY CHANNEL SECTION --> 
+                          
+                        <!-- MODEL ASSIGN BY CUSTOMER SECTION -->
+                        <aura:if isTrue="{! and(v.sectionDisplay.byCustomer)}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                            <h1 class="slds-text-heading_large slds-m-bottom_xx-large slds-text-color_weak">To assign by customer, enter the customer email domain and select the the user or queue to assign to</h1>
+                            <fieldset class="slds-form-element slds-m-bottom_xx-large">
+                                <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white;">
+                                   <thead>
+                                      <tr class="slds-text-title_caps" >
+                                         <th scope="col" class="slds-cell-wrap" >
+                                            <div  title="Name">
+                                               CUSTOMER EMAIL DOMAIN
+                                            </div>
+                                         </th>
+                                         <th scope="col" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="Developer Name">
+                                               ASSIGN TO USER
+                                            </div>
+                                         </th>
+                                          <th scope="col" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="Developer Name">
+                                               ASSIGN TO QUEUE
+                                            </div>
+                                         </th>
+                                          <th scope="col" class="slds-cell-wrap" style="width: 4rem;"></th>
+                                      </tr>
+                                   </thead>
+                                   <tbody>
+                                       <aura:iteration items="{!v.byCustomerRuleEntryList}" var="rule" indexVar="count">   
+                                      	<tr class="slds-hint-parent">
+                                          <td class="slds-cell-shrink slds-m-right-small" data-label="Select Row" style="vertical-align: top">
+                                               <lightning:input name="{! concat('customerDomain',count)}" label="" value="{!rule.customerDomain}" onchange="{!c.addAtValueToCustomerDomain}" disabled="false" class="profile"/>
+                                          </td>
+                                         <td scope="row" data-label="Name" class="slds-cell-wrap" style="vertical-align: top">
+                                           
+                                           <lightning:select name="{! concat('userAssignedTo',count)}" label="" value="{!rule.assignedTo}" onchange="{!c.channelUserSelected}" class="profile" disabled="{!rule.assignedToType == 'Queue'}">
+                                                 <option value="">Choose</option>
+                                                 <aura:iteration items="{!v.existingSFActiveUsers}" var="user">
+                                                     <option text="{!user.name}" value="{!user.sfUsername}" selected="{! user.sfUsername == rule.assignedTo}"/>
+                                                 </aura:iteration>
+                                             </lightning:select>
+                                             <aura:if isTrue="{!rule.assignedToType == 'User'}">
+                                             	<lightning:input name="{! concat('userNotification',count)}" type="checkbox" label="Send Notification" checked="{!rule.sendNotification}" onchange="" disabled="false" class="slds-m-top_small slds-m-left_xxx-small"/>
+                                             </aura:if>
+                                         </td>
+                                         <td data-label="Assign to Queue" class="slds-cell-wrap" style="vertical-align: top">
+                                             <lightning:select name="{! concat('queueAssignedTo',count)}" label="" value="{!rule.assignedTo}" onchange="{!c.channelQueueSelected}" class="profile" disabled="{!rule.assignedToType == 'User'}">
+                                                 <option value="">Choose</option>
+                                                 <aura:iteration items="{!v.queues}" var="queue">
+                                                     <option text="{!queue.name}" value="{!queue.sfDeveloperName}" selected="{! queue.sfDeveloperName == rule.assignedTo}"/>
+                                                 </aura:iteration>
+                                             </lightning:select>
+                                             <aura:if isTrue="{!rule.assignedToType == 'Queue'}">
+                                             	<lightning:input name="{! concat('queueNotification',count)}" type="checkbox" label="Send Notification" checked="{!rule.sendNotification}" onchange="" disabled="false" class="slds-m-top_small slds-m-left_xxx-small"/>
+                                             </aura:if>
+                                         </td> 
+                                         <td data-label="Assign to Queue" class="slds-cell-wrap"> 
+                                             <div >
+                                                <lightning:icon name="{! concat('row',count)}" onclick="{! c.delRow }" iconName="utility:delete" variant="success" size="xx-small"/> 
+                                                 <button name="{! concat('row',count)}" onclick="{! c.delRow }" class="slds-button"  style="padding-top: 2px; margin: 2px 0px 0 2px;">
+                                                     Del
+                                                 </button>
+                                            </div>
+                                         </td>
+                                      </tr>
+                                      </aura:iteration>
+                                   </tbody>
+                            	</table>
+                                <div class="slds-grid slds-m-top_medium"> 
+                                        <div class="slds-col slds-size_3-of-12">
+                                            <lightning:icon iconName="utility:add" variant="success" size="xx-small"/> 
+                                            <button class="slds-button" onclick="{! c.addRow }" style="padding-top: 2px; margin: 2px 0px 0 2px;">
+                                                Add Another
+                                            </button>
+                                        </div>
+                                    </div>
+                            </fieldset>
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF ASSIGN BY CUSTOMER SECTION -->  
+                        
+                        <!-- MODEL ASSIGN BY EMAIL KEYWORDS SECTION -->
+                        <aura:if isTrue="{! and(v.sectionDisplay.byEmailKeywords)}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                            <h1 class="slds-text-heading_large slds-m-bottom_xx-large slds-text-color_weak">To assign by Keywords, enter the keyword and select the the user or queue to assign to</h1>
+                            <fieldset class="slds-form-element slds-m-bottom_xx-large">
+                                <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white;">
+                                   <thead>
+                                      <tr class="slds-text-title_caps" >
+                                         <th scope="col" class="slds-cell-wrap" >
+                                            <div  title="Name">
+                                               KEYWORD IN EMAIL
+                                            </div>
+                                         </th>
+                                         <th scope="col" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="Developer Name">
+                                               ASSIGN TO USER
+                                            </div>
+                                         </th>
+                                          <th scope="col" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="Developer Name">
+                                               ASSIGN TO QUEUE
+                                            </div>
+                                         </th>
+                                          <th scope="col" class="slds-cell-wrap" style="width: 4rem;"></th>
+                                      </tr>
+                                   </thead>
+                                   <tbody>
+                                       <aura:iteration items="{!v.byEmailKeywordsRuleEntryList}" var="rule" indexVar="count">   
+                                      	<tr class="slds-hint-parent">
+                                          <td class="slds-cell-shrink slds-m-right-small" data-label="Select Row" style="vertical-align: top">
+                                               <lightning:input name="{! concat('keyword',count)}" label="" value="{!rule.keyword}" onchange="" disabled="false" class="profile"/>
+                                              <aura:if isTrue="{!rule.keyword.length > 0}">
+                                              <div style="display: inline-block">
+                                                <div style="float:left">  
+                                               <lightning:input name="{! concat('emailSubject',count)}" type="checkbox" label="Subject" checked="{!rule.subject}" onchange="" disabled="false" class="slds-m-top_small slds-m-left_xxx-small"/>
+                                                </div>
+                                                <div style="float:right"> 
+                                               <lightning:input name="{! concat('emailDescription',count)}" type="checkbox" label="Description" checked="{!rule.description}" onchange="" disabled="false" class="slds-m-top_small slds-m-left_xxx-small"/>
+                                                  </div>
+                                              </div>
+                                              </aura:if>
+                                          </td>
+                                         <td scope="row" data-label="Name" class="slds-cell-wrap" style="vertical-align: top">
+                                           
+                                           <lightning:select name="{! concat('userAssignedTo',count)}" label="" value="{!rule.assignedTo}" onchange="{!c.channelUserSelected}" class="profile" disabled="{!rule.assignedToType == 'Queue'}">
+                                                 <option value="">Choose</option>
+                                                 <aura:iteration items="{!v.existingSFActiveUsers}" var="user">
+                                                     <option text="{!user.name}" value="{!user.sfUsername}" selected="{! user.sfUsername == rule.assignedTo}"/>
+                                                 </aura:iteration>
+                                             </lightning:select>
+                                             <aura:if isTrue="{!rule.assignedToType == 'User'}">
+                                             	<lightning:input name="{! concat('userNotification',count)}" type="checkbox" label="Send Notification" checked="{!rule.sendNotification}" onchange="" disabled="false" class="slds-m-top_small slds-m-left_xxx-small"/>
+                                             </aura:if>
+                                         </td>
+                                         <td data-label="Assign to Queue" class="slds-cell-wrap" style="vertical-align: top">
+                                             <lightning:select name="{! concat('queueAssignedTo',count)}" label="" value="{!rule.assignedTo}" onchange="{!c.channelQueueSelected}" class="profile" disabled="{!rule.assignedToType == 'User'}">
+                                                 <option value="">Choose</option>
+                                                 <aura:iteration items="{!v.queues}" var="queue">
+                                                     <option text="{!queue.name}" value="{!queue.sfDeveloperName}" selected="{! queue.sfDeveloperName == rule.assignedTo}"/>
+                                                 </aura:iteration>
+                                             </lightning:select>
+                                             <aura:if isTrue="{!rule.assignedToType == 'Queue'}">
+                                             	<lightning:input name="{! concat('queueNotification',count)}" type="checkbox" label="Send Notification" checked="{!rule.sendNotification}" onchange="" disabled="false" class="slds-m-top_small slds-m-left_xxx-small"/>
+                                             </aura:if>
+                                         </td> 
+                                         <td data-label="Assign to Queue" class="slds-cell-wrap"> 
+                                             <div >
+                                                <lightning:icon name="{! concat('row',count)}" onclick="{! c.delRow }" iconName="utility:delete" variant="success" size="xx-small"/> 
+                                                 <button name="{! concat('row',count)}" onclick="{! c.delRow }" class="slds-button"  style="padding-top: 2px; margin: 2px 0px 0 2px;">
+                                                     Del
+                                                 </button>
+                                            </div>
+                                         </td>
+                                      </tr>
+                                      </aura:iteration>
+                                   </tbody>
+                            	</table>
+                                <div class="slds-grid slds-m-top_medium"> 
+                                        <div class="slds-col slds-size_3-of-12">
+                                            <lightning:icon iconName="utility:add" variant="success" size="xx-small"/> 
+                                            <button class="slds-button" onclick="{! c.addRow }" style="padding-top: 2px; margin: 2px 0px 0 2px;">
+                                                Add Another
+                                            </button>
+                                        </div>
+                                    </div>
+                            </fieldset>
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF ASSIGN BY EMAIL KEYWORDS SECTION -->  
+                          
+                        <!-- ORDERING ASSIGNMENT RULE -->
+                        <aura:if isTrue="{! and(v.sectionDisplay.ordering)}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_medium slds-text-color_weak">Choose the order for your assignment rules</h1>
+                                <ul class="slds-list--dotted slds-text-color_weak slds-m-left_medium slds-m-bottom_xx-large">
+                                    <li class=" slds-text-heading_small slds-text-color_weak">Assignment rules will execute in order. Assignment will be done based on the first matching rule.</li>
+                                    <li class=" slds-text-heading_small slds-text-color_weak">E.g. Enter 1 for rule 3 to make it the first rule, rule 1 and 2 will move 1 step down.</li>
+                                </ul>
+                                <fieldset class="slds-form-element slds-m-bottom_xx-large">
+	                                 <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white;row-height:3rem">
+                                   <thead>
+                                      <tr class="slds-text-title_caps" >
+
+                                         <th scope="col" class="slds-cell-wrap" style="width: 6rem;">
+                                            <div  title="Name">
+                                               Order
+                                            </div>
+                                         </th>
+                                         <th scope="col" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="Criteria">
+                                               Criteria
+                                            </div>
+                                         </th>
+                                         <th scope="col" class="slds-cell-wrap" style="width: 12rem;">
+                                            <div class="slds-truncate" title="Email">
+                                               Assign To
+                                            </div>
+                                         </th>
+                                         <th scope="col" style="width: 5rem;">
+                                            <div class="slds-truncate" title="Profile" >
+                                               Notify
+                                            </div>
+                                         </th>                                        
+                                      </tr>
+                                   </thead>
+                                   <tbody>
+                                     <aura:iteration items="{!v.newAssignmentRule.ruleEntryList}" var="ruleEntry" indexVar="count"> 
+                                      	<tr class="slds-hint-parent">
+                                          <td class="slds-cell-shrink" data-label="Select Row" style="text-align:center">
+                                              <lightning:input name="{!concat('row',count)}" type="number" value="{!ruleEntry.order}" label="" onblur="{!c.reorderRules}" disabled="false" class="profile" minlength="1"/>
+                                          </td>
+                                         <td scope="row" data-label="Name" class="slds-cell-wrap" >
+											  {!ruleEntry.displayText}	
+                                         </td>
+                                         <td data-label="Email" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="">{!ruleEntry.assignedToName}</div>
+                                         </td>
+                                         <td data-label="Profile" style="text-align:center">
+                                            <lightning:input type="checkbox" label="" name="" checked="{! not(empty(ruleEntry.emailTemplate))}" onchange="" disabled="true"/>
+                                         </td>
+                                      </tr>
+                                       </aura:iteration>	
+                                   </tbody>
+                            	</table>
+                            	</fieldset>
+                                   
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF ORDERING ASSIGNMENT RULE -->   
+                          
+                        <!-- ALL OTHER CASES SECTION (Assign to all a user or queue -->
+                        <aura:if isTrue="{! and(v.sectionDisplay.allOtherCases)}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                            <h1 class="slds-text-heading_large slds-m-bottom_xx-large slds-text-color_weak">If the case does not match any of your rules, which user or queue would you like to assign the case to?</h1>
+                            <fieldset class="slds-form-element slds-m-bottom_xx-large">
+                                <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white;">
+                                   <thead>
+                                      <tr class="slds-text-title_caps" >
+                                         <th scope="col" class="slds-cell-wrap" >
+                                            <div  title="Name">
+                                               
+                                            </div>
+                                         </th>
+                                         <th scope="col" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="Developer Name">
+                                               ASSIGN TO USER
+                                            </div>
+                                         </th>
+                                          <th scope="col" class="slds-cell-wrap">
+                                            <div class="slds-truncate" title="Developer Name">
+                                               ASSIGN TO QUEUE
+                                            </div>
+                                         </th>  
+                                      </tr>
+                                   </thead>
+                                   <tbody>
+                                       <aura:iteration items="{!v.allOtherCasesRuleEntryList}" var="rule" indexVar="count">   
+                                      	<tr class="slds-hint-parent">
+                                          <td class="slds-cell-shrink" data-label="Select Row" >
+                                               All Cases
+                                          </td>
+                                         <td scope="row" data-label="Name" class="slds-cell-wrap" style="vertical-align: top">
+                                           
+                                           <lightning:select name="{! concat('userAssignedTo',count)}" label="" value="{!rule.assignedTo}" onchange="{!c.channelUserSelected}" class="profile" disabled="{!rule.assignedToType == 'Queue'}">
+                                                 <option value="">Choose</option>
+                                                 <aura:iteration items="{!v.existingSFActiveUsers}" var="user">
+                                                     <option text="{!user.name}" value="{!user.sfUsername}" selected="{! user.sfUsername == rule.assignedTo}"/>
+                                                 </aura:iteration>
+                                             </lightning:select>
+                                             <aura:if isTrue="{!rule.assignedToType == 'User'}">
+                                             	<lightning:input name="{! concat('userNotification',count)}" type="checkbox" label="Send Notification" checked="{!rule.sendNotification}" onchange="" disabled="false" class="slds-m-top_small slds-m-left_xxx-small"/>
+                                             </aura:if>
+                                         </td>
+                                         <td data-label="Assign to Queue" class="slds-cell-wrap" style="vertical-align: top">
+                                             <lightning:select name="{! concat('queueAssignedTo',count)}" label="" value="{!rule.assignedTo}" onchange="{!c.channelQueueSelected}" class="profile" disabled="{!rule.assignedToType == 'User'}">
+                                                 <option value="">Choose</option>
+                                                 <aura:iteration items="{!v.queues}" var="queue">
+                                                     <option text="{!queue.name}" value="{!queue.sfDeveloperName}" selected="{! queue.sfDeveloperName == rule.assignedTo}"/>
+                                                 </aura:iteration>
+                                             </lightning:select>
+                                             <aura:if isTrue="{!rule.assignedToType == 'Queue'}">
+                                             	<lightning:input name="{! concat('queueNotification',count)}" type="checkbox" label="Send Notification" checked="{!rule.sendNotification}" onchange="" disabled="false" class="slds-m-top_small slds-m-left_xxx-small"/>
+                                             </aura:if>
+                                         </td> 
+                                      </tr>
+                                      </aura:iteration>
+                                   </tbody>
+                            	</table>
+                            </fieldset>
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>    
+                            </aura:set>
+                            </aura:if>
+                        </aura:if>
+                        <!-- END ALL OTHER CASES SECTION -->   
+                          
+                        <!-- COMPLETE SECTION -->
+                        <aura:if isTrue="{!v.sectionDisplay.complete}">
+                            <aura:if isTrue="{!v.model.advanced == false}">
+                            	<h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak">Congratulations you have completed assignment rules setup! </h1>
+                                <ul class="slds-list--dotted slds-text-color_weak slds-m-left_medium slds-m-bottom_xx-large">
+                                   <li class=" slds-text-heading_small slds-text-color_weak">Create test cases by sending test emails to the long email services address and check that the cases are getting assigned correctly.</li>
+                                </ul>
+                             <aura:set attribute="else">
+                                <form aura:id="frontdoor-form" target="_blank" method="POST" action="{! v.sfUrl + '/secur/frontdoor.jsp'}">
+                                    <input type="hidden" name="sid"
+                                          value="{!v.sfSessionId}" />
+                                    <input type="hidden" name="retURL" 
+                                          value="{!'lightning/setup/CaseRules/home'}" /> 
+                                </form> 
+                                <aura:if isTrue="{!v.newAssignmentRule.ruleEntryList.length > 0}">
+                                	<h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak">Assignment rules based on the models selected have been created successfully. </h1> 
+                                    <ul class="slds-list--dotted slds-text-color_weak slds-m-left_medium slds-m-bottom_xx-large">
+                                   <li class=" slds-text-heading_small slds-text-color_weak">Use Salesforce's native setup interface to further customize and create advanced rules. Click <ui:outputURL value="#" click="{!c.customizeLink}" label="here"/></li>
+                                </ul>
+                                <aura:set attribute="else">
+                                	<h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak">Use Salesforce's native setup interface to further customize and create advanced rules. Click <ui:outputURL value="#" click="{!c.customizeLink}" label="here"/> </h1> 
+                                </aura:set>    
+                                </aura:if>    
+                                
+                                
+                                </aura:set>
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF COMPLETE SECTION -->  
+                       
+                        <!-- COMMON BUTTONS -->
+                        <!-- <aura:if isTrue="{! and(v.isInitialising == false, v.unknownError == false)}"></aura:if> -->
+                        <footer class="slds-m-top_x-large" style="{! and(v.isProcessing == false, v.unknownError == false) ? 'display:block' : 'display:none' }">
+                         	
+                            <lightning:button aura:id="backButton" variant="neutral" label="Back" onclick="{!c.back}" disabled="false" class="wide-button"/>
+                            <lightning:button aura:id="nextButton" variant="neutral" label="Next >" onclick="{!c.next}" disabled="false" class="wide-button"/>
+                        </footer> 
+                        
+                        <!-- END OF COMMON BUTTONS -->
+                          
+                        </div>
+											    
+			    	</div>
+	
+			    </div>
+			    <!-- GRID START END -->
+		  		
+			</div>
+			<!-- END RECIPE HOLDER -->
+
+			
+	  </div>
+	  <!-- END CONTENT TEST HOLDER -->
+    
+    </body>  
+	
+</aura:component>

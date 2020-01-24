@@ -1,0 +1,42 @@
+<aura:component >
+    <aura:attribute name="isActive" type="Boolean"/>
+    
+    <aura:if isTrue="{!v.isActive}">
+        <!-- WELCOME TEXT AND IMAGE -->
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-1 slds-large-size_1-of-1 slds-m-top_xx-large slds-p-right_xx-large slds-p-left_xx-large">
+            <h1 class="slds-text-heading_large slds-text-align_center slds-text-color_inverse slds-p-top_xx-large larger">
+               Your guide to setting up Service Cloud<br/><a href="http://sforce.co/2p8WLZy" target="_blank">Download</a> your workbook<br/><br/>
+                <!-- IMAC DISPLAY IMAGE -->
+                <div class="slds-p-right_xx-large slds-p-left_xx-large"> 
+                    <img class="slds-text-align_center slds-show_medium" src="{!$Resource.TrialSignup +'/workbook-index.png'}" alt="Service Cloud" />
+                </div>
+            </h1>
+        </div>
+        
+        
+        <!-- FEATURE LIST -->
+        
+        
+        <div class="slds-text-heading_small slds-text-align_center slds-p-bottom_medium slds-p-right_xx-large slds-p-left_xx-large slds-m-top_x-large slds-text-color_inverse">
+            <ul>
+                <li class="slds-p-bottom_x-small">
+                    A <strong>Quick Start guide</strong> to setting up your trial, starting with Email Setup
+                </li>
+                <li class="slds-p-bottom_x-small">
+                    Learn about all of the <strong>pre-built customizations</strong> in this trial
+                </li>
+                <li class="slds-p-bottom_x-small">
+                    <strong>Walk through</strong> Case Management in Service Cloud
+                </li>
+                <li class="slds-p-bottom_x-small">
+                    Learn the basics of process automation with <strong>Rules and Process Builder</strong>
+                </li>
+                <li class="slds-p-bottom_x-small">
+                    Customize <strong>CSAT</strong> for your business
+                </li>
+                
+            </ul>
+        </div>
+    </aura:if>
+	
+</aura:component>

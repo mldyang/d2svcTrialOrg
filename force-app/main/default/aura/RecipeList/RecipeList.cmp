@@ -1,0 +1,765 @@
+<aura:component controller="RecipeListController" extends="c:RecipeBase">
+   <!-- <body class="desk" style="background: #FFFFFF;"> -->
+    <aura:attribute name="currentTabId" type="String" default="tab-1"/>
+    <aura:attribute name="setVC" type="Boolean" default="true"/> 
+    <aura:attribute name="socialEnabled" type="Boolean" default="false"/>
+    <aura:attribute name="chatEnabled" type="Boolean" default="false"/>
+    <aura:attribute name="customFields" type="Boolean" default="false"/>
+    <aura:attribute name="isD2SVCOrg" type="Boolean" default="true"/>
+    <aura:attribute name="showError" type="Boolean" default="false" />
+    <aura:attribute name="oauthRecordIdentifier" type="String" default="bw8u3Xm81547509012512"/>
+    <aura:attribute name="errorMessage" type="String" />
+    <aura:attribute name="processingMessage" type="String" default="Loading ..." />
+    <aura:attribute name="isProcessing" type="Boolean" default="false" />
+    <aura:attribute name="havePlayedVirtualConsultant" type="Boolean" default="true"/>
+    
+     <!-- This map stores the links for VC videos -->
+    <aura:set attribute="vcVideos" value="{ intro: 'https://s3-us-west-1.amazonaws.com/desktosvc/RecipeList/Recipe+Intro+V3.mp4', 
+                                           }" />
+    
+   <aura:set attribute="functionsMemory" value="{intro: {20: '', 36: '', 72: '', 94: ''}}"/> 
+    
+    <aura:set attribute="highlightTimestampsMap" value="{ intro: {5: 0, 6: ['SetupRecipesTitle','bottom',20], 12 : 0, 15:['setup-recipes-chat','bottom'], 20: 'function', 21: [['tab-1','bottom',-10],['tab-2','bottom',-10],['tab-3','bottom',-10]], 25: 0, 27: [['channels-header','bottom',20],['case-management-header','bottom',20]], 
+                                                        31:0, 36: 'function', 37: ['tab-2','bottom',-10], 39:0, 40:[['labels-header','bottom',10],['macros-header','bottom',10]], 54:0, 58:['migrate-articles-header','bottom',10], 63:0, 64:['support-center-header','bottom',10], 71:0, 72: 'function', 73: ['tab-3','bottom',-10],
+                                                        76:0, 77:['data-migration-header','bottom',10], 83:0, 85:['cutover-header','bottom',10], 89:0, 90:[['agent-training-header','bottom',10],['admin-training-header','bottom',10]], 94: 'function', 95: ['channels-header','bottom',20] }}" />
+    
+    <aura:set attribute="vcModalVideos" value="{ 
+                                               }" />
+    
+    <aura:handler name="init" action="{!c.init}" value="{!this}" />
+    <aura:handler name="render" action="{!c.afterRender}" value="{!this}" />
+	<aura:registerEvent name="recipeComponentChange" type="c:RecipeComponentChangeEvent"/> 
+    <aura:handler name="vcEvent" event="c:VirtualConsultantEvent" action="{!c.handleVCEvent}"/>
+    
+    <div aura:id="listWrapper">
+    <div style="width:100%;background:white">
+   	<div style="margin-left: auto; margin-right: auto; margin-top:1.5rem; width: 1150px; height: auto; overflow: auto;">
+        
+        <!-- POPOVER -->
+        <aura:if isTrue="{!v.isProcessing == false}">   
+            <div aura:id="popover" style="position:relative;display:none;opacity:0"> 
+                <div style="position:absolute;left:690px;top:80px;z-index:10">
+                    <c:Popover/>
+                </div>
+            </div>
+        </aura:if>
+        <!-- END OF POPOVER -->
+        
+        <!-- VIRTUAL CONSULTANT -->
+        <div aura:id="virtual-consultant-container" id="virtual-consultant-container" class="slds-grid slds-box slds-theme_default slds-m-bottom_small right-banner-after">
+            <div class="slds-text-heading_small slds-text-color_inverse slds-text-align_center slds-m-bottom_small" style="text-transform: uppercase;">
+                Virtual Consultant
+            </div>
+            <div style="height:153px;">
+                <c:VirtualConsultant aura:id="vc" hightlightTimestamps="" recipe="List"/>
+                <div aura:id="vc-highlight" id="vc-highlight" class="vc-highlight"></div>
+                <div aura:id="vc-highlight" id="vc-highlight" class="vc-highlight"></div>
+                <div aura:id="vc-highlight" id="vc-highlight" class="vc-highlight"></div>	  
+            </div>
+            <div class="slds-text-body_regular slds-text-color_inverse slds-text-align_center slds-m-top_medium" style="font-size:larger">
+                Play the video to start working with your virtual consultant on your setup migration!
+            </div>
+        </div>
+        <!-- VIRTUAL CONSULTANT --> 
+	  
+        <!-- TEST CONTENT HOLDER KEEPS IT ALIGNED CENTER AND CONSTRAINS THE WIDTH -->
+        <div aura:id="main-container" id="main-container" style="width: 900px; height: auto; overflow: hidden;float:left;opacity:1;-webkit-transition: opacity 2000ms linear;">
+            
+            <!-- ERRORS SECTION -->
+            <div style="{! if(v.showError,'display:block','display:none')}">
+                <c:Toast aura:id="toast" isActive="{!v.showError}" message="{!v.errorMessage}" type="warning">
+                    {!v.errorMessage}
+                </c:Toast> 
+            </div>
+            <!-- END OF ERRORS SECTION-->
+            
+            <aura:if isTrue="{!v.isProcessing == false}">   
+                <!-- NEXT RECIPE HOLDER -->
+                <div class="slds-grid slds-box slds-theme_default slds-m-bottom_small" style="margin-bottom:3.5em;background:rgb(249, 249, 250);display:none;">
+                    <!-- RIGHT CONTENT -->
+                    <div class="slds-col slds-size_3-of-7 slds-p-left_large slds-p-right_large " style="margin:auto;">
+                        
+                        <!-- CONTENT TITLE -->
+                        <h2 class="slds-text-heading_medium">Next</h2>
+                        <!-- CONTNET BYLINE -->
+                        <p class="slds-text-color_weak slds-m-bottom_large">Next Recommended Recipe</p>
+                        
+                        <!-- ACTION ITEMS HOLDER // COPY FROM HERE TO "END ACTION ITEMS HOLDER" AND PASTE BELOW TO MAKE A SECOND ROW OF ICONS  -->
+                        <div class="slds-grid slds-m-top_small">
+                            
+                            <!-- ACTION ITEM --> 
+                            <!-- THIS IS AN EXAMPLE OF A COMPLETED ACTION ITEM -->
+                            <!-- ICON STARTS OUT AS "user" AND CHANGES TO "task2" WHEN COMPLETE -->
+                            <!-- CHANGE XLINK URL AND CLASS "slds-icon-standard-" TO SELECT APPROPRIATE ICON -->
+                            <!-- ALSO ADD CLASS "completed-border" WHEN ITEM IS COMPLETE -->
+                            <!-- THE CONTROLLING CSS IS IN THE HEAD OF THIS FILE -->  
+                            <div class="slds-col slds-size_12-of-12 slds-m-right_x-small">
+                                
+                                <a aura:id="users" href="javascript:void(0);" class="slds-box completed-border slds-box_link slds-box_x-small slds-media" style="background:white;" name="UserRecipe" onclick="{!c.loadComponent}">
+                                    <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                        <lightning:icon iconName="standard:user" size="medium"/> 
+                                    </div>
+                                    <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                        <h2 class="slds-truncate slds-text-heading_small" title="Users" >Users</h2>
+                                    </div>
+                                </a>
+                                
+                            </div>
+                            <!-- END ACTION ITEM -->
+                        </div>
+                        <!-- END ACTION ITEMS HOLDER -->
+                        
+                    </div>
+                    <!-- END RIGHT CONTENT -->
+                </div>
+                <!-- END NEXT RECIPE HOLDER -->
+                
+                
+                <div class="slds-tabs_default maintab" style="opacity:1">
+                    <ul class="slds-tabs_default__nav" role="tablist">
+                        <li onclick="{!c.handleTabClick}" class="slds-tabs_default__item" title="Item One" role="presentation">
+                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-1" id="tab-1" aura:id="tab-1">
+                                Part 1
+                            </a>
+                        </li>
+                        <li onclick="{!c.handleTabClick}" class="slds-tabs_default__item" title="Item Two" role="presentation">
+                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="true" aria-controls="tab-default-2" id="tab-2" aura:id="tab-2">
+                                Part 2
+                            </a>
+                        </li>
+                        <li onclick="{!c.handleTabClick}" class="slds-tabs_default__item" title="Item Three" role="presentation">
+                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-3" id="tab-3" aura:id="tab-3">
+                                Part 3
+                            </a>
+                        </li>
+                    </ul>
+                    <div aura:id="tab-content-1" id="tab-content-1" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-1__item">
+                        
+                        <!-- CHANNELS RECIPE HOLDER -->
+                        <div class="slds-grid slds-box slds-theme_default slds-m-bottom_small recipe">
+                            
+                            <!-- LEFT RECIPE ICON -->
+                            <div class="slds-col slds-size_1-of-7">
+                                
+                                <div class="slds-align_absolute-center" style="height: 7rem;">
+                                    <lightning:icon iconName="utility:case" size="large"/> 
+                                </div>
+                                
+                            </div>
+                            <!-- LEFT RECIPE ICON END -->
+                            
+                            <!-- RIGHT CONTENT -->
+                            <div class="slds-col slds-size_6-of-7 slds-p-left_large slds-p-right_large">
+                                
+                                <!-- CONTENT TITLE -->
+                                <h2 aura:id="channels-header" class="slds-text-heading_medium">Channels</h2>
+                                <!-- CONTNET BYLINE -->
+                                <p class="slds-text-color_weak slds-m-bottom_large">Enable the support channels that you want to use for customer support</p>
+                                
+                                <!-- ACTION ITEMS HOLDER // COPY FROM HERE TO "END ACTION ITEMS HOLDER" AND PASTE BELOW TO MAKE A SECOND ROW OF ICONS  -->
+                                <div class="slds-grid slds-m-top_small">
+                                    
+                                    <!-- ACTION ITEM --> 
+                                    <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                        
+                                        <a aura:id="email" href="javascript:void(0);" class="slds-box completed-border slds-box_link slds-box_x-small slds-media" name="AddEmailChannel" onclick="{!c.loadComponent}">
+                                            <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                <lightning:icon iconName="standard:email" size="medium"/> 
+                                            </div>
+                                            <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                <h2 id='email-header' class="slds-truncate slds-text-heading_small" title="Email">Email</h2>
+                                            </div>
+                                        </a>
+                                        
+                                    </div>
+                                    <!-- END ACTION ITEM -->
+                                    
+                                    <!-- ACTION ITEM -->
+                                    <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                        
+                                        <a href="javascript:void(0);" class="slds-box slds-box_link slds-box_x-small slds-media" name="EmailAutoResponseRecipe" onclick="{!c.loadComponent}">
+                                            <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                <lightning:icon iconName="custom:custom96" size="medium"/>
+                                            </div>
+                                            <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                <h2 class="slds-truncate slds-text-heading_small" title="Auto-response">Auto-response</h2>
+                                            </div>
+                                        </a>
+                                        
+                                    </div>
+                                    <!-- END ACTION ITEM -->
+                                    
+                                    <!-- ACTION ITEM -->
+                                    <aura:if isTrue="{!not(v.isD2SVCOrg)}">
+                                        <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                            <a href="javascript:void(0);" class="slds-box slds-box_link slds-box_x-small slds-media disabled">
+                                                <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                    <lightning:icon iconName="standard:channel_program_members" size="medium"/> 
+                                                </div>
+                                                <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                    <h2 class="slds-truncate slds-text-heading_small" title="Web">Contact Creation</h2>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </aura:if>
+                                    <!-- END ACTION ITEM -->
+                                    
+                                    <!-- ACTION ITEM -->
+                                    <aura:if isTrue="{!and(v.isD2SVCOrg,v.socialEnabled)}">
+                                        <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                            <a href="javascript:void(0);" class="slds-box slds-box_link slds-box_x-small slds-media" name="SocialRecipe" onclick="{!c.loadComponent}">
+                                                <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                    <lightning:icon iconName="standard:social" size="medium"/> 
+                                                </div>
+                                                <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                    <h2 class="slds-truncate slds-text-heading_small" title="Social">Social</h2>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </aura:if>    
+                                    <!-- END ACTION ITEM -->
+                                    
+                                    <!-- ACTION ITEM -->
+                                    <aura:if isTrue="{!and(v.chatEnabled,and(v.isD2SVCOrg,not(v.socialEnabled)))}">
+                                        <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                            <a href="javascript:void(0);" class="slds-box slds-box_link slds-box_x-small slds-media disabled" disabled="disabled">
+                                                <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                    <lightning:icon iconName="standard:live_chat" size="medium"/>
+                                                </div>
+                                                <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                    <h2 class="slds-truncate slds-text-heading_small" title="Chat">Chat</h2>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </aura:if>
+                                    <!-- END ACTION ITEM --> 
+                                    
+                                    
+                                    
+                                </div>
+                                <!-- END ACTION ITEMS HOLDER -->
+                                
+                                
+                                <!-- ACTION ITEMS HOLDER // COPY FROM HERE TO "END ACTION ITEMS HOLDER" AND PASTE BELOW TO MAKE A SECOND ROW OF ICONS  -->
+                                <aura:if isTrue="{!not(and(v.isD2SVCOrg,not(v.socialEnabled),not(v.chatEnabled)))}">
+                                    <div class="slds-grid slds-m-top_small">
+                                        
+                                        <!-- ACTION ITEM -->
+                                        <aura:if isTrue="{!and(not(v.isD2SVCOrg),v.socialEnabled)}">
+                                            <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                                <a href="javascript:void(0);" class="slds-box slds-box_link slds-box_x-small slds-media disabled" disabled="disabled">
+                                                    <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                        <lightning:icon iconName="standard:social" size="medium"/> 
+                                                    </div>
+                                                    <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                        <h2 class="slds-truncate slds-text-heading_small" title="Social">Social</h2>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </aura:if>    
+                                        <!-- END ACTION ITEM -->
+                                        
+                                        <!-- ACTION ITEM -->
+                                        <aura:if isTrue="{!v.chatEnabled}">
+                                            <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                                <a href="javascript:void(0);" class="slds-box slds-box_link slds-box_x-small slds-media disabled" disabled="disabled">
+                                                    <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                        <lightning:icon iconName="standard:live_chat" size="medium"/>
+                                                    </div>
+                                                    <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                        <h2 class="slds-truncate slds-text-heading_small" title="Chat">Chat</h2>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </aura:if>
+                                        <!-- END ACTION ITEM -->                             
+                                        
+                                        
+                                    </div>
+                                </aura:if>    
+                                <!-- END ACTION ITEMS HOLDER -->    
+                                
+                                
+                            </div>
+                            <!-- END RIGHT CONTENT -->
+                        </div>
+                        <!-- END CHANNELS RECIPE HOLDER --> 
+                        
+                        <!-- CASE MANAGEMENT RECIPE HOLDER -->
+                        <div class="slds-grid slds-box slds-theme_default slds-m-bottom_small recipe">
+                            
+                            <!-- LEFT RECIPE ICON -->
+                            <div class="slds-col slds-size_1-of-7">
+                                
+                                <div class="slds-align_absolute-center" style="height: 7rem;">
+                                    <lightning:icon iconName="utility:people"  size="large"/>
+                                </div>
+                                
+                            </div>
+                            <!-- LEFT RECIPE ICON END -->
+                            
+                            <!-- RIGHT CONTENT -->
+                            <div class="slds-col slds-size_6-of-7 slds-p-left_large slds-p-right_large">
+                                
+                                <!-- CONTENT TITLE -->
+                                <h2 aura:id="case-management-header" class="slds-text-heading_medium">Case Management</h2>
+                                <!-- CONTNET BYLINE -->
+                                <p class="slds-text-color_weak slds-m-bottom_large">Setup your team, assignment rules and support process</p>
+                                
+                                <!-- ACTION ITEMS HOLDER // COPY FROM HERE TO "END ACTION ITEMS HOLDER" AND PASTE BELOW TO MAKE A SECOND ROW OF ICONS  -->
+                                <div class="slds-grid slds-m-top_small">
+                                    
+                                    
+                                    <!-- ACTION ITEM -->
+                                    <aura:if isTrue="{!not(v.isD2SVCOrg)}">
+                                        <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                            
+                                            <a href="javascript:void(0);" class="slds-box slds-box_link slds-box_x-small slds-media disabled" disabled="disabled">
+                                                <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                    <lightning:icon iconName="standard:omni_supervisor" size="medium"/>
+                                                </div>
+                                                <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                    <h2 class="slds-truncate slds-text-heading_small" title="Permissions">Permissions</h2>
+                                                </div>
+                                            </a>
+                                            
+                                        </div>
+                                    </aura:if>    
+                                    <!-- END ACTION ITEM -->
+                                    
+                                    
+                                    <!-- ACTION ITEM --> 
+                                    <!-- THIS IS AN EXAMPLE OF A COMPLETED ACTION ITEM -->
+                                    <!-- ICON STARTS OUT AS "user" AND CHANGES TO "task2" WHEN COMPLETE -->
+                                    <!-- CHANGE XLINK URL AND CLASS "slds-icon-standard-" TO SELECT APPROPRIATE ICON -->
+                                    <!-- ALSO ADD CLASS "completed-border" WHEN ITEM IS COMPLETE -->
+                                    <!-- THE CONTROLLING CSS IS IN THE HEAD OF THIS FILE -->  
+                                    <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                        
+                                        <a aura:id="users" href="javascript:void(0);" class="slds-box completed-border slds-box_link slds-box_x-small slds-media" name="UserRecipe" onclick="{!c.loadComponent}">
+                                            <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                <lightning:icon iconName="standard:user" size="medium"/> 
+                                            </div>
+                                            <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                <h2 class="slds-truncate slds-text-heading_small" title="Users" >Users</h2>
+                                            </div>
+                                        </a>
+                                        
+                                    </div>
+                                    <!-- END ACTION ITEM -->
+                                    
+                                    <!-- ACTION ITEM -->
+                                    <!-- THIS IS AN EXAMPLE OF A DISABLE ACTION ITEM -->
+                                    <!-- ADD THE CLASS "disabled" TO THE A ELEMENT AND disabled="disabled" ALSO -->
+                                    <!-- THEN ADD THE CLASS "slds-icon-bg-grey" TO THE SVG CLASS -->
+                                    <!-- THE CONTROLLING CSS IS IN THE HEAD OF THIS FILE -->  
+                                    <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                        
+                                        <a href="javascript:void(0);" class="slds-box slds-box_link slds-box_x-small slds-media" name="QueueRecipe" onclick="{!c.loadComponent}">
+                                            <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                <lightning:icon iconName="standard:groups" size="medium" variant="warning"/> 
+                                            </div>
+                                            <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                <h2 class="slds-truncate slds-text-heading_small" title="Groups">Groups</h2>
+                                            </div>
+                                        </a>
+                                        
+                                    </div>
+                                    <!-- END ACTION ITEM -->
+                                    
+                                    
+                                    <!-- ACTION ITEM -->
+                                    <aura:if isTrue="{!v.isD2SVCOrg}">
+                                        <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                            
+                                            <a href="javascript:void(0);" class="slds-box completed-border slds-box_link slds-box_x-small slds-media disabled" disabled="disabled" name="CaseAssignmentByRuleV2" onclick="{!c.loadComponent}">
+                                                <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                    <lightning:icon iconName="standard:product_request" size="medium"/> 
+                                                </div>
+                                                <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                    <h2 class="slds-truncate slds-text-heading_small" title="Case">Assignment Rules</h2>
+                                                </div>
+                                            </a>
+                                            
+                                        </div>
+                                    </aura:if>    
+                                    <!-- END ACTION ITEM -->
+                                    
+                                    
+                                    
+                                    
+                                </div>
+                                <!-- END ACTION ITEMS HOLDER -->
+                                
+                                <!-- ACTION ITEMS HOLDER // COPY FROM HERE TO "END ACTION ITEMS HOLDER" AND PASTE BELOW TO MAKE A SECOND ROW OF ICONS  -->
+                                <div class="slds-grid slds-m-top_small">
+                                    
+                                    <!-- ACTION ITEM --> 
+                                    <aura:if isTrue="{!not(v.isD2SVCOrg)}">
+                                        <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                            
+                                            <a href="javascript:void(0);" class="slds-box completed-border slds-box_link slds-box_x-small slds-media disabled" disabled="disabled">
+                                                <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                    <lightning:icon iconName="standard:product_request" size="medium"/> 
+                                                </div>
+                                                <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                    <h2 class="slds-truncate slds-text-heading_small" title="Case">Assignment Rules</h2>
+                                                </div>
+                                            </a>
+                                            
+                                        </div>
+                                    </aura:if> 
+                                    <!-- END ACTION ITEM -->
+                                    
+                                    
+                                    <!-- ACTION ITEM -->
+                                    <!-- THIS IS AN EXAMPLE OF A DISABLE ACTION ITEM -->
+                                    <!-- ADD THE CLASS "disabled" TO THE A ELEMENT AND disabled="disabled" ALSO -->
+                                    <!-- THEN ADD THE CLASS "slds-icon-bg-grey" TO THE SVG CLASS -->
+                                    <!-- THE CONTROLLING CSS IS IN THE HEAD OF THIS FILE -->  
+                                    <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                        
+                                        <a href="javascript:void(0);" class="slds-box slds-box_link slds-box_x-small slds-media disabled" disabled="disabled" name="SupportProcessSimple" onclick="{!c.loadComponent}">
+                                            <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                <lightning:icon iconName="standard:work_queue" size="medium"/> 
+                                            </div>
+                                            <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                <h2 class="slds-truncate slds-text-heading_small" title="Support Process">Support Process</h2>
+                                            </div>
+                                        </a>
+                                        
+                                    </div>
+                                    <!-- END ACTION ITEM -->
+                                </div>
+                                <!-- END ACTION ITEMS HOLDER -->
+                                
+                            </div>
+                            <!-- END RIGHT CONTENT -->
+                        </div>
+                        <!-- END CASE MANAGEMENT RECIPE HOLDER -->
+                        
+                    </div>
+                    <div aura:id="tab-content-2" id="tab-content-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">
+                        <!-- AGENT PRODUCTIVITY RECIPE HOLDER -->
+                        <div class="slds-grid slds-box slds-theme_default slds-m-bottom_small recipe" style="margin-bottom:3.5em;">
+                            
+                            <!-- LEFT RECIPE ICON -->
+                            <div class="slds-col slds-size_1-of-7">
+                                
+                                <div class="slds-align_absolute-center" style="height: 7rem;">
+                                    <lightning:icon iconName="utility:classic_interface"  size="large"/>
+                                </div>
+                                
+                            </div>
+                            <!-- LEFT RECIPE ICON END -->
+                            
+                            <!-- RIGHT CONTENT -->
+                            <div class="slds-col slds-size_6-of-7 slds-p-left_large slds-p-right_large ">
+                                
+                                <!-- CONTENT TITLE -->
+                                <h2 class="slds-text-heading_medium">Agent Productivity</h2>
+                                <!-- CONTNET BYLINE -->
+                                <p class="slds-text-color_weak slds-m-bottom_large">Setup features that will enhance Agent Productivity</p>
+                                
+                                <!-- ACTION ITEMS HOLDER // COPY FROM HERE TO "END ACTION ITEMS HOLDER" AND PASTE BELOW TO MAKE A SECOND ROW OF ICONS  -->
+                                <div class="slds-grid slds-m-top_small">
+                                    
+                                    <!-- ACTION ITEM --> 
+                                    <aura:if isTrue="{!not(v.isD2SVCOrg)}">
+                                        <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                            <a href="javascript:void(0);" class="slds-box completed-border slds-box_link slds-box_x-small slds-media" name="CaseAssignmentByRuleRecipe" onclick="{!c.loadComponent}">
+                                                <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                    <lightning:icon iconName="standard:template" size="medium"/> 
+                                                </div>
+                                                <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                    <h2 class="slds-truncate slds-text-heading_small" title="Using Rules">Console</h2>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </aura:if>
+                                    <!-- END ACTION ITEM -->
+                                    
+                                    <!-- ACTION ITEM -->
+                                    <aura:if isTrue="{!v.customFields}">
+                                        <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                            <a href="javascript:void(0);" class="slds-box slds-box_link slds-box_x-small slds-media disabled" disabled="disabled">
+                                                <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                    <lightning:icon iconName="standard:product_item" size="medium"/> 
+                                                </div>
+                                                <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                    <h2 class="slds-truncate slds-text-heading_small" title="By Availability">Custom Fields</h2>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </aura:if>
+                                    <!-- END ACTION ITEM -->
+                                    
+                                    <!-- ACTION ITEM --> 
+                                    <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                        
+                                        <a href="javascript:void(0);" class="slds-box completed-border slds-box_link slds-box_x-small slds-media" name="LabelsRecipeSimple" onclick="{!c.loadComponent}">
+                                            <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                <lightning:icon iconName="standard:quotes" size="medium"/> 
+                                            </div>
+                                            <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                <h2 aura:id="labels-header" class="slds-truncate slds-text-heading_small" title="Using Rules">Labels</h2>
+                                            </div>
+                                        </a>
+                                        
+                                    </div>
+                                    <!-- END ACTION ITEM -->
+                                    
+                                    <!-- ACTION ITEM --> 
+                                    <aura:if isTrue="{!or(v.isD2SVCOrg,!v.customFields)}">
+                                        <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                            <a href="javascript:void(0);" class="slds-box completed-border slds-box_link slds-box_x-small slds-media" name="MacrosRecipeSimple" onclick="{!c.loadComponent}">
+                                                <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                    <lightning:icon iconName="standard:macros" size="medium"/> 
+                                                </div>
+                                                <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                    <h2 aura:id="macros-header" class="slds-truncate slds-text-heading_small" title="Knowledge">Macros</h2>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </aura:if>
+                                    <!-- END ACTION ITEM -->
+                                    
+                                </div>
+                                <!-- END ACTION ITEMS HOLDER -->
+                                
+                                
+                                <!-- ACTION ITEMS HOLDER // COPY FROM HERE TO "END ACTION ITEMS HOLDER" AND PASTE BELOW TO MAKE A SECOND ROW OF ICONS  -->
+                                <aura:if isTrue="{!and(not(v.isD2SVCOrg),v.customFields)}">
+                                    <div class="slds-grid slds-m-top_small">
+                                        
+                                        <!-- ACTION ITEM --> 
+                                        <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                            <a href="javascript:void(0);" class="slds-box completed-border slds-box_link slds-box_x-small slds-media" name="CaseAssignmentByRuleRecipe" onclick="{!c.loadComponent}">
+                                                <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                    <lightning:icon iconName="standard:macros" size="medium"/> 
+                                                </div>
+                                                <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                    <h2 class="slds-truncate slds-text-heading_small" title="Knowledge">Macros</h2>
+                                                </div>
+                                            </a>
+                                        </div>
+                                        
+                                        <!-- END ACTION ITEM -->
+                                    </div>
+                                </aura:if>
+                                <!-- END ACTION ITEMS HOLDER -->
+                                
+                                
+                            </div>
+                            <!-- END RIGHT CONTENT -->
+                        </div>
+                        <!-- AGENT PRODUCTIVITY RECIPE HOLDER -->
+                        
+                        <!-- SUPPORT CENTER RECIPE HOLDER -->
+                        <div class="slds-grid slds-box slds-theme_default slds-m-bottom_small recipe" style="margin-bottom:3.5em;">
+                            
+                            <!-- LEFT RECIPE ICON -->
+                            <div class="slds-col slds-size_1-of-7">
+                                
+                                <div class="slds-align_absolute-center" style="height: 7rem;">
+                                    <lightning:icon iconName="utility:help_center"  size="large"/>
+                                </div>
+                                
+                            </div>
+                            <!-- LEFT RECIPE ICON END -->
+                            
+                            <!-- RIGHT CONTENT -->
+                            <div class="slds-col slds-size_6-of-7 slds-p-left_large slds-p-right_large ">
+                                
+                                <!-- CONTENT TITLE -->
+                                <h2 class="slds-text-heading_medium">Support Center</h2>
+                                <!-- CONTNET BYLINE -->
+                                <p class="slds-text-color_weak slds-m-bottom_large">Setup your customer facing Support Center</p>
+                                
+                                <!-- ACTION ITEMS HOLDER // COPY FROM HERE TO "END ACTION ITEMS HOLDER" AND PASTE BELOW TO MAKE A SECOND ROW OF ICONS  -->
+                                <div class="slds-grid slds-m-top_small">
+                                    
+                                    <!-- ACTION ITEM --> 
+                                    <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                        <a href="javascript:void(0);" class="slds-box completed-border slds-box_link slds-box_x-small slds-media" name="MigrateArticlesSimple" onclick="{!c.loadComponent}">
+                                            <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                <lightning:icon iconName="standard:article" size="medium"/> 
+                                            </div>
+                                            <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                <h2 aura:id="migrate-articles-header" class="slds-truncate slds-text-heading_small" title="Migrate Articles">Migrate Articles</h2>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <!-- END ACTION ITEM -->
+                                    
+                                    <!-- ACTION ITEM --> 
+                                    <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                        <a href="javascript:void(0);" class="slds-box completed-border slds-box_link slds-box_x-small slds-media" name="SupportCenterSimple" onclick="{!c.loadComponent}">
+                                            <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                <lightning:icon iconName="standard:sossession" size="medium"/> 
+                                            </div>
+                                            <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                <h2 aura:id="support-center-header" class="slds-truncate slds-text-heading_small" title="Support Center">Support Center</h2>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <!-- END ACTION ITEM -->                             
+                                    
+                                </div>
+                                <!-- END ACTION ITEMS HOLDER -->
+                                
+                            </div>
+                            <!-- END RIGHT CONTENT -->
+                        </div>
+                        <!-- END SUPPORT CENTER RECIPE HOLDER -->
+                    </div>
+                    <div aura:id="tab-content-3" id="tab-content-3" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-3__item">
+                        <!-- DATA MIGRATION RECIPE HOLDER -->
+                        <div class="slds-grid slds-box slds-theme_default slds-m-bottom_small recipe" style="margin-bottom:3.5em;">
+                            
+                            <!-- LEFT RECIPE ICON -->
+                            <div class="slds-col slds-size_1-of-7">
+                                
+                                <div class="slds-align_absolute-center" style="height: 7rem;">
+                                    <lightning:icon iconName="utility:database"  size="large"/>
+                                </div>
+                                
+                            </div>
+                            <!-- LEFT RECIPE ICON END -->
+                            
+                            <!-- RIGHT CONTENT -->
+                            <div class="slds-col slds-size_6-of-7 slds-p-left_large slds-p-right_large ">
+                                
+                                <!-- CONTENT TITLE -->
+                                <h2 class="slds-text-heading_medium">Data Migration</h2>
+                                <!-- CONTNET BYLINE -->
+                                <p class="slds-text-color_weak slds-m-bottom_large">Migrate Your Desk Companies, Customers and Cases</p>
+                                
+                                <!-- ACTION ITEMS HOLDER // COPY FROM HERE TO "END ACTION ITEMS HOLDER" AND PASTE BELOW TO MAKE A SECOND ROW OF ICONS  -->
+                                <div class="slds-grid slds-m-top_small">
+                                    
+                                    <!-- ACTION ITEM --> 
+                                    <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                        <a href="javascript:void(0);" class="slds-box completed-border slds-box_link slds-box_x-small slds-media" name="MigrateDataSimple" onclick="{!c.loadComponent}">
+                                            <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                <lightning:icon iconName="standard:work_queue" size="medium"/> 
+                                            </div>
+                                            <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                <h2 aura:id="data-migration-header" class="slds-truncate slds-text-heading_small" title="Using Rules">Migrate Data</h2>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <!-- END ACTION ITEM -->
+                                    
+                                    <!-- ACTION ITEM -->
+                                    <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                        <a href="javascript:void(0);" class="slds-box slds-box_link slds-box_x-small slds-media disabled" disabled="disabled" name="ReportsOverviewSimple" onclick="{!c.loadComponent}">
+                                            <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                <lightning:icon iconName="standard:report" size="medium"/> 
+                                            </div>
+                                            <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                <h2 class="slds-truncate slds-text-heading_small" title="By Availability">Reports Overview</h2>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <!-- END ACTION ITEM -->                                  
+                                </div>
+                                <!-- END ACTION ITEMS HOLDER -->
+                                
+                            </div>
+                            <!-- END RIGHT CONTENT -->
+                        </div>
+                        <!-- END DATA MIGRATION RECIPE HOLDER -->
+                        
+                        <!-- CUTOVER RECIPE HOLDER -->
+                        <div class="slds-grid slds-box slds-theme_default slds-m-bottom_small recipe" style="margin-bottom:3.5em;">
+                            
+                            <!-- LEFT RECIPE ICON -->
+                            <div class="slds-col slds-size_1-of-7">
+                                
+                                <div class="slds-align_absolute-center" style="height: 7rem;">
+                                    <lightning:icon iconName="utility:right"  size="large"/>
+                                </div>
+                                
+                            </div>
+                            <!-- LEFT RECIPE ICON END -->
+                            
+                            <!-- RIGHT CONTENT -->
+                            <div class="slds-col slds-size_6-of-7 slds-p-left_large slds-p-right_large ">
+                                
+                                <!-- CONTENT TITLE -->
+                                <h2 class="slds-text-heading_medium">Training &amp; Cutover</h2>
+                                <!-- CONTNET BYLINE -->
+                                <p class="slds-text-color_weak slds-m-bottom_large">Train your agents and go live on Service Cloud!</p>
+                                
+                                <!-- ACTION ITEMS HOLDER // COPY FROM HERE TO "END ACTION ITEMS HOLDER" AND PASTE BELOW TO MAKE A SECOND ROW OF ICONS  -->
+                                <div class="slds-grid slds-m-top_small">
+                                    
+                                    <!-- ACTION ITEM --> 
+                                    <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                        <a href="javascript:void(0);" class="slds-box completed-border slds-box_link slds-box_x-small slds-media" name="CutoverActivitiesSimple" onclick="{!c.loadComponent}">
+                                            <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                <lightning:icon iconName="standard:task" size="medium"/> 
+                                            </div>
+                                            <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                <h2 id="cutover-header" class="slds-truncate slds-text-heading_small" title="Support Center">Cutover Activities</h2>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <!-- END ACTION ITEM -->  
+                                    
+                                    <!-- ACTION ITEM --> 
+                                    <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                        <a href="javascript:void(0);" class="slds-box completed-border slds-box_link slds-box_x-small slds-media" name="AgentTrainingSimple" onclick="{!c.loadComponent}">
+                                            <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                <lightning:icon iconName="custom:custom15" size="medium"/> 
+                                            </div>
+                                            <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                <h2 id="agent-training-header" class="slds-truncate slds-text-heading_small" title="Migrate Articles">Agent Training</h2>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <!-- END ACTION ITEM -->
+                                    
+                                    <!-- ACTION ITEM --> 
+                                    <div class="slds-col slds-size_4-of-12 slds-m-right_x-small">
+                                        <a href="javascript:void(0);" class="slds-box completed-border slds-box_link slds-box_x-small slds-media" name="AdminTrainingSimple" onclick="{!c.loadComponent}">
+                                            <div class="slds-media__figure slds-media__figure_fixed-width slds-align_absolute-center slds-m-left_xx-small">
+                                                <lightning:icon iconName="custom:custom67" size="medium"/> 
+                                            </div>
+                                            <div class="slds-media__body slds-p-top_small slds-p-bottom_small slds-p-right_small">
+                                                <h2 id="admin-training-header" class="slds-truncate slds-text-heading_small" title="Support Center">Admin Training</h2>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <!-- END ACTION ITEM -->  
+                                    
+                                    
+                                    
+                                </div>
+                                <!-- END ACTION ITEMS HOLDER -->
+                                
+                            </div>
+                            <!-- END RIGHT CONTENT -->
+                        </div>
+                        <!-- END CUTOVER RECIPE HOLDER -->
+                    </div>
+                </div>
+                <aura:set attribute="else">
+                    <div class="slds-align_absolute-center slds-is-relative">
+                        <lightning:spinner variant="brand" size="small" /><br/><br/><br/>{!v.processingMessage}
+                    </div>
+                </aura:set>
+            </aura:if>	
+            
+            
+            
+            
+        </div>
+        <!-- END CONTENT TEST HOLDER -->
+	 </div>
+    </div>  
+    </div>    
+ <!-- </body> -->
+	
+</aura:component>

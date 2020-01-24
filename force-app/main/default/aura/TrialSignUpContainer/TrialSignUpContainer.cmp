@@ -1,0 +1,40 @@
+<aura:component >
+    <aura:handler event="aura:doneRendering" action="{!c.doneRendering}"/>
+    <aura:attribute name="isDoneRendering" type="Boolean" default="false"/>
+    <aura:attribute name="showSpinner" type="Boolean" default="false"/>
+    
+    <aura:handler name="trialCreatedEvent" event="c:TrialCreated"
+    action="{!c.handleTrialCreatedEvent}"/>
+	<!-- ARROW -->
+  	<div aura:id="arrow" class="arrow slds-show_medium"></div>
+  	
+  	<!-- OVERALL RESPONSIVE BG --> 
+    <div class="slds-grid slds-wrap" style="{! 'background: url(' + $Resource.TrialSignup +'/bg2.png) repeat 20px 87px; height: 100%; overflow: hidden;  '}">
+	  
+	  <!-- LEFT HAND SIDE CONTENT 50% -->
+	  <div aura:id="leftContainer" class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12" style="min-height: 100vh;">
+
+          <aura:if isTrue="{!v.showSpinner}">
+              <div class="slds-align_absolute-center slds-is-relative" style="height: 100%;">
+                  <lightning:spinner aura:id="spinner" variant="brand"  size="medium" class="nobg"/>
+              </div>
+          </aura:if>
+          <c:TrialSignUpLandingPageLeft aura:id="trialSignUpLandingPageLeft" isActive="true"/>
+          <c:TrialSignUpWorkbookLeft aura:id="trialSignUpWorkbookLeft" isActive="false"/>
+          <c:TrialSignUpVirtualConsultantLeft aura:id="trialSignUpVirtualConsultantLeft" isActive="false"/>
+		  	
+	  </div>
+	  <!-- END LEFT HAND SIDE -->
+	  
+	  <!-- RIGHT HAND SIDE CONTENT 50% -->
+	  
+	  <div aura:id="rightContainer" class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12" style="background: #F4F6F9;min-height: 100vh;">
+		  
+		   	<c:TrialSignUpLandingPageRight />
+			
+		</div>
+		<!-- END RIGHT HAND SIDE CONTENT -->
+	  
+	  </div>
+	  <!-- END OVERALL RESPONSIVE BG -->
+</aura:component>

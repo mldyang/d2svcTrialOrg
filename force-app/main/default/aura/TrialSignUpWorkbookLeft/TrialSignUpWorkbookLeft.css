@@ -1,0 +1,26 @@
+.THIS a{
+    color: white;
+    text-decoration: none;
+    border-bottom: 3px solid white;
+}
+
+.THIS a:focus {
+    color: white;
+    text-decoration: none;
+}
+
+.THIS a:visited { 
+    color: white;
+    text-decoration: none;
+}
+
+.THIS a:hover { 
+    color: white;
+    text-decoration: none;
+    border-bottom: none;
+}
+
+.THIS a:active {
+    color: white;
+    text-decoration: none;
+}

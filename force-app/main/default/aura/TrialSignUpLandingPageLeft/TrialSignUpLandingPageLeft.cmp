@@ -1,0 +1,48 @@
+<aura:component >
+    <aura:attribute name="isActive" type="Boolean"/>
+    
+    <aura:if isTrue="{!v.isActive}">
+        <!-- WELCOME TEXT AND IMAGE -->
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-1 slds-large-size_1-of-1 slds-m-top_xx-large slds-p-right_xx-large slds-p-left_xx-large">
+            <h1 class="slds-text-heading_large slds-text-align_center slds-text-color_inverse slds-p-top_xx-large larger">
+                We've created a 90-day trial just for Desk customers migrating to Service Cloud<br/><br/>
+                <!-- IMAC DISPLAY IMAGE -->
+                <div class="slds-p-right_xx-large slds-p-left_xx-large"> 
+                    <img class="slds-text-align_center slds-show_medium" src="{!$Resource.TrialSignup +'/macbook_with_csat.png'}" alt="Service Cloud" />
+                </div>
+            </h1>
+        </div>
+        
+        
+        <!-- FEATURE LIST -->
+        
+        
+        <div class="slds-text-heading_small slds-text-align_center slds-p-bottom_medium slds-p-right_xx-large slds-p-left_xx-large slds-m-top_x-large slds-text-color_inverse">
+            <ul>
+                <li class="slds-p-bottom_x-small">
+                    A best practice layout providing a <strong>360-degree view of the customer</strong>
+                </li>
+                <li class="slds-p-bottom_x-small">
+                    Customized <strong>Case Console</strong> and <strong>Processes (Rules)</strong> that gets you started right away
+                </li>
+                <li class="slds-p-bottom_x-small">
+                    <strong>Auto Contact (Customer) creation</strong> based on new customer email cases
+                </li>
+                <li class="slds-p-bottom_x-small">
+                    Option to enable a <strong>CSAT feature</strong> similar to Desk CSAT
+                </li>
+                <li class="slds-p-bottom_x-small">
+                    <strong>Sample macros</strong> to help you get started with macros quickly
+                </li>
+                <li class="slds-p-bottom_x-small">
+                    Pre-built <strong>Service Dashboard and Reports</strong> for Support Managers
+                </li>
+                <li class="slds-p-bottom_x-small">
+                    ... and more!
+                </li>
+                
+            </ul>
+        </div>
+    </aura:if>
+	
+</aura:component>

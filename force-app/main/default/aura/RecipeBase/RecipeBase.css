@@ -1,0 +1,22 @@
+.THIS .vc-highlight{
+  position: absolute;
+  width: 0px;
+  height: 0px;
+  display: inline;
+  z-index:8;
+}
+
+.THIS .vc-horizontal{
+   -webkit-transition: width 0.3s linear;
+   border-bottom: thick solid red; 
+}
+
+.THIS .vc-vertical{
+   -webkit-transition: height 0.3s linear;
+   border-left: thick solid red; 
+}
+
+.THIS .wide-button{
+    width: 9em;
+    margin-right: 5px;
+}

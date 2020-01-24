@@ -1,0 +1,31 @@
+.THIS .wide-button{
+    width: 9em;
+    margin-right: 5px;
+}
+
+.THIS .slds-required {
+    display: none;
+}
+
+.THIS .slds-checkbox .slds-form-element__label{
+    font-size: 0.9rem;
+    font-family: Salesforce Sans;
+
+}
+
+.THIS .slds-input{
+    font-family: Salesforce Sans;
+}
+
+.THIS .slds-form-element__help{
+    font-family: Salesforce Sans;
+}
+
+.THIS .slds-table_fixed-layout .slds-cell-shrink:first-child{
+    text-align: left;
+    padding-left: 0.5rem;
+}
+
+.THIS td{
+    padding: 8px !important;
+}

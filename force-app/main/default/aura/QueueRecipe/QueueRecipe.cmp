@@ -1,0 +1,336 @@
+<aura:component controller="QueueRecipeController" extends="c:RecipeBase">
+    <aura:attribute name="oauthRecordIdentifier" type="String" access="public" default="j9m7Mmfk1525821522228"/>
+    
+    <!-- Users has list of all users to start with, but changes from step to step -->
+    <aura:attribute name="queues" type="List" access="public"/>
+    <aura:attribute name="manualQueues" type="List" access="public" default="[{name:'', sfDeveloperName:'', isManual:true, error:''} ]"/>
+    <aura:attribute name="noOfQueuesSuccessful" type="Integer" access="public"/>
+    <aura:attribute name="noOfQueuesFailed" type="Integer" access="public"/>
+    <aura:attribute name="createQueuesHeading" type="String" access="public"/>
+    <aura:attribute name="createQueuesSubHeading" type="String" access="public"/>
+    <aura:attribute name="goBackTo" type="String" access="public"/>
+    
+    <aura:attribute name="profiles" type="Map" access="public"/>
+    <aura:attribute name="allowedProfiles" type="List" access="public"/>
+    <aura:attribute name="sfLicenseInfo" type="Map" access="public"/>
+    <aura:attribute name="sfLicenseSubHeader" type="String" access="public"/>
+    <aura:attribute name="completeHeader" type="String" access="public" default="Congrats! You have completed the Group/Queue Recipe."/>
+    
+    
+    <!-- This map determines which steps are to be shown -->
+    <aura:attribute name="sectionDisplay" type="Map" default="{ deskGroups: true, manualQueues: false, createQueues: false, addUsersToQueue: false, complete: false }" />
+    
+    
+    <aura:attribute name="isProcessing" type="Boolean" default="false"/>
+    <aura:attribute name="processingMessage" type="String" default="Fetching queues from Desk &amp; Salesforce" />
+    
+    <aura:attribute name="showError" type="Boolean" default="false" />
+    <aura:attribute name="errorMessage" type="String" />
+    <aura:attribute name="unknownError" type="Boolean" default="false" />
+    
+    <aura:handler name="init" action="{!c.init}" value="{!this}" />
+    <aura:registerEvent name="recipeComponentChange" type="c:RecipeComponentChangeEvent"/>
+    
+    
+    <body class="desk" style="background:white;">
+        <!-- TEST CONTENT HOLDER -->
+        <div style="margin: auto; width: 100%; height: 100vh;">
+            
+            <!-- RECIPE HOLDER -->
+            <div style="margin: 3em 3em 0 3em;">
+                
+                <!-- ERRORS SECTION -->
+                
+                <div style="{! if(v.showError,'display:block','display:none')}">
+                    <c:Toast aura:id="toast" isActive="{!v.showError}" message="{!v.errorMessage}" type="warning">
+                        {!v.errorMessage}
+                    </c:Toast> 
+                </div>
+                
+                
+                <!-- END OF ERRORS SECTION-->
+                
+                <!-- BLOCKING ERROR -->    
+                <aura:if isTrue="{!v.unknownError}">
+                    
+                    <div aura:id="unknownErrorMessage" id="unknown" class="middle" >
+                        <lightning:icon iconName="utility:error" variant="error" size="large"/>
+                        <div class="slds-text-heading_small slds-m-top_x-small">There seems to be an issue with creating your trial org. Please contact <a href = "mailto: support@desk.com">support@desk.com</a></div>
+                    </div>
+                    
+                </aura:if>
+                <!-- BLOCKING ERROR END -->
+                
+                <!-- GRID START -->
+                <div class="slds-col slds-size_1-of-1 slds-p-around_medium" style="max-width:800px">
+                    
+                    <div class="slds-grid">
+                        
+                        <div class="slds-col slds-size_12-of-12 slds-show_small">
+                            
+                            <!-- BREADCRUMBS -->
+                            <c:Breadcrumb recipe="Groups"/>
+                            <!-- END BREADCRUMBS -->
+                            
+                            <!-- DESK QUEUES SECTION -->
+                            <aura:if isTrue="{! v.sectionDisplay.deskGroups}">
+                                <aura:if isTrue="{!v.isProcessing == false}">
+                                    <h1 class="slds-text-heading_large slds-m-bottom_medium slds-text-color_weak ">Select the groups from Desk you would like to create in Service cloud</h1>
+                                    <ul class="slds-list--dotted slds-text-color_weak slds-m-left_medium slds-m-bottom_xx-large">
+                                  		<li aura:id="auto-response-sf-from-email" class="slds-text-heading_small slds-text-color_weak">Groups will be created as Queues in Service Cloud.</li>
+                                    	<li class="slds-text-heading_small slds-text-color_weak">Desk groups that already exist in Service Cloud are shown with their checkbox disabled.</li>
+                                        <li class="slds-text-heading_small slds-text-color_weak">Adding groups as Queues to Service Cloud will not affect your existing Desk functioning.</li>
+                                	</ul>
+                                    <fieldset class="slds-form-element slds-m-bottom_xx-large slds-m-left_small">
+                                        <aura:iteration items="{!v.queues}" var="queue" indexVar="count"> 
+                                            <aura:if isTrue="{!queue.inDesk == true}">
+                                                <lightning:input aura:id="modelCommon" type="checkbox" label="{!queue.name}" name="red" checked="{! queue.selected}" onchange="" disabled="{!queue.inSalesforce}"/>                                         
+                                            </aura:if>
+                                        </aura:iteration>	
+                                    </fieldset>
+                                    <aura:set attribute="else">
+                                        <div class="slds-align_absolute-center slds-is-relative">
+                                            <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                        </div>    
+                                    </aura:set>
+                                    
+                                </aura:if>
+                            </aura:if>
+                            <!-- END OF DESK QUEUES SECTION -->                       
+                            
+                            <!-- MANUAL QUEUES SECTION -->
+                            <aura:if isTrue="{!v.sectionDisplay.manualQueues}">
+                                <aura:if isTrue="{!v.isProcessing == false}">
+                                    <h1 class="slds-text-heading_large slds-m-bottom_xx-large slds-text-color_weak">Would you like to create a new Queue, besides those selected from Desk? </h1>
+                                    
+                                    <div class="slds-m-bottom_xx-large slds-m-left_small">    
+                                        <aura:iteration items="{!v.manualQueues}" var="row" indexVar="count">
+                                            <div class="slds-grid slds-m-top_medium"> 
+                                                <div class="slds-col slds-size_6-of-12 slds-m-right_small">
+                                                    <lightning:input name="{! concat('queue',count)}" type="text" label="" placeholder="Name" required="true" value="{!row.name}"
+                                                                     onblur="{!c.validateQueue}"/>
+                                                    <aura:if isTrue="{!row.error}">
+                                                        <div class="slds-text-color_error slds-form-element__help">
+                                                            {!row.error}
+                                                        </div>
+                                                    </aura:if>
+                                                </div>
+                                                
+                                                <aura:if isTrue="{! count == v.manualQueues.length-1}"> 
+                                                    <div class="slds-col slds-size_4-of-12">
+                                                        <lightning:icon iconName="utility:add" variant="success" size="xx-small"/> 
+                                                        <button class="slds-button" onclick="{! c.addManualQueueRow }" style="padding-top: 2px; margin: 2px 0px 0 2px;">
+                                                            Add
+                                                        </button>
+                                                    </div>
+                                                    <aura:set attribute="else">
+                                                        <div class="slds-col slds-size_4-of-12">
+                                                            <lightning:icon iconName="utility:delete" variant="success" size="xx-small"/> 
+                                                            <button class="slds-button" onclick="{! c.delManualQueueRow }" style="padding-top: 2px; margin: 2px 0px 0 2px;">
+                                                                Del
+                                                            </button>
+                                                        </div>
+                                                    </aura:set>
+                                                    
+                                                </aura:if> 
+                                            </div>
+                                        </aura:iteration>
+                                    </div>
+                                    <!-- <lightning:button variant="brand" label="Add Row" onclick="{! c.addManualEmailRow }" /> -->
+                                    
+                                    <aura:set attribute="else">
+                                        <div class="slds-align_absolute-center slds-is-relative">
+                                            <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                        </div>
+                                    </aura:set>    
+                                </aura:if>
+                            </aura:if>
+                            <!-- END OF MANUAL QUEUES SECTION -->
+                            
+                            <!-- CREATE QUEUES SECTION --> 
+                            <aura:if isTrue="{! v.sectionDisplay.createQueues}">
+                                <aura:if isTrue="{!v.isProcessing == false}">
+                                    <h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak ">
+                                        {!v.createQueuesHeading}</h1>
+                                    <div class="slds-text-heading_small slds-text-color_weak slds-m-bottom_xx-large" style="font-family:SalesforceSans-Light">
+                                        {!v.createQueuesSubHeading}
+                                    </div>
+                                    <fieldset class="slds-form-element slds-m-bottom_xx-large">
+                                        <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white;width:600px">
+                                            <thead>
+                                                <tr class="slds-text-title_caps" >
+                                                    <th class="slds-text-align_right" scope="col" style="width: 3.25rem;">
+                                                        
+                                                    </th>
+                                                    <th scope="col" class="slds-cell-wrap" style="width: 10rem;">
+                                                        <div  title="Name">
+                                                            Name
+                                                            
+                                                        </div>
+                                                    </th>
+                                                    <th scope="col" class="slds-cell-wrap">
+                                                        <div class="slds-truncate" title="Developer Name">
+                                                            Developer Name
+                                                        </div>
+                                                    </th>                                       
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <aura:iteration items="{!v.queues}" var="queue" indexVar="count"> 
+                                                    <aura:if isTrue="{! or(queue.inDesk == true, queue.isManual == true)}">
+                                                        <tr class="slds-hint-parent">
+                                                            <td class="slds-cell-shrink" data-label="Select Row">
+                                                                <aura:if isTrue="{!queue.errorMessage}">
+                                                                    <lightning:input type="checkbox" disabled="{! or(empty(queue.errorStatusCode), not(queue.errorStatusCode == 'DUPLICATE_DEVELOPER_NAME'))}" checked="{! queue.selected}"/>
+                                                                    <aura:set attribute="else">
+                                                                        <lightning:icon iconName="utility:success" variant="success" size="small"/> 
+                                                                    </aura:set>
+                                                                </aura:if>    
+                                                            </td>
+                                                            <td scope="row" data-label="Name" class="slds-cell-wrap" >
+                                                                <div   title="{!queue.name}">{!queue.name}</div>
+                                                            </td>
+                                                            <td data-label="Developer Name" class="slds-cell-wrap">
+                                                                <aura:if isTrue="{!queue.errorStatusCode == 'DUPLICATE_DEVELOPER_NAME'}">
+                                                                    <lightning:input name="{! concat('sfDeveloperName',count)}" type="text" label="" placeholder="Developer Name" required="true" value="{!queue.sfDeveloperName}"
+                                                                                     onblur="{!c.validateDeveloperName}" messageWhenPatternMismatch="Developer Name should not have spaces"/>
+                                                                    <div class="slds-text-color_error slds-form-element__help">
+                                                                        {!queue.sfDeveloperNameError}
+                                                                    </div>
+                                                                    <div class="slds-text-color_error slds-form-element__help">
+                                                                        {!queue.errorMessage}
+                                                                    </div>
+                                                                    
+                                                                    <aura:set attribute="else">
+                                                                        
+                                                                        <div title="{!queue.sfDeveloperName}">{!queue.sfDeveloperName}</div>
+                                                                        <aura:if isTrue="{!queue.errorMessage}">
+                                                                            <div class="slds-text-color_error slds-form-element__help">
+                                                                                {!queue.errorMessage}
+                                                                            </div>
+                                                                        </aura:if>
+                                                                    </aura:set> 
+                                                                    
+                                                                </aura:if>
+                                                            </td> 
+                                                        </tr>
+                                                    </aura:if>
+                                                </aura:iteration>	
+                                            </tbody>
+                                        </table>
+                                    </fieldset>
+                                    <aura:set attribute="else">
+                                        <div class="slds-align_absolute-center slds-is-relative">
+                                            <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                        </div>    
+                                    </aura:set>
+                                    
+                                </aura:if>
+                            </aura:if>
+                            <!-- END OF CREATE QUEUES SECTION -->
+                            
+                            <!-- ADD USERS TO QUEUES SECTION -->
+                            <aura:if isTrue="{! v.sectionDisplay.addUsersToQueue}">
+                                <aura:if isTrue="{!v.isProcessing == false}">
+                                    <h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak ">Select the Users that you would like to add to the Queues</h1>
+                                    <fieldset class="slds-form-element slds-m-bottom_xx-large">
+                                        <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white;row-height:3rem">
+                                            <thead>
+                                                <tr class="slds-text-title_caps" >
+                   
+                                                    <th scope="col" class="slds-cell-wrap" style="width: 15rem;">
+                                                        <div  title="SalesforceQueue">
+                                                            Queues in Salesforce
+                                                            
+                                                        </div>
+                                                    </th>
+                                                    <th scope="col" class="slds-cell-wrap" style="width: 10rem;">
+                                                        <div class="slds-truncate" title="User">
+                                                            User
+                                                            
+                                                        </div>
+                                                    </th>
+                                                    <th scope="col">
+                                                        <div class="slds-truncate" title="DeskQueue" style="width: 10rem;">
+                                                            Queues in Desk
+                                                            
+                                                        </div>
+                                                    </th>
+                                                    
+                                                    
+                                                </tr>
+                                            </thead>
+                                            
+                                            <tbody>
+                                                <aura:iteration items="{!v.queues}" var="queue" indexVar="count"> 
+                                                    <tr class="slds-hint-parent">
+                                                        
+                                                        <td class="slds-cell-shrink" data-label="Select Row">
+                                                            <lightning:input type="checkbox" disabled="{! queue.sfQueue}" checked="{! queues.selected}"/>
+                                                        </td>
+                                                        
+                                                        <td scope="row" data-label="Name" class="slds-cell-wrap" >
+                                                             <div title="{!user.name}">{!user.name}</div>
+                                                        </td>
+                                                        
+                                                        <td data-label="Email" class="slds-cell-wrap">
+                                                            <lightning:input type="check" disabled="{! queues.deskQueue}" checked="{! queues.selected}"/>
+                                                        
+                                                        </td>
+                           
+                                                        
+                                                    </tr>
+                                                </aura:iteration>	
+                                            </tbody> 
+                                        </table>
+                                    </fieldset>
+                                    <aura:set attribute="else">
+                                        <div class="slds-align_absolute-center slds-is-relative">
+                                            <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                        </div>    
+                                    </aura:set>
+                                    
+                                </aura:if>
+                            </aura:if>  
+                            <!-- END OF ADD USERS TO QUEUES SECTION -->
+                            
+                            <!-- COMPLETE SECTION -->
+                            <aura:if isTrue="{! v.sectionDisplay.complete}">
+                                <aura:if isTrue="{!v.isProcessing == false}">
+                                    <h1 class="slds-text-heading_large slds-m-bottom_large slds-text-color_weak ">{!v.completeHeader}</h1>
+                                    <aura:set attribute="else">
+                                        <div class="slds-align_absolute-center slds-is-relative">
+                                            <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                        </div>    
+                                    </aura:set>
+                                    
+                                </aura:if>
+                            </aura:if>
+                            <!-- COMPLETE SECTION -->
+                            
+                            <!-- COMMON BUTTONS -->
+                            <!-- <aura:if isTrue="{! and(v.isInitialising == false, v.unknownError == false)}"></aura:if> -->
+                            <footer class="slds-m-top_x-large" style="{! and(v.isProcessing == false, v.unknownError == false) ? 'display:block' : 'display:none' }">
+                                
+                                <lightning:button aura:id="backButton" variant="neutral" label="Back" onclick="{!c.back}" disabled="false" class="wide-button"/>
+                                <lightning:button aura:id="nextButton" variant="neutral" label="Next >" onclick="{!c.next}" disabled="false" class="wide-button"/>
+                            </footer> 
+                            
+                            <!-- END OF COMMON BUTTONS -->
+                            
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <!-- GRID START END -->
+                
+            </div>
+            <!-- END RECIPE HOLDER -->
+            
+            
+        </div>
+        <!-- END CONTENT TEST HOLDER -->
+        
+    </body>  
+</aura:component>

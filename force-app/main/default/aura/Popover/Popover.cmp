@@ -1,0 +1,24 @@
+<aura:component >
+    <section aria-describedby="dialog-body-id-6" aria-labelledby="dialog-heading-id-1" class="slds-popover slds-popover_walkthrough slds-nubbin_right slds-popover_small" role="dialog">
+        <!-- <button class="slds-button slds-button_icon slds-button_icon-small slds-float_right slds-popover__close slds-button_icon-inverse" title="Close dialog">
+            <svg class="slds-button__icon" aria-hidden="true">
+            	<use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#close" />
+            </svg>
+        	<span class="slds-assistive-text">Close dialog</span>
+        </button> -->
+        <header class="slds-popover__header slds-p-vertical_medium">
+        	<h2 id="dialog-heading-id-1" class="slds-text-heading_medium">Virtual Consultant</h2>
+        </header>
+        <div class="slds-popover__body" id="dialog-body-id-6">
+            <p>Play the video to get started!</p><p><br/>Your virtual consultant will guide you through the setup migration.</p>
+        </div>
+        <!--
+        <footer class="slds-popover__footer">
+            <div class="slds-grid slds-grid_vertical-align-center">
+                <span class="slds-text-title">Step 2 of 4</span>	
+                <button class="slds-button slds-button_brand slds-col_bump-left">Next</button>
+            </div>
+        </footer>
+		-->
+    </section>
+</aura:component>

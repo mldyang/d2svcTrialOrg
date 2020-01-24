@@ -1,0 +1,589 @@
+<apex:page showHeader="false" sidebar="false" standardStylesheets="false" docType="html-5.0" >
+
+    <apex:slds />
+    
+    <script>
+    
+    var lexOrigin = "https://yourdomain-dev-ed.lightning.force.com";
+    
+    function sendToLC() {
+        var message = document.getElementById("message").value;
+        parent.postMessage(message, lexOrigin);
+    }
+    
+    function getParamValue(paramName)
+    {
+        var url = window.location.search.substring(1); //get rid of "?" in querystring
+        var qArray = url.split('&'); //get key-value pairs
+        for (var i = 0; i < qArray.length; i++) 
+        {
+            var pArr = qArray[i].split('='); //split key and value
+            if (pArr[0] == paramName) 
+                return pArr[1]; //return value
+        }
+    }
+    
+    function checkIfParamExists(paramName)
+    {
+        var url = window.location.search.substring(1); //get rid of "?" in querystring
+        var qArray = url.split('&'); //get key-value pairs
+        for (var i = 0; i < qArray.length; i++) 
+        {
+            var pArr = qArray[i].split('='); //split key and value
+            if (pArr[0] == paramName) 
+                return true; //return value
+        }
+        return false;
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+       var trialDays = getParamValue('days');
+       if (trialDays == -1 || trialDays == null){
+	       document.getElementById('trialdaysbar').style.display = 'none';
+       } else{
+       	   document.getElementById('trialdays').innerHTML = trialDays;
+       }
+       if(!checkIfParamExists('days')){
+       	 document.getElementById('header').style.display = 'block';	
+       }
+        
+       var createdDate = Date.parse(getParamValue('createdDate'));
+       var v1point5Date = new Date(Date.UTC(2018, 4, 3, 21, 0, 0, 0));
+       var v1point9point1Date = new Date(Date.UTC(2018, 7, 21, 0, 0, 0, 0));
+        //console.log(new Date(createdDate)," :: ",v1point9point1Date,createdDate >= v1point9point1Date);
+        
+        
+       if (createdDate == -1 || createdDate == null){
+           document.getElementById('MigrationToolsVideo-Large').src = 'https://www.youtube.com/embed/5m6PUy00mpU?enablejsapi=1&rel=0';
+           document.getElementById('MigrationToolsVideo-Small').src = 'https://www.youtube.com/embed/5m6PUy00mpU?enablejsapi=1&rel=0';
+       } else if (createdDate >= v1point5Date && createdDate < v1point9point1Date){
+       	   document.getElementById('MigrationToolsVideo-Large').src = 'https://www.youtube.com/embed/u6FkcFhyaXE?enablejsapi=1&rel=0';
+           document.getElementById('MigrationToolsVideo-Small').src = 'https://www.youtube.com/embed/u6FkcFhyaXE?enablejsapi=1&rel=0';
+       } else if (createdDate >= v1point9point1Date){
+           document.getElementById('MigrationToolsVideo-Large').src = 'https://www.youtube.com/embed/rxLF6WMxxi8?enablejsapi=1&rel=0';
+           document.getElementById('MigrationToolsVideo-Small').src = 'https://www.youtube.com/embed/rxLF6WMxxi8?enablejsapi=1&rel=0';
+       }
+        
+    }, false);
+    
+    function showHideContent(element)
+    {
+        var contentId = element.id.substring(1);
+        
+        for (i = 1; i <= 5; i++) { 
+            if(i == contentId){
+            	document.getElementById('R' + i).style.display = 'block';
+                document.getElementById('L' + i).classList.add("slds-theme_shade");
+     
+            }
+            else{
+            	document.getElementById('R' + i).style.display = 'none';
+                document.getElementById('L' + i).classList.remove("slds-theme_shade");
+            }
+        }
+        
+        var iframeList = document.getElementsByTagName("iframe");
+        for (i = 0; i < iframeList.length; i++) { 
+            iframeList[i].contentWindow.postMessage('{"event":"command","func":"' + 'stopVideo' + '","args":""}', '*');   
+        }
+    }
+    
+</script>
+    <style>
+    
+    .slds-scope .slds-page-header {
+    padding: 1rem;
+    border-bottom: 1px solid rgb(221, 219, 218);
+    border-radius: .25rem;
+    background: rgb(243, 242, 242);
+    background-clip: padding-box;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid rgb(221, 219, 218);
+}
+
+.slds-scope .slds-theme_shade, .slds-scope .slds-theme--shade {
+    background-color: rgb(243, 242, 242);
+}
+    
+    </style>
+    <body class="desk" style="background: #F5F6F8; ">
+	  			
+    
+	<!-- HEADER FOR ILLUSTRAITION OF WHAT THE PAGE WOULD LOOK LIKE -->
+	<div id="header" class="slds-page-header slds-m-bottom_medium slds-m-top_medium" style="display:none">
+	  <div class="slds-media">
+	    <div class="slds-media__figure">
+	      <span class="slds-icon_container slds-icon-standard-opportunity" title="Description of icon when needed">
+	        <svg class="slds-icon slds-page-header__icon" aria-hidden="true">
+	          <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="assets/icons/standard-sprite/svg/symbols.svg#opportunity" />
+	        </svg>
+	      </span>
+	    </div>
+	    <div class="slds-media__body">
+	      <h1 class="slds-page-header__title slds-truncate slds-align-middle" title="Trial Onboarding">Service Cloud Lightning Trial Onboarding</h1>
+	      <p class="slds-text-body_small slds-line-height_reset">Your guide to successfully onboarding with your Service Cloud Trial</p>
+	    </div>
+	  </div>
+	</div>
+	<!-- HEADER ENDS -->
+    
+	
+	<!-- ONBOARDING APP STARTS -->
+	<div class="slds-box slds-theme_default" style="padding: 0;">
+		
+		<!-- LEFT COL -->
+		<div class="slds-grid">
+			<div class="slds-col slds-size_1-of-3 slds-border_right">
+				
+				
+		    
+		    <!-- LEFT LIST ITEM START -->
+		    <div id="L1" class="slds-col slds-size_1-of-1 slds-p-around_medium slds-border_bottom slds-theme_shade" style="cursor: pointer" onClick="showHideContent(this)">
+			    
+			    <div class="slds-grid">
+				    
+				    <div class="slds-col slds-size_1-of-8 slds-show_large">
+					    <!-- LIST ICON -->
+					    <span class="slds-avatar slds-avatar_circle">
+							<abbr class="slds-avatar__initials slds-icon-standard-user" title="person name">1</abbr>
+						</span>
+						<!-- LIST ICON END -->
+				    </div>
+					
+				    <div class="slds-col slds-size_7-of-8 slds-small-size_8-of-8 slds-medium-size_8-of-8 slds-large-size_7-of-8">
+					    <!-- LIST LINK -->
+					    <h2 class="slds-text-heading_medium slds-p-bottom_small">
+						    <a href="#link1">Introducing your Service Console</a>
+					    </h2>
+					    <!-- LIST LINK END -->
+					    <!-- LIST BLURB -->
+					    <p class="slds-show_medium">
+                            Watch the basics of navigating your Service Console. See how to access the menu and go to your first Case!
+					    </p><br/>
+					    <!-- CTA BUTTON -->
+					    <!-- <button class="slds-button slds-button_neutral slds-align_absolute-center slds-m-top_small">Watch Video</button> -->
+					    <!-- CTA BUTTON END -->
+					    <!-- LIST BLURB END -->
+			    	</div>
+		    	</div>
+
+		    </div>
+		    <!-- LEFT LIST ITEM END -->
+		    
+		    
+		    
+		    <!-- LEFT LIST ITEMN START -->
+		    <div id="L2" class="slds-col slds-size_1-of-1 slds-p-around_medium slds-border_bottom" style="cursor: pointer" onClick="showHideContent(this)">
+			    
+			    <div class="slds-grid">
+				    
+				    <div class="slds-col slds-size_1-of-8 slds-show_large">
+					    <!-- LIST ICON -->
+					    <span class="slds-avatar slds-avatar_circle">
+							<abbr class="slds-avatar__initials slds-icon-standard-user" title="person name">2</abbr>
+						</span>
+						<!-- LIST ICON END -->
+				    </div>
+					
+				    <div class="slds-col slds-size_7-of-8 slds-small-size_8-of-8 slds-medium-size_8-of-8 slds-large-size_7-of-8">
+					    <!-- LIST LINK -->
+					    <h2 class="slds-text-heading_medium slds-p-bottom_small">
+						    <a href="#link1">Resolving a Case in Service Cloud</a>
+					    </h2>
+					    <!-- LIST LINK END -->
+					    <!-- LIST BLURB -->
+					    <p class="slds-show_medium">
+							View the video walkthrough of an entire Case Life-cycle in Service Cloud! Get an overview of Case Details Page.
+					    </p><br/>
+					    <!-- CTA BUTTON -->
+					    <!-- <button class="slds-button slds-button_neutral slds-align_absolute-center slds-m-top_small">Read More</button> -->
+					    <!-- CTA BUTTON END -->
+					    <!-- LIST BLURB END -->
+			    	</div>
+		    	</div>
+
+		    </div>
+		    <!-- LEFT LIST ITEM END -->
+		    
+		    
+                
+            <!-- LEFT LIST ITEMN START -->
+		    <div id="L3" class="slds-col slds-size_1-of-1 slds-p-around_medium slds-border_bottom" style="cursor: pointer" onClick="showHideContent(this)">
+			    
+			    <div class="slds-grid">
+				    
+				    <div class="slds-col slds-size_1-of-8 slds-show_large">
+					    <!-- LIST ICON -->
+					    <span class="slds-avatar slds-avatar_circle">
+							<abbr class="slds-avatar__initials slds-icon-standard-user" title="person name">3</abbr>
+						</span>
+						<!-- LIST ICON END -->
+				    </div>
+					
+				    <div class="slds-col slds-size_7-of-8 slds-small-size_8-of-8 slds-medium-size_8-of-8 slds-large-size_7-of-8">
+					    <!-- LIST LINK -->
+					    <h2 class="slds-text-heading_medium slds-p-bottom_small">
+							 <a href="#link1">Migrate Your Data: Desk to Service Cloud Data Migration tools</a>
+					    </h2>
+					    <!-- LIST LINK END -->
+					    <!-- LIST BLURB -->
+					    <p class="slds-show_medium">
+							Your Trial Org has the Desk Case and Article migration tools pre-installed. See how you can use them to migrate your data.
+					    </p><br/>
+					    <!-- CTA BUTTON -->
+					    <!-- <button class="slds-button slds-button_neutral slds-align_absolute-center slds-m-top_small">Open the Guide</button> -->
+					    <!-- CTA BUTTON END -->
+					    <!-- LIST BLURB END -->
+			    	</div>
+		    	</div>
+
+		    </div>
+		    <!-- LEFT LIST ITEM END -->
+                
+            <!-- LEFT LIST ITEMN START -->
+		    <div id="L4" class="slds-col slds-size_1-of-1 slds-p-around_medium slds-border_bottom" style="cursor: pointer" onClick="showHideContent(this)">
+			    
+			    <div class="slds-grid">
+				    
+				    <div class="slds-col slds-size_1-of-8 slds-show_large">
+					    <!-- LIST ICON -->
+					    <span class="slds-avatar slds-avatar_circle">
+							<abbr class="slds-avatar__initials slds-icon-standard-user" title="person name">4</abbr>
+						</span>
+						<!-- LIST ICON END -->
+				    </div>
+					
+				    <div class="slds-col slds-size_7-of-8 slds-small-size_8-of-8 slds-medium-size_8-of-8 slds-large-size_7-of-8">
+					    <!-- LIST LINK -->
+					    <h2 class="slds-text-heading_medium slds-p-bottom_small">
+							 <a href="#link1">Trial Org Customizations: What's Pre-configured in your Special Trial</a>
+					    </h2>
+					    <!-- LIST LINK END -->
+					    <!-- LIST BLURB -->
+					    <p class="slds-show_medium">
+							Learn more about the pre-built customizations in your trial. Download the workbook for a deeper dive.
+					    </p><br/>
+					    <!-- CTA BUTTON -->
+					    <!-- <button class="slds-button slds-button_neutral slds-align_absolute-center slds-m-top_small">Open the Guide</button> -->
+					    <!-- CTA BUTTON END -->
+					    <!-- LIST BLURB END -->
+			    	</div>
+		    	</div>
+
+		    </div>
+		    <!-- LEFT LIST ITEM END -->
+                
+            <!-- LEFT LIST ITEMN START -->
+		    <div id="L5" class="slds-col slds-size_1-of-1 slds-p-around_medium slds-border_bottom" style="cursor: pointer" onClick="showHideContent(this)">
+			    
+			    <div class="slds-grid">
+				    
+				    <div class="slds-col slds-size_1-of-8 slds-show_large">
+					    <!-- LIST ICON -->
+					    <span class="slds-avatar slds-avatar_circle">
+							<abbr class="slds-avatar__initials slds-icon-standard-user" title="person name">5</abbr>
+						</span>
+						<!-- LIST ICON END -->
+				    </div>
+					
+				    <div class="slds-col slds-size_7-of-8 slds-small-size_8-of-8 slds-medium-size_8-of-8 slds-large-size_7-of-8">
+					    <!-- LIST LINK -->
+					    <h2 class="slds-text-heading_medium slds-p-bottom_small">
+						    <a href="#link1">Get Started with your Setup: Setup your Email Channel</a>
+					    </h2>
+					    <!-- LIST LINK END -->
+					    <!-- LIST BLURB -->
+					    <p class="slds-show_medium">
+							See the Setup Flows in action. Use the email Setup Flow to setup your Email channel! 
+					    </p><br/>
+					    <!-- CTA BUTTON -->
+					    <!-- <button class="slds-button slds-button_neutral slds-align_absolute-center slds-m-top_small">Learn More</button> -->
+					    <!-- CTA BUTTON END -->
+					    <!-- LIST BLURB END -->
+			    	</div>
+		    	</div>
+
+		    </div>
+		    <!-- LEFT LIST ITEM END -->
+		    
+		    <!-- SMALL TRIAL BOX START
+		    <div class="slds-col slds-size_1-of-1  slds-popover_walkthrough slds-border_bottom">
+				<div class="slds-col slds-size_1-of-1 slds-small-size_8-of-8 slds-medium-size_8-of-8 slds-large-size_8-of-8 slds-p-around_medium"> 
+					
+					<h2 class="slds-text-heading_large slds-text-align_center">
+					    28 
+					</h2>
+					
+					<p class="slds-text-align_center slds-text-title_caps ">
+						days left on trial
+					</p>						    
+		    	</div>
+		    	<div class="slds-col slds-size_1-of-1 slds-popover_walkthrough-alt">
+			    	<div class="slds-grid">
+					    <div class="slds-col slds-size_5-of-8 slds-p-left_medium slds-p-right_medium slds-p-top_x-large slds-show_large">
+						    
+							<div class="slds-progress-bar slds-progress-bar_circular" aria-valuemin="0" aria-valuemax="100" aria-valuenow="25" role="progressbar">
+								<span class="slds-progress-bar__value" style="width: 94%;">
+									<span class="slds-assistive-text">Progress: 94%</span>
+								</span>
+							</div>
+							
+				    	</div>
+				    	
+				    	<div class="slds-col slds-size_1-of-1 slds-small-size_1-of-1 slds-medium-size_1-of-1 slds-large-size_3-of-8 slds-p-top_large slds-text-align_center">
+						    
+						    <button class="slds-button slds-button_brand">Subscribe Now</button>
+							
+				    	</div>
+		    		</div>
+			    </div>
+		    </div>
+		    SMALL TRIAL BOX END -->
+		    
+		    		
+
+		  </div>
+		  <!-- LEFT COL END -->
+		 
+		  
+		  <!-- RIGHT COL -->
+		  <div class="slds-col slds-size_2-of-3 slds-theme_shade">
+			
+            <!-- RIGHT CONTENT SECTION -->  
+			<div id="R1" class="onboarding-content" style="display:block;">
+				<!-- VIDEO LARGE HOLDER -->
+				<div class="slds-col slds-size_1-of-1 slds-show_large ">
+					<iframe width="100%" height="534" src="https://www.youtube.com/embed/qCy0L1qTq1I?enablejsapi=1&rel=0" frameborder="0" allowfullscreen="true" enablejsapi="1"></iframe>
+				</div>
+				<!-- VIDEO LARGE HOLDER END -->
+                <!-- VIDEO SMALL HOLDER -->
+				<div class="slds-col slds-size_1-of-1 slds-hide_large">
+					<iframe width="100%" height="534" src="https://www.youtube.com/embed/qCy0L1qTq1I?enablejsapi=1&rel=0" frameborder="0" allowfullscreen="true" enablejsapi="1"></iframe>
+				</div>
+				<!-- VIDEO SMALL HOLDER END -->
+				
+				
+				<!-- CONTENT TITLE -->
+				<div class="slds-col slds-size_1-of-1 slds-p-left_xx-large slds-p-right_xx-large slds-m-top_medium">
+					<h1 class="slds-text-heading_large">Introducing your Service Console</h1>
+				</div>
+				<!-- CONTENT TITLE END -->
+				
+				<!-- CONTENT SECTION -->
+				<div class="slds-col slds-size_1-of-1">
+					
+					<div class="slds-theme_default slds-box slds-m-left_xx-large slds-m-right_xx-large slds-m-top_medium slds-m-bottom_medium">
+                        <p>1. Click on the arrow next to Cases on the navigation bar. The menu will show the key entities that you can acesss: Case, Account (Company in Desk), Contact (Customer in Desk), Reports, Dashboard. You can also see Trial Onboarding here, which will bring you back to this tab.</p><br/>
+                        <p>2. Select the Case. From the page, select All Cases List View. Click on Case number against 'Welcome to your first case on Service Cloud". This will take you to the Case View page.</p><br/>
+						<p>3. Case Console page shows the 360 degree view to the left, the Case Path and Case feed in the middle, and knowledge articles, related list to the right.</p>
+					</div>
+					
+				</div>
+				<!-- CONTENT SECTION END -->
+				
+			</div>
+            <!-- RIGHT CONTENT SECTION END -->  
+              
+            <!-- RIGHT CONTENT SECTION -->  
+			<div id="R2" class="onboarding-content" style="display:none;">
+				<!-- VIDEO LARGE HOLDER -->
+                
+				<div class="slds-col slds-size_1-of-1 slds-show_large ">
+					<iframe width="100%" height="534" src="https://www.youtube.com/embed/K8AbAtRhzwk?enablejsapi=1&rel=0" frameborder="0" allowfullscreen="true" enablejsapi="1"></iframe>
+				</div>
+				<!-- VIDEO LARGE HOLDER END -->
+                <!-- VIDEO SMALL HOLDER -->
+				<div class="slds-col slds-size_1-of-1 slds-hide_large">
+					<iframe width="100%" height="534" src="https://www.youtube.com/embed/K8AbAtRhzwk?enablejsapi=1&rel=0" frameborder="0" allowfullscreen="true" enablejsapi="1"></iframe>
+				</div>
+				<!-- VIDEO SMALL HOLDER END -->
+				
+				
+				<!-- CONTENT TITLE -->
+				<div class="slds-col slds-size_1-of-1 slds-p-left_xx-large slds-p-right_xx-large slds-m-top_medium">
+					<h1 class="slds-text-heading_large">Resolving a Case in Service Cloud</h1>
+				</div>
+				<!-- CONTENT TITLE END -->
+				
+				<!-- CONTENT SECTION -->
+				<div class="slds-col slds-size_1-of-1">
+					
+					<div class="slds-theme_default slds-box slds-m-left_xx-large slds-m-right_xx-large slds-m-top_medium slds-m-bottom_medium">
+                        <p>1. Select the Case menu, and from the Case views, select unresolved cases list view.</p><br/>
+						<p>2. Go to the case details page by clicking the case number.</p><br/>
+                        <p>3. Use the Email Action to send a reply to the customer. You can also use a macro as shown in the video. Notice status automatically changes to Pending</p><br/>
+					</div>
+					
+				</div>
+				<!-- CONTENT SECTION END -->
+				
+			</div>
+            <!-- RIGHT CONTENT SECTION END -->  
+              
+            <!-- RIGHT CONTENT SECTION -->  
+			<div id="R3" class="onboarding-content" style="display:none;">
+				<!-- VIDEO LARGE HOLDER -->
+                
+				<div class="slds-col slds-size_1-of-1 slds-show_large ">
+					<iframe id="MigrationToolsVideo-Large" width="100%" height="534" src="https://www.youtube.com/embed/5m6PUy00mpU?enablejsapi=1&rel=0" frameborder="0" allowfullscreen="true" enablejsapi="1"></iframe>
+				</div>
+				<!-- VIDEO LARGE HOLDER END -->
+                <!-- VIDEO SMALL HOLDER -->
+				<div class="slds-col slds-size_1-of-1 slds-hide_large">
+					<iframe id="MigrationToolsVideo-Small" width="100%" height="534" src="https://www.youtube.com/embed/5m6PUy00mpU?enablejsapi=1&rel=0" frameborder="0" allowfullscreen="true" enablejsapi="1"></iframe>
+				</div>
+				<!-- VIDEO SMALL HOLDER END -->
+				
+				
+				<!-- CONTENT TITLE -->
+				<div class="slds-col slds-size_1-of-1 slds-p-left_xx-large slds-p-right_xx-large slds-m-top_medium">
+					<h1 class="slds-text-heading_large">Migrating your Data: Desk to Service Cloud data migration tools</h1>
+				</div>
+				<!-- CONTENT TITLE END -->
+				
+				<!-- CONTENT SECTION -->
+				<div class="slds-col slds-size_1-of-1">
+					
+					<div class="slds-theme_default slds-box slds-m-left_xx-large slds-m-right_xx-large slds-m-top_medium slds-m-bottom_medium">
+						<p>1. Click on the apps icon. From the modal window Select Desk Case Migration.</p>
+						<p>2. From the wizard that loads, follow the instructions to migrate your data.</p>
+						<p>3. Follow the same steps to launch the Desk Article Migration tools</p>
+					</div>
+					
+				</div>
+				<!-- CONTENT SECTION END -->
+				
+			</div>
+            <!-- RIGHT CONTENT SECTION END --> 
+              
+            <!-- RIGHT CONTENT SECTION -->  
+			<div id="R4" class="onboarding-content" style="display:none;">
+				<!-- VIDEO LARGE HOLDER -->
+                
+				<div class="slds-col slds-size_1-of-1 slds-show_large ">
+					<iframe width="100%" height="534" src="https://www.youtube.com/embed/yEGY3UdaYgw?enablejsapi=1&rel=0" frameborder="0" allowfullscreen="true" enablejsapi="1"></iframe>
+				</div>
+				<!-- VIDEO LARGE HOLDER END -->
+                <!-- VIDEO SMALL HOLDER -->
+				<div class="slds-col slds-size_1-of-1 slds-hide_large">
+					<iframe width="100%" height="534" src="https://www.youtube.com/embed/yEGY3UdaYgw?enablejsapi=1&rel=0" frameborder="0" allowfullscreen="true" enablejsapi="1"></iframe>
+				</div>
+				<!-- VIDEO SMALL HOLDER END -->
+				
+				
+				<!-- CONTENT TITLE -->
+              
+				<div class="slds-col slds-size_1-of-1 slds-p-left_xx-large slds-p-right_xx-large slds-m-top_medium">
+					<h1 class="slds-text-heading_large">Trial Org Pre-configured Customizations</h1>
+				</div>
+					
+				<!-- CONTENT TITLE END -->
+				
+				<!-- CONTENT SECTION -->
+				<div class="slds-col slds-size_1-of-1">
+					
+					<div class="slds-theme_default slds-box slds-m-left_xx-large slds-m-right_xx-large slds-m-top_medium slds-m-bottom_medium">
+						<p><a href="http://sforce.co/2p8WLZy" target="_blank">Download</a> the workbook for a detailed breakdown of all the pre-configured components in your trial.</p>					
+					</div>
+					
+				</div>
+				<!-- CONTENT SECTION END -->
+				
+			</div>
+            <!-- RIGHT CONTENT SECTION END --> 
+              
+            <!-- RIGHT CONTENT SECTION -->  
+			<div id="R5" class="onboarding-content" style="display:none;">
+				<!-- VIDEO LARGE HOLDER -->
+                
+				<div class="slds-col slds-size_1-of-1 slds-show_large ">
+					<iframe width="100%" height="534" src="https://www.youtube.com/embed/OgfNga2TbyA?enablejsapi=1&rel=0" frameborder="0" allowfullscreen="true" enablejsapi="1"></iframe>
+				</div>
+				<!-- VIDEO LARGE HOLDER END -->
+                <!-- VIDEO SMALL HOLDER -->
+				<div class="slds-col slds-size_1-of-1 slds-hide_large">
+					<iframe width="100%" height="534" src="https://www.youtube.com/embed/OgfNga2TbyA?enablejsapi=1&rel=0" frameborder="0" allowfullscreen="true" enablejsapi="1"></iframe>
+				</div>
+				<!-- VIDEO SMALL HOLDER END -->
+				
+				
+				<!-- CONTENT TITLE -->
+				<div class="slds-col slds-size_1-of-1 slds-p-left_xx-large slds-p-right_xx-large slds-m-top_medium">
+					<h1 class="slds-text-heading_large">Get Started with your Setup: Setup your Email Channel</h1>
+				</div>
+				<!-- CONTENT TITLE END -->
+				
+				<!-- CONTENT SECTION -->
+				<div class="slds-col slds-size_1-of-1">
+					
+					<div class="slds-theme_default slds-box slds-m-left_xx-large slds-m-right_xx-large slds-m-top_medium slds-m-bottom_medium">
+                        <p>1. Go to Service Cloud Setup by clicking on the Gear icon on the top right and then selecting Service Cloud Setup</p><br/>
+						<p>2. From the Setup Flow tiles on the Service Setup Home, click on Get Started on the Email setup tile</p><br/>
+						<p>3. Follow the steps in the wizard.</p><br/>
+					</div>
+					
+				</div>
+				<!-- CONTENT SECTION END -->
+				
+			</div>
+            <!-- RIGHT CONTENT SECTION END --> 
+		   
+		</div>
+		<!-- RIGHT COL ENDS -->
+		
+		</div>	
+	</div>
+	<!-- ONBOARDING APP ENDS -->
+	
+	<!-- FIXED TRIAL BOX --> 
+	<!-- <div style="height: 180px;"> -->
+	<div id="trialdaysbar" style="height: 50px;">
+        <div class="slds-docked-form-footer slds-popover_walkthrough">
+		<!-- DAYS -->
+	    <h2 id="trialdays" class="slds-text-heading_large slds-text-align_center slds-m-right_medium">
+			28 
+		</h2>
+		<!-- TEXT -->
+		<p class="slds-text-align_center slds-text-title_caps slds-m-right_medium slds-m-top_x-small">
+			days left on your trial
+		</p>
+		<!-- CTA -->
+	    <!-- <button type="button" class="slds-button slds-button_brand" onClick="window.open('https://support.desk.com/customer/portal/emails/new')">Switch Licenses to Service Cloud</button> -->
+            <a class="slds-text-body_regular slds-text-align_center slds-m-top_xx-small" style="color: white" onClick="window.open('https://support.desk.com/customer/portal/emails/new')">Switch Licenses to Service Cloud</a>
+	  </div>
+	</div>
+	<!-- FIXED TRIAL BOX END --> 
+        
+    <!-- Modal -->
+    <div id="modal" class="demo-only" style="height: 900px;display:none;">
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header slds-modal__header_empty">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
+                      <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#close" />
+                      </svg>
+                      <span class="slds-assistive-text">Close</span>
+                    </button>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <!-- <p>Sit nulla est ex deserunt exercitation anim occaecat. Nostrud ullamco deserunt aute id consequat veniam incididunt duis in sint irure nisi. Mollit officia cillum Lorem ullamco minim nostrud elit officia tempor esse quis. Cillum sunt ad dolore
+                    quis aute consequat ipsum magna exercitation reprehenderit magna. Tempor cupidatat consequat elit dolor adipisicing.</p>
+                    <p>Dolor eiusmod sunt ex incididunt cillum quis nostrud velit duis sit officia. Lorem aliqua enim laboris do dolor eiusmod officia. Mollit incididunt nisi consectetur esse laborum eiusmod pariatur proident. Eiusmod et adipisicing culpa deserunt nostrud
+                    ad veniam nulla aute est. Labore esse esse cupidatat amet velit id elit consequat minim ullamco mollit enim excepteur ea.</p>
+					
+                    <iframe src="https://desksurvey.secure.force.com/contact/?brandID=7112" frameborder="0" width="100%" height="400px"></iframe>
+					-->	
+                </div>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral">Cancel</button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </div>
+   <!-- Modal End -->
+
+  </body>
+
+</apex:page>

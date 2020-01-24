@@ -1,0 +1,74 @@
+<aura:component >
+    <aura:attribute name="isActive" type="Boolean"/>
+    
+    <aura:if isTrue="{!v.isActive}">
+        <!-- WELCOME TEXT AND IMAGE -->
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-1 slds-large-size_1-of-1 slds-m-top_xx-large slds-p-right_xx-large slds-p-left_xx-large">
+            <h1 class="slds-text-heading_large slds-text-align_center slds-text-color_inverse slds-p-top_xx-large larger">
+                Your Virtual Consultant will walk you through <br/>setting up of Service Cloud!
+                <!-- IMAC DISPLAY IMAGE -->
+                <div class="slds-p-right_xx-large slds-p-left_xx-large slds-m-top_xx-large slds-m-bottom_xx-large"> 
+                  
+                    <!-- BUNDLE GRID -->
+                    <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_medium">
+                      
+                        <div class="slds-col slds-size_10-of-12 slds-m-bottom_small"></div>
+                        <!-- BUNDLE ITEM -->    
+                        <div class="slds-col slds-size_8-of-12 slds-m-bottom_small" style="display: block; margin: auto;">
+                        
+                            <div class="slds-box slds-theme_default add-bg slds-has-bottom-magnet" style="{!'background: url(' + $Resource.SetupRecipe + '/SetupRecipe/bg.png) repeat'}">
+                                
+                                <!-- CENTRALIZE ICON COMBO -->
+                                <div class="slds-align_absolute-center" style="height: 10rem;">
+                                    <span class="slds-avatar slds-avatar_circle slds-avatar_large" style="height:6.5rem;width:6.5rem;">
+                                      <img alt="Person name" src="{!$Resource.SetupRecipe + '/SetupRecipe/avatar1.jpg'}" title="User avatar" />
+                                    </span>
+                                </div>
+                                <!-- END CENTRALIZE ICON COMBO -->
+                                
+                            </div>
+                        <!-- BUNDLE TITLE BOX -->
+                        <div class="slds-col slds-box slds-theme_default slds-has-top-magnet">
+                            <!-- BUNDLE TITLE -->
+                            <div class="slds-align_absolute-center" style="height: 5rem;">
+                                    <h2 class="slds-text-heading_large slds-text-align_center">Virtual Consultant</h2>
+                            </div>
+                        </div>
+                        <!-- END BUNDLE TITLE BOX -->
+            
+                    </div>
+                        <!-- BUNDLE ITEM END -->
+                    
+                    </div>
+                    <!-- END BUNDLE GRID -->
+                </div>
+            </h1>
+        </div>
+        
+        
+        <!-- FEATURE LIST -->
+        
+        
+        <div class="slds-text-heading_small slds-text-align_center slds-p-bottom_medium slds-p-right_xx-large slds-p-left_xx-large slds-m-top_x-large slds-text-color_inverse">
+            <ul>
+                <li class="slds-p-bottom_x-small">
+                    Launch your <strong>Virtual Consultant</strong> from inside your trial 
+                </li>
+                <li class="slds-p-bottom_x-small">
+                    A set of <strong>wizards</strong> will step you through moving your Desk configuration
+                </li>
+                <li class="slds-p-bottom_x-small">
+                    <strong>Data Migration tool</strong> to move your data from Desk to Service Cloud
+                </li>
+                <li class="slds-p-bottom_x-small">
+                    <strong>Video instructions</strong> for Labels, Macros, and Support Center
+                </li>
+                <li class="slds-p-bottom_x-small">
+                    <strong>Training &amp; Cutover</strong> instructions, to cutover to Service Cloud
+                </li>
+                
+            </ul>
+        </div>
+    </aura:if>
+	
+</aura:component>

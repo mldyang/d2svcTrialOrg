@@ -1,0 +1,352 @@
+<aura:component controller="EmailRecipeController" extends="c:RecipeBase">
+    
+    <aura:attribute name="oauthRecordIdentifier" type="String" access="public" default="NyIqasCW1541174120580"/>
+
+	<!-- Existing Email-to-case in Salesforce -->
+    <aura:attribute type="List" name="existingEmailToCase" access="public" />
+    <aura:attribute type="String" name="sfSystemUserEmail" access="public" />
+    
+    <!-- Inbound and Outbound emails from Desk, that do not exist in Salesforce Email-to-case -->
+    <aura:attribute type="List" name="emailsFromDesk" access="public" />
+    
+    <!-- List of Emails that have to be verified -->
+    <aura:attribute type="List" name="emailsToVerify" access="public" />
+    <aura:attribute type="Integer" name="verifyConfirmationCount" access="public" default="0" />
+    
+    <!-- This map determines which steps are to be shown -->
+    <aura:attribute name="sectionDisplay" type="Map" default="{ existing: true, deskEmail: false, manualEmail: false, verify: false, complete: false }" />
+	
+    <!-- This map stores the links for VC videos -->
+    <aura:set attribute="vcVideos" value="{ email-existing: 'https://s3-us-west-1.amazonaws.com/desktosvc/Email/Existing+Email+Channels+-+V6A.mp4', 
+                                          email-deskEmail: 'https://s3-us-west-1.amazonaws.com/desktosvc/Email/Desk+Emails+With+Intro.mp4', 
+                                          email-deskEmailNoIntro: 'https://s3-us-west-1.amazonaws.com/desktosvc/Email/Desk+Emails+Without+Intro.mp4',	
+                                          email-manualEmailNoDeskEmail: 'https://s3-us-west-1.amazonaws.com/desktosvc/Email/Add+New+Email+-+No+Email+From+Desk+V4.mp4',
+                                          email-manualEmailYesDeskEmail: 'https://s3-us-west-1.amazonaws.com/desktosvc/Email/Add+New+Email+V3.mp4', 	
+                                          email-verify: 'https://s3-us-west-1.amazonaws.com/desktosvc/Email/Verify+Email+V2.mp4',
+                                          email-verifyError: 'https://s3-us-west-1.amazonaws.com/desktosvc/Verify+Emails+-+Error+V3.mp4',
+                                          email-complete: 'https://s3-us-west-1.amazonaws.com/desktosvc/Completed+Congrats+V3.mp4' }" />
+    
+    <aura:set attribute="highlightTimestampsMap" value="{ email-existing: { 6: 0, 7: ['channel','bottom'], 12 : 0, 13: ['email-services-address','bottom'], 22: 0, 23: ['verified','bottom']	}, 
+                                                          email-deskEmail: { 5: ['deskEmails','left']	}, 
+                                                          email-deskEmailNoIntro: { 1: ['deskEmails','left'] },	
+                                                          email-manualEmailNoDeskEmail: { 15: ['manual-emails','left']	},
+                                                       	  email-manualEmailYesDeskEmail: { 5: ['manual-emails','left', -10], 15:0	}, 	
+                                                          email-verify: { 16: ['emails-to-verify','left',-10]	},
+                                                          email-verifyError: { },
+                                                          email-complete: { 1: 0, 2: ['channel','bottom'], 7 : 0, 8: ['email-services-address','bottom'], 15: 0	} }" />
+    
+    <aura:set attribute="vcModalVideos" value="{ email-verify: ['https://s3-us-west-1.amazonaws.com/desktosvc/Verify+Emails+Demo+Screen+Edited+V2.mp4','https://s3-us-west-1.amazonaws.com/desktosvc/Verify+Emails+Demo+VC+V1_2.mp4','Verify Email Channel'],
+                                                 email-complete: ['https://s3-us-west-1.amazonaws.com/desktosvc/Test+Email+Channel+Demo+Edited+V3.mp4', 'https://s3-us-west-1.amazonaws.com/desktosvc/Test+Email+Channel+VC+V2_1.mp4','Testing Email Channel']
+                                               }" />
+    
+    <!-- Manages the rows for adding email address Manually -->
+    <aura:attribute name="manualEmailRows" type="List" default="[ {name: '', email: '', error: ''}]"/>
+    <aura:attribute type="Boolean" name="emailError" default="false" />
+    <aura:attribute type="String" name="emailErrorMessage" default="" />
+    <aura:attribute type="Boolean" name="isInitialising" default="true" />
+    <aura:attribute type="Boolean" name="isVerifying" default="false" />
+    <aura:attribute type="Boolean" name="bypassVerification" default="false" />
+    <aura:attribute type="Boolean" name="isCreatingEmailToCase" default="falsie" />
+    <aura:attribute type="Boolean" name="isProcessing" default="false" />
+    <aura:attribute type="String" name="processingMessage"  />
+    <aura:attribute type="String" name="videoDuration" default=""  />
+    
+    <aura:attribute name="showError" type="Boolean" default="false" />
+    <aura:attribute name="errorMessage" type="String" />
+    <aura:attribute name="unknownError" type="Boolean" default="false" />
+    <aura:handler name="init" action="{!c.init}" value="{!this}" /> 
+    <aura:handler name="toastClickEvent" event="c:ToastClick" action="{!c.handleToastClick}"/>
+    <aura:handler name="vcEvent" event="c:VirtualConsultantEvent" action="{!c.handleVCEvent}"/>
+    <aura:registerEvent name="recipeComponentChange" type="c:RecipeComponentChangeEvent"/>
+    
+      <body class="desk" style="background:white;">
+	  <!-- TEST CONTENT HOLDER -->
+	  <div style="margin: auto; width: 100%; height: 100vh;">
+          
+          <!-- RECIPE HOLDER -->
+          <div style="margin: 3em 3em 0 3em;">
+              
+              <!-- ERRORS SECTION -->
+
+                    <div style="{! if(v.showError,'display:block','display:none')}">
+                         <c:Toast aura:id="toast" isActive="{!v.showError}" message="{!v.errorMessage}" type="warning">
+                            {!v.errorMessage}
+                        </c:Toast> 
+                    </div>
+                    
+
+              <!-- END OF ERRORS SECTION-->
+              
+              <!-- BLOCKING ERROR -->    
+              <aura:if isTrue="{!v.unknownError}">
+                  
+                  <div aura:id="unknownErrorMessage" id="unknonw" class="middle" >
+                      <lightning:icon iconName="utility:error" variant="error" size="large"/>
+                      <div class="slds-text-heading_small slds-m-top_x-small">There seems to be an issue with creating your trial org. Please contact <a href = "mailto: support@desk.com">support@desk.com</a></div>
+                  </div>
+                  
+              </aura:if>
+              <!-- BLOCKING ERROR END -->
+              
+              <!-- VIRTUAL CONSULTANT -->
+              <c:VirtualConsultant aura:id="vc" hightlightTimestamps="" recipe="Email"/>
+			  <div aura:id="vc-highlight" id="vc-highlight" class="vc-highlight"></div>	
+			  <!-- VIRTUAL CONSULTANT END --> 
+              
+              <!-- GRID START -->
+              <div aura:id="main-grid" id="main-grid" class="slds-col slds-size_1-of-1 slds-p-around_medium" style="max-width:800px;">
+                  
+                  <div class="slds-grid">
+                      
+                      <div class="slds-col slds-size_12-of-12 slds-show_small">
+                          
+                          <!-- BREADCRUMBS -->
+                          <c:Breadcrumb recipe="Email Channel"/>
+                          <!-- END BREADCRUMBS -->
+                          
+                        <!-- EXISTING SECTION -->
+                        <aura:if isTrue="{!v.sectionDisplay.existing}">
+                            <aura:if isTrue="{!v.isInitialising == false}">
+                            <h1 class="slds-text-heading_large slds-m-bottom_xx-large slds-text-color_weak" style="width:900px">Here are your existing email channels. Click Next to add new email channel</h1>
+                            <!-- <div class="slds-text-heading_small slds-text-color_weak slds-m-bottom_large" style="font-family:SalesforceSans-Light">Click next to add a new email channel</div>    -->
+                            <fieldset class="slds-form-element slds-m-bottom_xx-large">
+	                                 <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white;width:900px">
+                                   <thead>
+                                      <tr class="slds-text-title_caps" >
+                                         <th scope="col" class="slds-cell-wrap" style="width: 250px">
+                                            <div aura:id="channel" title="Name">
+                                               CHANNEL
+                                            </div>
+                                         </th>
+                                         <th scope="col" class="slds-cell-wrap" style="width: 550px">
+                                            <div aura:id="email-services-address" class="slds-truncate" title="Developer Name">
+                                               EMAIL SERVICES ADDRESS
+                                            </div>
+                                         </th>  
+                                          <th scope="col" class="slds-cell-wrap" style="width:100px">
+                                            <div aura:id="verified" class="slds-truncate" title="Developer Name">
+                                               VERIFIED
+                                            </div>
+                                         </th>
+                                      </tr>
+                                   </thead>
+                                   <tbody>
+                                     <aura:iteration items="{!v.existingEmailToCase}" var="email" indexVar="count"> 
+                                      		<tr class="slds-hint-parent">
+                                          <td class="slds-cell-wrap" data-label="Select Row" style="padding:3px" >
+                                               {!email.email}  
+                                          </td>
+                                         <td scope="row" data-label="Name" class="slds-cell-wrap" style="padding:3px">
+                                            {!email.emailServicesAddress}
+                                         </td>
+                                         <td data-label="Developer Name" class="slds-cell-wrap" style="padding:3px">
+                                             <aura:if isTrue="{!email.verified}">
+                                             	Yes
+                                             <aura:set attribute="else">
+                                             	No    
+                                             </aura:set>
+                                             </aura:if>
+                                         </td> 
+                                      </tr>
+                                       </aura:iteration>	
+                                   </tbody>
+                            	</table>
+                            	</fieldset>
+                                <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                	<lightning:spinner variant="brand" size="small" /><br/><br/><br/>Fetching existing email channels
+                                </div>
+                            </aura:set>
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF EXISTING SECTION -->  
+        
+                        <!-- DESK EMAIL SECTION -->
+                        <aura:if isTrue="{! and(v.sectionDisplay.deskEmail, v.unknownError == false)}">
+                            <aura:if isTrue="{!v.isInitialising == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_medium slds-text-color_weak">Select the Desk Inbound/Outbound Emails you would like to add as channels: </h1>
+                                <div class="slds-text-heading_small slds-text-color_weak slds-m-bottom_large" style="font-family:SalesforceSans-Light">Adding your email channels to Salesforce will not affect your existing Desk functioning</div>
+                                <div aura:id="deskEmails">
+                                <fieldset class="slds-form-element slds-m-left_small slds-m-bottom_xx-large">
+                                    <aura:iteration items="{!v.emailsFromDesk}" var="emailData">
+                                        <lightning:input type="checkbox" label="{! join(': ', emailData.name, emailData.email) }" name="red" checked="{! emailData.selected}"/>
+                                    </aura:iteration>
+                               	</fieldset>
+                                </div>
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                    <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>Initialising
+                                </div>    
+                            </aura:set>
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF DESK EMAIL SECTION -->
+                        
+                        <!-- MANUAL EMAIL SECTION -->
+                        <aura:if isTrue="{!v.sectionDisplay.manualEmail}">
+                            <!-- <aura:if isTrue="{!v.isCreatingEmailToCase == false}"> -->
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_xx-large slds-text-color_weak">Would you like to add a new email address?</h1>
+                                <div aura:id="manual-emails" class="slds-m-bottom_xx-large slds-m-left_small">    
+                                    <aura:iteration items="{!v.manualEmailRows}" var="row" indexVar="count">
+                                        <div class="slds-grid slds-m-top_medium"> 
+                                        <div class="slds-col slds-size_4-of-12 slds-m-right_small">
+                                            <lightning:input type="text" label="" placeholder="Name" value="{!row.name}" required="true" pattern="[A-Za-z0-9 ]*" messageWhenPatternMismatch="Enter alpha-numeric characters"/>
+                                        </div>
+                                        <div class="slds-col slds-size_5-of-12 slds-m-right_small">
+                                            <lightning:input name="{! concat('email',count)}" type="text" label="" placeholder="Email" required="true" value="{!row.email}"
+                                                                    onblur="{!c.validateEmail}" messageWhenPatternMismatch="Email format is invalid"/>
+                                            <!--<aura:if isTrue="{!v.emailError}">
+                                                <div class="slds-text-color_error slds-form-element__help">
+                                                    {!v.emailErrorMessage}
+                                                </div>
+                                            </aura:if>-->
+                                            <aura:if isTrue="{!row.error}">
+                                                <div class="slds-text-color_error slds-form-element__help">
+                                                    {!row.error}
+                                                </div>
+                                            </aura:if>
+                                        </div>
+                                        <!--
+										TO BE REPLACED WITH DELETE BUTTON     
+                                        <aura:if isTrue="{! count == v.manualEmailRows.length-1}"> 
+                                        <div class="slds-col slds-size_3-of-12">
+                                            <lightning:icon iconName="utility:add" variant="success" size="xx-small"/> 
+                                            <button class="slds-button" onclick="{! c.addManualEmailRow }" style="padding-top: 2px; margin: 2px 0px 0 2px;">
+                                                Add Another
+                                            </button>
+                                        </div>
+                                        </aura:if> 
+										-->
+                                        </div>
+											
+                                    </aura:iteration>
+                                    <div class="slds-grid slds-m-top_medium"> 
+                                        <div class="slds-col slds-size_3-of-12">
+                                            <lightning:icon iconName="utility:add" variant="success" size="xx-small"/> 
+                                            <button class="slds-button" onclick="{! c.addManualEmailRow }" style="padding-top: 2px; margin: 2px 0px 0 2px;">
+                                                Add Another
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            <!-- <lightning:button variant="brand" label="Add Row" onclick="{! c.addManualEmailRow }" /> -->
+                    
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                               		 <lightning:spinner variant="brand" size="small" /> <br/><br/><br/>{!v.processingMessage}
+                                </div>
+                            </aura:set>    
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF MANUAL EMAIL SECTION -->
+                        
+                        <!-- VERIFY EMAIL CONFIRMATION SECTION -->
+                        <aura:if isTrue="{!v.sectionDisplay.verify}">
+                            <aura:if isTrue="{!v.isVerifying == false}">
+                                <h1 class="slds-text-heading_large slds-m-bottom_medium slds-text-color_weak">Verification emails have been sent. Check the emails added and verify by clicking on the link in the emails </h1>
+                                <div class="slds-text-heading_small slds-text-color_weak slds-m-bottom_xx-large" style="font-family:SalesforceSans-Light">Please check the box after you verify the email(s). Adding &amp; verifying your email channel will not affect your existing Desk functioning.</div>
+                                <div aura:id="emails-to-verify">
+                                    <fieldset class="slds-form-element slds-m-left_small slds-m-bottom_xx-large">
+                                    <aura:iteration items="{!v.emailsToVerify}" var="emailData">
+                                        
+                                        <lightning:input type="checkbox" label="{! join(': ', emailData.name, emailData.email) }" name="red" checked="{! emailData.selected}"/>
+                                    </aura:iteration>
+                                    </fieldset>
+                                </div>
+                            <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                	<lightning:spinner variant="brand" size="small" /><br/><br/><br/>Checking if email(s)  have been verified
+                                </div>
+                            </aura:set>
+                            
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF DESK EMAIL SECTION -->
+                        
+                        <!-- COMPLETE SECTION -->
+                        <aura:if isTrue="{!v.sectionDisplay.complete}">
+                            <aura:if isTrue="{!v.isProcessing == false}">
+                            <h1 class="slds-text-heading_large slds-m-bottom_medium slds-text-color_weak">Congratulations you have added your Email Addresses!</h1>
+                            <div class="slds-text-heading_small slds-text-color_weak slds-m-bottom_large" style="font-family:SalesforceSans-Light">Watch the Virtual Consultant video to learn what the long email services address is. A video demo on how to test the email channel is shown at the end.</div>
+                                <fieldset class="slds-form-element slds-m-bottom_xx-large">
+	                                 <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_striped" style="border-top-color: white;width:900px">
+                                   <thead>
+                                      <tr class="slds-text-title_caps" >
+                                         <th scope="col" class="slds-cell-wrap" style="width: 250px">
+                                            <div aura:id="channel" title="Name">
+                                               CHANNEL
+                                            </div>
+                                         </th>
+                                         <th scope="col" class="slds-cell-wrap" style="width: 550px">
+                                            <div aura:id="email-services-address" class="slds-truncate" title="Developer Name">
+                                               EMAIL SERVICES ADDRESS
+                                            </div>
+                                         </th>  
+                                          <th scope="col" class="slds-cell-wrap" style="width:100px">
+                                            <div aura:id="verified" class="slds-truncate" title="Developer Name">
+                                               VERIFIED
+                                            </div>
+                                         </th>
+                                      </tr>
+                                   </thead>
+                                   <tbody>
+                                     <aura:iteration items="{!v.existingEmailToCase}" var="email" indexVar="count"> 
+                                      		<tr class="slds-hint-parent">
+                                          <td class="slds-cell-wrap" data-label="Select Row" style="padding:3px" >
+                                               {!email.email}  
+                                          </td>
+                                         <td scope="row" data-label="Name" class="slds-cell-wrap" style="padding:3px">
+                                            {!email.emailServicesAddress}
+                                         </td>
+                                         <td data-label="Developer Name" class="slds-cell-wrap" style="padding:3px">
+                                             <aura:if isTrue="{!email.verified}">
+                                             	Yes
+                                             <aura:set attribute="else">
+                                             	No    
+                                             </aura:set>
+                                             </aura:if>
+                                         </td> 
+                                      </tr>
+                                       </aura:iteration>	
+                                   </tbody>
+                            	</table>
+                            	</fieldset>
+                                <aura:set attribute="else">
+                                <div class="slds-align_absolute-center slds-is-relative">
+                                	<lightning:spinner variant="brand" size="small" /><br/><br/><br/>Fetching updated email information
+                                </div>
+                            </aura:set>
+                            </aura:if>
+                        </aura:if>
+                        <!-- END OF COMPLETE SECTION -->
+                          
+              
+    
+                        <!-- COMMON BUTTONS -->
+                        <!-- <aura:if isTrue="{! and(v.isInitialising == false, v.unknownError == false)}"></aura:if> -->
+                        <footer class="slds-m-top_x-large" style="{! or(v.isInitialising == true, v.unknownError == true, v.isProcessing == true) ? 'display:none' : 'display:block' }">
+                         	
+                            <lightning:button aura:id="backButton" variant="neutral" label="Back" onclick="{!c.back}" disabled="false" class="wide-button"/>
+                            <lightning:button aura:id="nextButton" variant="neutral" label="Next >" onclick="{!c.next}" disabled="false" class="wide-button"/>
+                        </footer> 
+                        
+                        <!-- END OF COMMON BUTTONS -->
+                          
+                        </div>
+											    
+			    	</div>
+	
+			    </div>
+			    <!-- GRID START END -->
+		  		
+			</div>
+			<!-- END RECIPE HOLDER -->
+
+			
+	  </div>
+	  <!-- END CONTENT TEST HOLDER -->
+    
+    </body>
+	
+</aura:component>

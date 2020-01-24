@@ -1,0 +1,134 @@
+<apex:page controller="TrialOnboardingController" showHeader="false" sidebar="false" standardStylesheets="false" docType="html-5.0" >
+
+    <apex:slds />
+    
+    <script>
+    
+    var lexOrigin = "https://yourdomain-dev-ed.lightning.force.com";
+    var firstTimeRecipeUser = false;
+    
+    function sendToLC() {
+        var message = document.getElementById("message").value;
+        parent.postMessage(message, lexOrigin);
+    }
+    
+    function getParamValue(paramName)
+    {
+        var url = window.location.search.substring(1); //get rid of "?" in querystring
+        var qArray = url.split('&'); //get key-value pairs
+        for (var i = 0; i < qArray.length; i++) 
+        {
+            var pArr = qArray[i].split('='); //split key and value
+            if (pArr[0] == paramName) 
+                return pArr[1]; //return value
+        }
+    }
+    
+    function checkIfParamExists(paramName)
+    {
+        var url = window.location.search.substring(1); //get rid of "?" in querystring
+        var qArray = url.split('&'); //get key-value pairs
+        for (var i = 0; i < qArray.length; i++) 
+        {
+            var pArr = qArray[i].split('='); //split key and value
+            if (pArr[0] == paramName) 
+                return true; //return value
+        }
+        return false;
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+       console.log(window.location.protocol + "//" + window.location.host);
+       var trialDays = getParamValue('days');
+       var orgId = getParamValue('orgId');
+       var createdDate = getParamValue('createdDate');
+        var orgUrl = (window.location != window.parent.location)
+            ? document.referrer
+            : document.location.href;
+        var mydomain = orgUrl.substring(orgUrl.indexOf('://')+3, orgUrl.indexOf('.'));
+        var baseUrl = 'https://desktosvc.secure.force.com/trial';
+       if(orgId){       
+       	   Visualforce.remoting.Manager.invokeAction(
+               '{!$RemoteAction.TrialOnboardingController.checkIfVCAllowed}',              
+               mydomain,
+               //'virtualcampfirejuly17',
+               orgId,
+               createdDate,
+               function(result,event){
+                   if(event.status){
+                       console.log('result: ',result);
+                       if(result){
+                           window.location.replace(baseUrl + '/trialonboardingV2?days='+trialDays+'&createdDate='+createdDate+'&orgId='+orgId+'&mydomain='+mydomain);
+                       }else{
+                           window.location.replace(baseUrl + '/trialonboardingV1?days='+trialDays+'&createdDate='+createdDate+'&orgId='+orgId+'&mydomain='+mydomain);
+                       }
+                   }
+               },
+               {escape: true}
+       	   );
+        }else{
+           window.location.replace(baseUrl + '/trialonboardingV1?days='+trialDays+'&createdDate='+createdDate+'&orgId='+orgId+'&mydomain='+mydomain); 
+        }
+        
+   }, false);
+   
+    
+    function showHideContent(element)
+    {
+        var contentId = element.id.substring(1);
+        
+        for (i = 1; i <= 5; i++) { 
+            if(i == contentId){
+            	document.getElementById('R' + i).style.display = 'block';
+                document.getElementById('L' + i).classList.add("slds-theme_shade");
+     
+            }
+            else{
+            	document.getElementById('R' + i).style.display = 'none';
+                document.getElementById('L' + i).classList.remove("slds-theme_shade");
+            }
+        }
+        
+        var iframeList = document.getElementsByTagName("iframe");
+        for (i = 0; i < iframeList.length; i++) { 
+            iframeList[i].contentWindow.postMessage('{"event":"command","func":"' + 'stopVideo' + '","args":""}', '*');   
+        }
+    }
+    
+    
+
+</script>
+    <style>
+    
+    .slds-scope .slds-page-header {
+    padding: 1rem;
+    border-bottom: 1px solid rgb(221, 219, 218);
+    border-radius: .25rem;
+    background: rgb(243, 242, 242);
+    background-clip: padding-box;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid rgb(221, 219, 218);
+}
+
+.slds-scope .slds-theme_shade, .slds-scope .slds-theme--shade {
+    background-color: rgb(243, 242, 242);
+}
+    
+    </style>
+    <body class="desk" style="background: #F5F6F8; ">
+	  			
+    
+	<div class="demo-only" style="height: 6rem;">
+      <div role="status" class="slds-spinner slds-spinner_medium">
+        <span class="slds-assistive-text">Loading</span>
+        <div class="slds-spinner__dot-a"></div>
+        <div class="slds-spinner__dot-b"></div>
+      </div>
+    </div>
+     
+      
+        
+
+  </body>
+
+</apex:page>
